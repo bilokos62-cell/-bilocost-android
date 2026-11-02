@@ -19,10 +19,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Prepare website
-        run: |
-          mkdir -p www
-          cp index.html www/index.html
+     - name: Prepare website
+  run: |
+    mkdir -p www
+    cp index.html www/index.html
+    cp IMG-20261024-WA0000.jpg www/
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
