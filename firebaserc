@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "bilocost-a8136"
+  },
+  "targets": {
+    "bilocost-a8136": {
+      "hosting": {
+        "drc": [
+          "bilocost-drc-2026"
+        ]
+      }
+    }
   }
 }
