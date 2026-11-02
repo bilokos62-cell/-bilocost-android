@@ -34,8 +34,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Add Android platform
-        run: npx cap add android
+            - name: Configure Capacitor and add Android
+        run: |
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.bilocost.app",
+            "appName": "Bilocost",
+            "webDir": "www"
+          }
+          EOF
+          cat capacitor.config.json
+          npx cap add android
+  
 
       - name: Sync Capacitor
         run: npx cap sync android
