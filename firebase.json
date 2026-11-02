@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "drc",
     "public": "www",
     "ignore": [
       "firebase.json",
