@@ -1,0 +1,6 @@
+{
+  "appId": "com.bilocost.app",
+  "appName": "Bilocost",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
