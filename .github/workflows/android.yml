@@ -30,6 +30,7 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/index.html
+          cp IMG-20261024-WA0000.jpg www/
 
       - name: Install dependencies
         run: npm install
