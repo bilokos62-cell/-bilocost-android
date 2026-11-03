@@ -194,7 +194,7 @@ button.seller{background:var(--card);color:inherit}button.pm{width:100%;text-ali
 <body>
 <div class="app"> 
 <header>
-  <div class="logo"><img class="lg" width="38" height="38" alt=""><div><b>Bilocost</b><small>ACHAT À BAS PRIX</small></div></div>
+  <div class="logo"><img class="lg" src="IMG-20261024-WA0000.jpg" width="38" height="38" alt="Bilocost"><div><b>Bilocost</b><small>ACHAT À BAS PRIX</small></div></div>
   <div style="display:flex;gap:8px;align-items:center"><button class="commune" id="communeBtn" aria-label="Choisir la commune"><svg class="i" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> <span id="communeLbl">Kinshasa</span> ▾</button><button class="ib" data-go="favs" aria-label="Favoris"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button class="ib" data-go="cart" aria-label="Panier"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><b class="dot" id="cc" style="display:none"></b></button><button class="av sm" id="hav" data-t="me" aria-label="Profil"></button></div>
 </header>
 <main id="view" class="wrap"></main>
@@ -336,7 +336,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const col=s=>"hsl("+([...s].reduce((a,c)=>a+c.charCodeAt(0),0)*37%360)+",55%,38%)";
 function toast(m){const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",2400)}
-const logos=()=>document.querySelectorAll("img.lg").forEach(i=>i.src=LOGO);
+const logos=()=>document.querySelectorAll("img.lg").forEach(i=>{i.src="IMG-20261024-WA0000.jpg";i.alt="Bilocost";});
 
 function list(){let r=items.filter(i=>(S.cat==="Tout"||i.cat===S.cat)&&(S.commune==="Kinshasa"||i.c===S.commune)&&(!S.newOnly||i.e==="Neuf")&&(!S.etat||i.e===S.etat)&&!i.sold&&(i.p&&i.p.length)&&age(i)<EXPIRE_DAYS&&(!S.swapOnly||i.swap)&&(!S.gemsOnly||gem(i))&&!foodExpired(i)&&(!S.pmin||i.cdf>=S.pmin)&&(!S.pmax||i.cdf<=S.pmax)&&(!S.q||(i.t+i.cat+i.c+Object.values(i.attrs||{}).join(" ")+(i.serial||"")).toLowerCase().includes(S.q.toLowerCase())));
  if(S.sort==="asc")r.sort((a,b)=>a.cdf-b.cdf);if(S.sort==="desc")r.sort((a,b)=>b.cdf-a.cdf);if(!S.sort)r.sort((a,b)=>rank(b)-rank(a));return r}
