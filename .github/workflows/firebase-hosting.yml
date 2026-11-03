@@ -1,3 +1,4 @@
+
 name: Deploy Bilocost Website to Firebase
 
 on:
@@ -30,7 +31,6 @@ jobs:
       - name: Deploy to Firebase Hosting
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
-                run: |
+        run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
-          firebase target:apply hosting drc bilocost-drc-2026 --project bilocost-a8136
-          firebase deploy --only hosting:drc --project bilocost-a8136
+          firebase deploy --only hosting --project bilocost-a8136
