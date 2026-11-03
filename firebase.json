@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "drc",
+    "site": "bilocost-drc-2026",
     "public": "www",
     "ignore": [
       "firebase.json",
