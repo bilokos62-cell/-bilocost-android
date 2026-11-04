@@ -1,6 +1,9 @@
 name: Generate Bilocost iOS project
 
 on:
+  push:
+    branches:
+      - ios-setup
   workflow_dispatch:
 
 permissions:
