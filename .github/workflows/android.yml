@@ -27,7 +27,7 @@ jobs:
 
       - name: Validate app JavaScript syntax
         run: |
-          node -e 'const fs=require("fs"); const h=fs.readFileSync("index.html","utf8"); const a=[...h.matchAll(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(x=>x[1]).filter(x=>x.trim()); if(a.length<2) throw new Error("Application script missing"); fs.writeFileSync("/tmp/bilocost.js",a[a.length-1]);'
+          node -e 'const fs=require("fs"); const h=fs.readFileSync("index.html","utf8"); const p=h.indexOf("const CLOUD="); if(p<0) throw new Error("Application script missing"); const a=h.lastIndexOf("<script",p); const b=h.indexOf("</script>",p); if(a<0||b<0) throw new Error("Application script is incomplete"); fs.writeFileSync("/tmp/bilocost.js",h.slice(h.indexOf(">",a)+1,b));'
           node --check /tmp/bilocost.js
       - name: Prepare web files
         run: |
