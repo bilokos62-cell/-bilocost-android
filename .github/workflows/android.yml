@@ -27,8 +27,17 @@ jobs:
 
       - name: Prepare web files
         run: |
-          mkdir -p www
+          mkdir -p www/icons
           cp index.html www/index.html
+          # The storefront references this local brand image; include it in the WebView bundle.
+          cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
+          cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
+          # Include optional PWA assets when present, so web and Android use the same source.
+          if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
+          if [ -f sw.js ]; then cp sw.js www/; fi
+          if [ -d icons ]; then cp -R icons/. www/icons/; fi
+          # Fail early if an HTML-referenced local brand image is missing.
+          test -s www/IMG-20261024-WA0000.jpg
 
       - name: Install dependencies
         run: npm install
