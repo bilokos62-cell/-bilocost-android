@@ -763,7 +763,7 @@ const PG={
   <label class="pm" style="margin-top:12px"><input type="checkbox" id="rauth"><span style="flex:1"><small class="sub">Je confirme être autorisé(e) à louer ce bien.</small></span></label>
   <label class="pm"><input type="checkbox" id="rrules"><span style="flex:1"><small class="sub">J’accepte les règles de location de Bilocost.</small></span></label>
   <button class="btn ghost" style="margin-top:14px" data-act="rsave">Enregistrer en brouillon</button>
-  <button class="btn" style="margin-top:10px" disabled>Soumettre pour vérification</button><div class="sub" style="margin-top:6px">${KYC.ready?"":"Soumission indisponible : la vérification d’identité n’est pas configurée."}</div>`]},
+  <button class="btn" style="margin-top:10px" data-act="rsubmit" ${myKyc()!=="VERIFIED"?"disabled":""}>Soumettre pour examen</button><div class="sub" style="margin-top:6px">${myKyc()==="VERIFIED"?"L’équipe Bilocost examinera les justificatifs du bien.":"La vérification du compte doit être validée avant la soumission."}</div>`]},
  boosts(){const sel=S.boostSel||"week",A=myItems().filter(i=>!i.sold),ok=PAY.methods.some(m=>m.ready);
   return ["Mises en avant",`<p class="sub" style="margin:0 0 10px">Placez vos annonces en tête des résultats avec un badge. Choisissez une offre, puis l’annonce à mettre en avant.</p>`
   +BOOSTS.map(b=>`<button class="pm ${b.id===sel?"on":""}" data-act="bpick" data-v="${b.id}"><span class="lic">${I(b.star?"star":"bolt","",22)}</span><span style="flex:1"><b>${b.n}</b><small class="sub">${b.d}</small></span><span style="text-align:right"><b class="cdf">${fmt(b.cdf)} CDF</b><small class="sub">≈ ${fmt(b.cdf/RATE)} $</small></span></button>`).join("")
@@ -1008,14 +1008,14 @@ async function sendCallback(){const p=($("#cbp").value||"").replace(/[^\d+]/g,""
  if(CLOUD){if(needUser())return;try{await FB.F.addDoc(FB.F.collection(FB.db,"callbacks"),{byUid:S.user.uid,...o,status:"OPEN"});close_();toast("Demande envoyée : nous vous rappelons")}catch(e){toast("Envoi impossible")}}
  else{S.callbacks.push(o);save();close_();toast("Demande enregistrée sur cet appareil (démo)")}}
 /* ===== Bilocost Rent (location) : identité vérifiée obligatoire, caution payée avant remise ===== */
-const KYC={ready:false}; // aucun prestataire de vérification d'identité configuré : personne n'est « vérifié »
+const KYC={ready:true}; // aucun prestataire de vérification d'identité configuré : personne n'est « vérifié »
 const RENT={endpoint:""};
 const RCATS=[["Téléphones et tablettes","phone"],["Jeux vidéo","gamepad"],["Informatique","laptop"],["Photo et audiovisuel","camera"],["Outils et équipements","tool"],["Événementiel","shirt"],["Véhicules","car"],["Immobilier","building"],["Sport et loisirs","ball"]];
 const RSHORT={"Téléphones et tablettes":"Téléphones","Photo et audiovisuel":"Photo, vidéo","Outils et équipements":"Outils","Sport et loisirs":"Sport","Événementiel":"Événements"};
 const KSTAT={NOT_STARTED:"Non commencé",PENDING:"En attente de vérification",VERIFIED:"Vérification réussie",EXPIRED:"Document expiré",REJECTED:"Document refusé",RENEWAL_REQUIRED:"Vérification à renouveler",RESTRICTED:"Compte temporairement restreint"};
 const RERR={BAD_DATES:"Dates invalides.",BELOW_MIN:"Durée inférieure au minimum de ce bien.",ABOVE_MAX:"Durée supérieure au maximum de ce bien.",NOT_AVAILABLE:"Ces dates ne sont pas disponibles.",PAST_DATE:"La date de début est déjà passée.",DEPOSIT_TOO_HIGH:"Caution supérieure à la valeur déclarée."};
 const SERIAL_CATS=["Téléphones et tablettes","Jeux vidéo","Informatique","Photo et audiovisuel","Véhicules"];
-const myKyc=()=>"NOT_STARTED"; // sera lu côté serveur (identityVerifications) quand un prestataire sera branché
+const myKyc=()=>{const s=String((S.user&&S.user.verificationStatus)||"").toLowerCase();return s==="verified"?"VERIFIED":s==="pending"?"PENDING":s==="rejected"?"REJECTED":s==="expired"?"EXPIRED":"NOT_STARTED"}; // sera lu côté serveur (identityVerifications) quand un prestataire sera branché
 const todayISO=()=>new Date().toISOString().slice(0,10);
 const rN=s=>{const t=Date.parse(s+"T00:00:00Z");if(Number.isNaN(t))throw{code:"BAD_DATES"};return t};
 const fmtD=s=>new Date(s+"T00:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"short",timeZone:"UTC"});
