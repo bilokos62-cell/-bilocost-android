@@ -197,12 +197,12 @@ button.seller{background:var(--card);color:inherit}button.pm{width:100%;text-ali
   <div class="logo"><img class="lg" src="IMG-20261024-WA0000.jpg" width="38" height="38" alt="Bilocost"><div><b>Bilocost</b><small>ACHAT À BAS PRIX</small></div></div>
   <div style="display:flex;gap:8px;align-items:center"><button class="commune" id="communeBtn" aria-label="Choisir la commune"><svg class="i" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> <span id="communeLbl">Kinshasa</span> ▾</button><button class="ib" data-go="favs" aria-label="Favoris"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button class="ib" data-go="cart" aria-label="Panier"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><b class="dot" id="cc" style="display:none"></b></button><button class="av sm" id="hav" data-t="me" aria-label="Profil"></button></div>
 </header>
-<main id="view" class="wrap"></main>
+<main id="view" class="wrap"><div class="empty" style="margin:24px 0">Chargement de Bilocost…</div></main>
 <nav aria-label="Navigation principale"><div>
   <button data-t="home" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Accueil</span></button>
   <button data-t="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Explorer</span></button>
   <button class="plus" data-t="pub" aria-label="Publier un article"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-  <button data-t="msg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg><span>Messages</span><b class="dot">3</b></button>
+  <button data-t="msg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg><span>Messages</span><b class="dot" hidden></b></button>
   <button data-t="me"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Profil</span></button>
 </div></nav>
 </div>
@@ -225,6 +225,8 @@ window.BILO_FIREBASE = {
 </script>
 
 <script>
+window.addEventListener("error",e=>{const v=document.getElementById("view");if(v&&!v.innerHTML.trim()){v.innerHTML='<section class="warn" style="margin:24px 0"><b>Bilocost n’a pas pu charger son interface.</b><p style="margin:8px 0 0">Erreur détectée : '+String(e.message||"JavaScript").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))+'</p><p>Rechargez la page. Si le problème persiste, transmettez cette capture à l’assistance.</p></section>';}});
+window.addEventListener("unhandledrejection",e=>{const v=document.getElementById("view");if(v&&!v.innerHTML.trim()){v.innerHTML='<section class="warn" style="margin:24px 0"><b>Bilocost n’a pas pu terminer son chargement.</b><p>Une opération asynchrone a échoué. Vérifiez la connexion et transmettez cette capture à l’assistance.</p></section>';}});
 const CLOUD=!!(window.BILO_FIREBASE&&window.BILO_FIREBASE.apiKey);
 const SA="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const makeSerial=()=>{const a=new Uint32Array(8);crypto.getRandomValues(a);const c=[...a].map(x=>SA[x%32]).join("");return "BLC-"+c.slice(0,4)+"-"+c.slice(4)};
@@ -310,7 +312,7 @@ const COMMUNES=["Bandalungwa","Barumbu","Bumbu","Gombe","Kalamu","Kasa-Vubu","Ki
 const CATS=[["Tout","flame"],["Vêtements","shirt"],["Chaussures","shoe"],["Électronique","phone"],["Maison","sofa"],["Véhicules","car"],["Alimentation","leaf"],["Immobilier","building"],["Autres","gift"]];
 const CBG={"Vêtements":"#bbf7d0","Chaussures":"#e2e8f0","Électronique":"#dbeafe","Maison":"#fef3c7","Véhicules":"#e0f2fe","Alimentation":"#dcfce7","Immobilier":"#e0e7ff","Autres":"#fce7f3"};
 const ETATS=["Neuf","Comme neuf","Très bon état","Bon état","État acceptable"];
-const MSG=[["Jean Mulumba","10:24","Bonjour, est-ce que l’article est encore dispo ?","iPhone 13 • Gombe",2],["Sarah Wembi","Hier","Oui, je peux vous livrer sur Kalamu aujourd’hui.","Nike Air Force 1",1],["Mike Tshibangu","Hier","Merci beaucoup !","HP Pavilion Core i7",0],["Aicha Kasongo","Lun.","D’accord, je vous envoie le numéro.","Canapé 3 places",0],["Patrick Mwamba","Lun.","Ok, à tout de suite.","Sweat Nike noir",0],["Fanta Diop","Dim.","Parfait !","Toyota Corolla 2012",0]];
+const MSG=[]; // Aucun faux message ni contact de démonstration.
 let items=[
  {id:1,t:"iPhone Pro orange 256 Go",cdf:3650000,cat:"Électronique",e:"Neuf",c:"Gombe",r:4.9,n:18,p:[IMG.a],delivery:{mode:"both",fee:5000,negotiable:true},bg:"#fde7cf",s:"Jean Mulumba",w:"+243897123456"},
  {id:2,t:"Mocassins cuir à pompons",cdf:420000,cat:"Chaussures",e:"Comme neuf",c:"Limete",r:4.8,n:14,p:[IMG.b],bg:"#e8d9c5",s:"Moïse Katende",w:"+243830000000"},
