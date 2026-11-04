@@ -601,11 +601,26 @@ const ERR={"auth/email-already-in-use":"Cette adresse e-mail est déjà utilisé
 const errMsg=e=>ERR[e&&e.code]||"Une erreur est survenue ("+((e&&e.code)||"inconnue")+")";
 async function initFirebase(){const V="10.12.2",u=m=>`https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
  const [app,A,F,O]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage"))]);
- const a=app.initializeApp(window.BILO_FIREBASE);Object.assign(FB,{A,F,O,auth:A.getAuth(a),db:F.getFirestore(a),st:O.getStorage(a)})}
+ const a=app.getApps().length?app.getApp():app.initializeApp(window.BILO_FIREBASE);
+ const auth=A.getAuth(a);
+ // Persist sessions across Android app restarts and browser refreshes.
+ try{await A.setPersistence(auth,A.indexedDBLocalPersistence)}
+ catch(e){try{await A.setPersistence(auth,A.browserLocalPersistence)}catch(x){console.warn("Firebase Auth persistence fallback",x)}}
+ auth.languageCode="fr";
+ Object.assign(FB,{A,F,O,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
+
 const mapItem=d=>{const x=d.data();return{id:d.id,t:x.title,cdf:x.priceCDF,cat:x.category,e:x.condition,c:x.commune,r:x.rating||0,n:x.ratingCount||0,p:x.photos||[],bg:"#eef2f7",s:x.sellerName,sellerId:x.sellerId,w:x.sellerPhone||"",d:x.description||"",serial:x.serial||"",refCDF:x.refCDF||0,reserved:!!x.reserved,delivery:x.delivery||{mode:"pickup",fee:0,negotiable:false},attrs:x.attrs||{},swap:!!x.swap,swapWant:x.swapWant||"",bundle:x.bundle||0,at:(x.createdAt&&x.createdAt.seconds?x.createdAt.seconds*1000:Date.now()),renewedAt:x.renewedAt||0,sold:x.status==="sold",pending:x.status==="pending",boostUntil:(x.boostUntil&&x.boostUntil.seconds?x.boostUntil.seconds*1000:(typeof x.boostUntil==="number"?x.boostUntil:0)),boostPlan:x.boostPlan||""}};
-async function loadProfile(u){const F=FB.F,ref=F.doc(FB.db,"users",u.uid);let d=await F.getDoc(ref);
- if(!d.exists()){await F.setDoc(ref,{name:S.pendingName||u.displayName||"Membre Bilocost",phone:S.pendingPhone||"",mode:"particulier",createdAt:F.serverTimestamp()});d=await F.getDoc(ref)}
- const x=d.data();let priv={};try{const q=await F.getDoc(F.doc(FB.db,"identity_verifications",u.uid));if(q.exists())priv=q.data()}catch(e){}return{name:x.publicName||x.shopName||((x.shop&&x.shop.name)||x.name),legalName:x.name,phone:x.phone||"",bio:x.bio||"",commune:x.commune,avatar:x.avatar,mode:x.mode||"particulier",bundle:x.bundle||0,shop:x.shop,shopName:x.publicName||x.shopName||((x.shop&&x.shop.name)||""),identity:priv.identity||{},verificationStatus:priv.status||"none",uid:u.uid,email:u.email,emailVerified:u.emailVerified}}
+async function loadProfile(u){
+ const F=FB.F,ref=F.doc(FB.db,"users",u.uid);let d=await F.getDoc(ref);
+ if(!d.exists()){
+  await F.setDoc(ref,{uid:u.uid,name:S.pendingName||u.displayName||"Membre Bilocost",phone:S.pendingPhone||"",email:u.email||"",emailVerified:!!u.emailVerified,mode:"particulier",createdAt:F.serverTimestamp(),updatedAt:F.serverTimestamp()});
+  d=await F.getDoc(ref)
+ }
+ const x=d.data();let priv={};
+ try{const q=await F.getDoc(F.doc(FB.db,"identity_verifications",u.uid));if(q.exists())priv=q.data()}catch(e){}
+ return{name:x.publicName||x.shopName||((x.shop&&x.shop.name)||x.name),legalName:x.name,phone:x.phone||"",bio:x.bio||"",commune:x.commune,avatar:x.avatar,mode:x.mode||"particulier",bundle:x.bundle||0,shop:x.shop,shopName:x.publicName||x.shopName||((x.shop&&x.shop.name)||""),identity:priv.identity||{},verificationStatus:priv.status||"none",uid:u.uid,email:u.email,emailVerified:u.emailVerified}
+}
+
 function applyItems(){const all=S.allItems||[];items=all.filter(i=>!i.pending);S.pendingItems=all.filter(i=>i.pending&&S.user&&i.sellerId===S.user.uid)}
 async function bootCloud(){const nd=document.querySelector("nav .dot");if(nd)nd.style.display="none";
  try{await initFirebase()}catch(e){toast("Connexion à Firebase impossible");return}
@@ -641,11 +656,35 @@ async function sendBilocostOtp(){
  }catch(e){toast(errMsg(e));if(phoneRecaptcha){try{phoneRecaptcha.clear()}catch(x){}phoneRecaptcha=null}}
 }
 async function verifyBilocostOtp(){try{const code=((document.querySelector("#otpCode")||{}).value||"").trim();if(!/^\d{6}$/.test(code))return toast("Entrez le code à 6 chiffres");await phoneConfirmation.confirm(code);phoneConfirmation=null;S.seen=true;save();close_();toast("Numéro vérifié") }catch(e){toast(e.code==="auth/invalid-verification-code"?"Code incorrect":"Vérification impossible : "+errMsg(e))}}
-async function cloudSignup(n,p,w){const em=($("#ae").value||"").trim();if(!/^\S+@\S+\.\S+$/.test(em))return toast("Adresse e-mail invalide");
- try{S.pendingName=n;S.pendingPhone=p;const c=await FB.A.createUserWithEmailAndPassword(FB.auth,em,w);S.seen=true;save();toast("Compte créé. Vérifiez votre e-mail.");try{await FB.A.sendEmailVerification(c.user)}catch(e){}}catch(e){toast(errMsg(e))}}
-async function cloudLogin(){const em=($("#le").value||"").trim(),w=$("#lw").value;if(!em||w.length<6)return toast("Entrez votre e-mail et votre mot de passe");
- try{await FB.A.signInWithEmailAndPassword(FB.auth,em,w);S.seen=true;save()}catch(e){toast(errMsg(e))}}
-async function cloudReset(){const em=(($("#le")||{}).value||"").trim();if(!em)return toast("Entrez votre e-mail ci-dessus");try{await FB.A.sendPasswordResetEmail(FB.auth,em);toast("E-mail de réinitialisation envoyé")}catch(e){toast(errMsg(e))}}
+async function cloudSignup(n,p,w){
+ const em=((($("#ae")||{}).value)||"").trim().toLowerCase();
+ if(!/^\S+@\S+\.\S+$/.test(em))return toast("Adresse e-mail invalide");
+ if(!FB.A||!FB.auth)return toast("Firebase Authentication n'est pas initialisé. Réessayez dans quelques secondes.");
+ try{
+  S.pendingName=n;S.pendingPhone=p;
+  const c=await FB.A.createUserWithEmailAndPassword(FB.auth,em,w);
+  await FB.A.updateProfile(c.user,{displayName:n});
+  try{await FB.A.sendEmailVerification(c.user);toast("Compte créé. Un lien de vérification a été envoyé à "+em)}
+  catch(e){toast("Compte créé, mais l'e-mail de vérification n'a pas pu être envoyé : "+errMsg(e))}
+  S.seen=true;save();
+ }catch(e){toast(errMsg(e))}
+}
+
+async function cloudLogin(){
+ const em=((($("#le")||{}).value)||"").trim().toLowerCase(),w=(($("#lw")||{}).value)||"";
+ if(!em||w.length<6)return toast("Entrez votre e-mail et votre mot de passe");
+ if(!FB.A||!FB.auth)return toast("Connexion Firebase en cours. Réessayez dans quelques secondes.");
+ try{await FB.A.signInWithEmailAndPassword(FB.auth,em,w);S.seen=true;save();toast("Connexion réussie")}
+ catch(e){toast(errMsg(e))}
+}
+
+async function cloudReset(){
+ const em=((($("#le")||{}).value)||"").trim().toLowerCase();
+ if(!em)return toast("Entrez votre e-mail dans le champ de connexion");
+ try{await FB.A.sendPasswordResetEmail(FB.auth,em);toast("Lien de réinitialisation envoyé à "+em)}
+ catch(e){toast(errMsg(e))}
+}
+
 async function cloudResend(){try{await FB.A.sendEmailVerification(FB.auth.currentUser);toast("E-mail envoyé")}catch(e){toast(errMsg(e))}}
 async function cloudRecheck(){try{await FB.auth.currentUser.reload();S.user.emailVerified=FB.auth.currentUser.emailVerified;render();renderPage();toast(S.user.emailVerified?"E-mail vérifié":"Pas encore vérifié")}catch(e){toast(errMsg(e))}}
 async function saveIdentity(){if(!CLOUD||!S.user||!S.user.uid)return toast("Connectez-vous pour vérifier votre identité");const val=id=>(($(id)||{}).value||"").trim();const docType=val("#idtype"),docNumber=val("#idnumber"),birthDate=val("#idbirth"),birthPlace=val("#idplace"),file=(($("#iddoc")||{}).files||[])[0];if(!docType||!docNumber||!birthDate||!birthPlace)return toast("Remplissez tous les champs obligatoires");let docPath=(S.user.identity||{}).docPath||"";if(file){if(file.size>8*1024*1024)return toast("Document trop volumineux : maximum 8 Mo");if(!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(file.type))return toast("Format accepté : JPG, PNG, WEBP ou PDF");const path="private_identity/"+S.user.uid+"/document_"+Date.now();const ref=FB.O.ref(FB.st,path);await FB.O.uploadBytes(ref,file,{contentType:file.type});docPath=path}if(!docPath)return toast("Ajoutez la photo ou le scan de votre document");const identity={docType,docNumber,birthDate,birthPlace,docPath,submittedAt:Date.now()};await FB.F.setDoc(FB.F.doc(FB.db,"identity_verifications",S.user.uid),{uid:S.user.uid,identity,status:"pending",submittedAt:FB.F.serverTimestamp()},{merge:true});S.user.identity=identity;S.user.verificationStatus="pending";renderPage();toast("Dossier envoyé. Vérification humaine en attente.")}
