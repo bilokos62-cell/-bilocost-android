@@ -650,7 +650,7 @@ async function sendBilocostOtp(){
 async function verifyBilocostOtp(){try{const code=((document.querySelector("#otpCode")||{}).value||"").trim();if(!/^\d{6}$/.test(code))return toast("Entrez le code à 6 chiffres");await phoneConfirmation.confirm(code);phoneConfirmation=null;S.seen=true;save();close_();toast("Numéro vérifié") }catch(e){toast(e.code==="auth/invalid-verification-code"?"Code incorrect":"Vérification impossible : "+errMsg(e))}}
 async function cloudSignup(n,p,w){
  const em=((($("#ae")||{}).value)||"").trim().toLowerCase();
- if(!/^\S+@\S+\.\S+$/.test(em))return toast("Adresse e-mail invalide");
+ if(!em.includes("@")||em.lastIndexOf(".")<em.indexOf("@")+2||em.endsWith("."))return toast("Adresse e-mail invalide");
  if(!FB.A||!FB.auth)return toast("Firebase Authentication n'est pas initialisé. Réessayez dans quelques secondes.");
  try{
   S.pendingName=n;S.pendingPhone=p;
