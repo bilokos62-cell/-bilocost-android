@@ -392,7 +392,7 @@ function doAuth(k){
  if(k==="doSignup"){
   const n=($("#an")||{}).value?.trim()||"",em=(($("#ae")||{}).value||"").trim().toLowerCase(),w=(($("#aw")||{}).value)||"",c=(($("#ac")||{}).value)||"",p=(($("#ap")||{}).value||"").replace(/[^\\d+]/g,"");
   if(n.length<2)return toast("Entrez votre nom complet");
-  if(!/^\\S+@\\S+\\.\\S+$/.test(em))return toast("Adresse e-mail invalide");
+  if(!em.includes("@")||em.lastIndexOf(".")<em.indexOf("@")+2||em.endsWith("."))return toast("Adresse e-mail invalide");
   if(w.length<6)return toast("Mot de passe : 6 caractères minimum");
   if(w!==c)return toast("Les mots de passe ne correspondent pas");
   cloudSignup(n,p,w);return
@@ -610,7 +610,7 @@ async function loadProfile(u){
 
 function applyItems(){const all=S.allItems||[];items=all.filter(i=>!i.pending);S.pendingItems=all.filter(i=>i.pending&&S.user&&i.sellerId===S.user.uid)}
 async function bootCloud(){const nd=document.querySelector("nav .dot");if(nd)nd.style.display="none";
- try{await initFirebase();S.cloudError=""}catch(e){S.cloudError="Firebase ne répond pas : "+(e&&e.message||"vérifiez la configuration et le réseau");render();toast("Connexion à Firebase impossible");return}
+ try{await initFirebase();try{await FB.A.getRedirectResult(FB.auth)}catch(re){console.error("Google redirect result",re);toast(errMsg(re)+" ("+(re.code||"erreur")+")")}S.cloudError=""}catch(e){S.cloudError="Firebase ne répond pas : "+(e&&e.message||"vérifiez la configuration et le réseau");render();toast("Connexion à Firebase impossible");return}
  const {A,F,auth,db}=FB;
  F.onSnapshot(F.query(F.collection(db,"items"),F.orderBy("createdAt","desc"),F.limit(200)),s=>{S.cloudError="";S.allItems=s.docs.map(mapItem);applyItems();render();tryDeep();if(S.stack.length)renderPage()},e=>{S.cloudError="Impossible de lire les annonces : "+(e.code||e.message||"accès refusé");render();toast("Lecture des annonces impossible")});
  F.onSnapshot(F.query(F.collection(db,"events"),F.orderBy("startAt","asc"),F.limit(100)),s=>{S.events=s.docs.map(d=>{const x=d.data();return{id:d.id,title:x.title,desc:x.description||"",type:x.type,startAt:x.startAt,endAt:x.endAt,commune:x.commune,spot:x.spot||"",sellerId:x.sellerId,sellerName:x.sellerName,w:x.sellerPhone||"",p:x.photos||[]}});render();if(S.stack.length)renderPage();tryDeep()},()=>{});
@@ -623,17 +623,21 @@ async function bootCloud(){const nd=document.querySelector("nav .dot");if(nd)nd.
   render();if(S.stack.length)renderPage()})}
 let phoneConfirmation=null,phoneRecaptcha=null;
 async function socialAuth(provider){
- if(!CLOUD||!FB.A)return toast("Connexion Firebase non initialisée");
+ if(!CLOUD||!FB.A||!FB.auth)return toast("Firebase Authentication n'est pas initialisé. Rechargez la page.");
  const A=FB.A;
- if(provider==="Google"||provider==="Facebook"){
-  try{const P=provider==="Google"?new A.GoogleAuthProvider():new A.FacebookAuthProvider();P.setCustomParameters({prompt:"select_account"});await A.signInWithPopup(FB.auth,P);S.seen=true;save()}
-  catch(e){if(e.code==="auth/popup-blocked")toast("Autorisez les fenêtres pop-up pour Bilocost");else if(e.code==="auth/account-exists-with-different-credential")toast("Cette adresse utilise déjà une autre méthode de connexion");else toast(errMsg(e))}return;
- }
- if(provider==="Téléphone (+243)"){phoneAuthPanel();return}
- if(provider==="Telegram"){
-  sheet(`<h2>Connexion Telegram</h2><p class="sub">La connexion Telegram doit être reliée à un bot Bilocost et à un endpoint serveur qui vérifie la signature Telegram. Elle ne peut pas être activée uniquement depuis cette page.</p><div class="warn">À configurer : nom du bot, domaine autorisé et endpoint sécurisé côté serveur. Ne partagez jamais le jeton du bot dans le HTML.</div><button class="btn" data-close>Fermer</button>`);return;
+ if(provider==="Google"){
+  try{
+   const P=new A.GoogleAuthProvider();P.setCustomParameters({prompt:"select_account"});
+   const native=!!(window.Capacitor&&typeof window.Capacitor.isNativePlatform==="function"&&window.Capacitor.isNativePlatform());
+   if(native)return toast("La connexion Google native Android nécessite la configuration OAuth Android de Firebase.");
+   const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+   if(mobile){await A.signInWithRedirect(FB.auth,P);return}
+   await A.signInWithPopup(FB.auth,P);S.seen=true;save()
+  }catch(e){console.error("Bilocost Google sign-in",e);toast(errMsg(e)+" ("+(e&&e.code||"erreur inconnue")+")")}
+  return;
  }
 }
+
 function phoneAuthPanel(){
  sheet(`<h2>Connexion par téléphone</h2><p class="sub">Recevez un code SMS sur votre numéro (+243).</p><label class="fld"><span>${I("phone")}</span><span style="flex:1"><small>Numéro de téléphone</small><input id="otpPhone" type="tel" inputmode="tel" placeholder="+243 897 123 456" autocomplete="tel"></span></label><div id="bilocost-recaptcha" style="margin:12px 0"></div><button class="btn" id="sendOtp" type="button" onclick="sendBilocostOtp()">Envoyer le code SMS</button><div id="otpVerifyArea" style="display:none;margin-top:12px"><label class="fld"><span>${I("lock")}</span><span style="flex:1"><small>Code reçu par SMS</small><input id="otpCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"></span></label><button class="btn" type="button" onclick="verifyBilocostOtp()">Vérifier et se connecter</button></div><p class="sub" style="margin-top:12px">Des frais SMS peuvent s’appliquer selon le pays et la configuration Firebase.</p>`);
 }
