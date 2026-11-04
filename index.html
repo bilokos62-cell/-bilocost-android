@@ -389,16 +389,17 @@ function needUser(){if(!CLOUD){toast("Connexion Firebase obligatoire : aucune ac
 function doAuth(k){
  if(!CLOUD)return toast("Firebase indisponible : connexion réelle obligatoire.");
  if(k==="close"||k==="skip"){S.auth=null;S.seen=true;save();showAuth();render();return}
- if(k==="doSignup"){const n=$("#an").value.trim(),p=$("#ap").value.replace(/[^\d+]/g,""),w=$("#aw").value,c=$("#ac").value;
-  if(n.length<2)return toast("Entrez votre nom complet");if(p.replace(/\D/g,"").length<9)return toast("Entrez un numéro WhatsApp valide");
-  if(w.length<6)return toast("Mot de passe : 6 caractères minimum");if(w!==c)return toast("Les mots de passe ne correspondent pas");
-  if(CLOUD){cloudSignup(n,p,w);return}
-  S.user={name:n,phone:p,mode:"particulier"};remember(S.user);S.auth=null;S.seen=true;save();showAuth();render();toast("Bienvenue "+n.split(" ")[0]+" !");return}
- if(k==="doLogin"){if(CLOUD){cloudLogin();return}const p=$("#lp").value.replace(/[^\d+]/g,""),w=$("#lw").value;
-  if(p.replace(/\D/g,"").length<9)return toast("Entrez un numéro valide");if(w.length<6)return toast("Mot de passe : 6 caractères minimum");
-  const ex=S.accounts.find(a=>a.phone.replace(/\D/g,"")===p.replace(/\D/g,""));S.user=ex||{name:"Membre Bilocost",phone:p,mode:"particulier"};remember(S.user);
-  S.auth=null;S.seen=true;save();showAuth();render();toast("Connecté");return}
- S.auth=k;showAuth()}
+ if(k==="doSignup"){
+  const n=($("#an")||{}).value?.trim()||"",em=(($("#ae")||{}).value||"").trim().toLowerCase(),w=(($("#aw")||{}).value)||"",c=(($("#ac")||{}).value)||"",p=(($("#ap")||{}).value||"").replace(/[^\\d+]/g,"");
+  if(n.length<2)return toast("Entrez votre nom complet");
+  if(!/^\\S+@\\S+\\.\\S+$/.test(em))return toast("Adresse e-mail invalide");
+  if(w.length<6)return toast("Mot de passe : 6 caractères minimum");
+  if(w!==c)return toast("Les mots de passe ne correspondent pas");
+  cloudSignup(n,p,w);return
+ }
+ if(k==="doLogin"){cloudLogin();return}
+ S.auth=k;showAuth()
+}
 
 /* ---------- Photos ---------- */
 function phs(){const e=$("#phs");if(e)e.innerHTML=S.photos.map((p,i)=>`<div style="position:relative"><img src="${p}" alt="Photo ${i+1}"><button type="button" class="x" data-rm="${i}" aria-label="Retirer la photo">×</button></div>`).join("")+(S.photos.length<4?`<button type="button" class="add" data-pick>${I("camera","",24)}<small>Ajouter des photos</small></button>`:"")}
