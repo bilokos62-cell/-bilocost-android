@@ -33,7 +33,6 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
-          python3 scripts/clean-branding.py www/index.html
           # The storefront references this local brand image; include it in the WebView bundle.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
