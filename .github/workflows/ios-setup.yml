@@ -1,0 +1,53 @@
+name: Generate Bilocost iOS project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout iOS setup branch
+        uses: actions/checkout@v4
+        with:
+          ref: ios-setup
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare web assets
+        run: |
+          mkdir -p www
+          cp index.html www/index.html
+          if [ -f IMG-20261024-WA0000.jpg ]; then cp IMG-20261024-WA0000.jpg www/; fi
+          if [ -f IMG-20261024-WA0000~2.jpg ]; then cp IMG-20261024-WA0000~2.jpg www/; fi
+          if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
+          if [ -f sw.js ]; then cp sw.js www/; fi
+          if [ -d icons ]; then mkdir -p www/icons && cp -R icons/. www/icons/; fi
+          if [ -d resources ]; then mkdir -p www/resources && cp -R resources/. www/resources/; fi
+
+      - name: Generate native iOS project
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Commit generated iOS project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ios package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No generated iOS changes to commit."
+          else
+            git commit -m "build(ios): generate native Capacitor iOS project"
+            git push origin ios-setup
+          fi
