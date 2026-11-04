@@ -1086,6 +1086,9 @@ async function saveRentDraft(){if(!CLOUD||!FB.F||!FB.O)return toast("Connexion F
  try{const ref=FB.F.doc(FB.F.collection(FB.db,"rentalListings"));const urls=[];for(let k=0;k<S.rphotos.length;k++){const path=FB.O.ref(FB.st,`rentalListings/${S.user.uid}/${ref.id}/${k}.jpg`);await FB.O.uploadString(path,S.rphotos[k],"data_url");urls.push(await FB.O.getDownloadURL(path))}
  d.photos=urls;await FB.F.setDoc(ref,d);S.rphotos=[];toast("Brouillon enregistré dans votre compte Bilocost");back()}
  catch(e){if(btn)btn.disabled=false;toast("Enregistrement du brouillon impossible : "+(e.code||"vérifiez les règles Firebase"))}}
+// Auth controls are handled directly inside the fixed auth layer for reliable taps on mobile WebViews.
+const authRoot=document.querySelector("#auth");
+authRoot.addEventListener("click",e=>{const b=e.target.closest("[data-auth]");if(!b)return;e.preventDefault();e.stopPropagation();try{doAuth(b.dataset.auth)}catch(err){console.error("Bilocost auth action failed",err);toast("Action impossible : "+(err&&err.message||"erreur inattendue"))}},true);
 const SEL="[data-go],[data-back],[data-act],[data-checkout],[data-sec],[data-t],[data-cat],[data-sort],[data-new],[data-open],[data-fav],[data-close],[data-buy],[data-sheet],[data-chat],[data-c],[data-auth],[data-soc],[data-eye],[data-reset],[data-send],[data-share],[data-rm],[data-pick],[data-logout],#communeBtn,#theme,#sheet";
 document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return;const d=t.dataset;
  if("back" in d){back();return}
