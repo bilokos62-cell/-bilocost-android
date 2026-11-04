@@ -51,12 +51,23 @@ jobs:
           rm -f android/app/src/main/res/mipmap-*/ic_launcher.png
           rm -f android/app/src/main/res/mipmap-*/ic_launcher_round.png
           cp -R android-resources/app/src/main/res/. android/app/src/main/res/
+          # Update manifest attributes safely, without duplicating XML attributes.
           python3 - <<'PY'
+          import xml.etree.ElementTree as ET
           from pathlib import Path
-          p = Path("android/app/src/main/AndroidManifest.xml")
-          s = p.read_text()
-          s = s.replace('<application', '<application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round"', 1)
-          p.write_text(s)
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          android_ns = "http://schemas.android.com/apk/res/android"
+          ET.register_namespace("android", android_ns)
+          tree = ET.parse(manifest)
+          application = tree.getroot().find("application")
+          if application is None:
+              raise SystemExit("AndroidManifest.xml has no <application> element")
+          application.set(f"{{{android_ns}}}icon", "@mipmap/ic_launcher")
+          application.set(f"{{{android_ns}}}roundIcon", "@mipmap/ic_launcher_round")
+          tree.write(manifest, encoding="utf-8", xml_declaration=True)
+          # Validate the exact file Gradle will parse.
+          ET.parse(manifest)
           PY
 
       - name: Sync Capacitor
