@@ -55,16 +55,38 @@ jobs:
 
       - name: Install Bilocost launcher icon
         run: |
-          # Remove Capacitor's default PNG launcher files to avoid duplicate
-          # Android resources with the Bilocost JPG files of the same name.
-          rm -f android/app/src/main/res/mipmap-*/ic_launcher.png
-          rm -f android/app/src/main/res/mipmap-*/ic_launcher_round.png
-          cp -R android-resources/app/src/main/res/. android/app/src/main/res/
-          # Update manifest attributes safely, without duplicating XML attributes.
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          source = Path("resources/bilocost-icon.jpg")
+          if not source.is_file():
+              raise SystemExit("Official Bilocost icon is missing: resources/bilocost-icon.jpg")
+          image = Image.open(source).convert("RGBA")
+          # Square launcher art is required by Android's legacy mipmap resources.
+          side = min(image.size)
+          left = (image.width - side) // 2
+          top = (image.height - side) // 2
+          image = image.crop((left, top, left + side, top + side))
+          sizes = {"mdpi":48, "hdpi":72, "xhdpi":96, "xxhdpi":144, "xxxhdpi":192}
+          base = Path("android/app/src/main/res")
+          for density, px in sizes.items():
+              folder = base / f"mipmap-{density}"
+              folder.mkdir(parents=True, exist_ok=True)
+              icon = image.resize((px, px), Image.Resampling.LANCZOS)
+              icon.save(folder / "ic_launcher.png", optimize=True)
+              icon.save(folder / "ic_launcher_round.png", optimize=True)
+          # Remove adaptive XML that could fall back to the Android robot if its
+          # foreground drawable is unavailable on a particular Android build.
+          adaptive = base / "mipmap-anydpi-v26"
+          if adaptive.exists():
+              for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
+                  (adaptive / name).unlink(missing_ok=True)
+          PY
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           from pathlib import Path
-
           manifest = Path("android/app/src/main/AndroidManifest.xml")
           android_ns = "http://schemas.android.com/apk/res/android"
           ET.register_namespace("android", android_ns)
@@ -75,7 +97,6 @@ jobs:
           application.set(f"{{{android_ns}}}icon", "@mipmap/ic_launcher")
           application.set(f"{{{android_ns}}}roundIcon", "@mipmap/ic_launcher_round")
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
-          # Validate the exact file Gradle will parse.
           ET.parse(manifest)
           PY
 
