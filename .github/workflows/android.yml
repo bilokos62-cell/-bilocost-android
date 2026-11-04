@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
-          cp resources/IMG_20261104_114004_803.jpg www/resources/bilocost-logo.jpg
+          python3 scripts/clean-branding.py www/index.html
           # The storefront references this local brand image; include it in the WebView bundle.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
@@ -68,8 +68,11 @@ jobs:
           source = Path("resources/IMG_20261104_114004_803.jpg")
           if not source.is_file():
               raise SystemExit("Bilocost brand image is missing: resources/IMG_20261104_114004_803.jpg")
-          image = Image.open(source).convert("RGBA")
-          # Square launcher art is required by Android's legacy mipmap resources.
+          image = Image.open(source).convert("RGB")
+          # Remove the photographed black corners and thin white frame.
+          w, h = image.size
+          image = image.crop((round(w * 0.11), round(h * 0.10),
+                              round(w * 0.90), round(h * 0.89)))
           side = min(image.size)
           left = (image.width - side) // 2
           top = (image.height - side) // 2

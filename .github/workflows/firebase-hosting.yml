@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
-          cp resources/IMG_20261104_114004_803.jpg www/resources/bilocost-logo.jpg
+          python3 scripts/clean-branding.py www/index.html
           # Copy the local brand assets used by the storefront.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
