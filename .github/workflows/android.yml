@@ -60,9 +60,9 @@ jobs:
           from pathlib import Path
           from PIL import Image
 
-          source = Path("resources/bilocost-icon.jpg")
+          source = Path("IMG-20261024-WA0000.jpg")
           if not source.is_file():
-              raise SystemExit("Official Bilocost icon is missing: resources/bilocost-icon.jpg")
+              raise SystemExit("Bilocost brand image is missing: IMG-20261024-WA0000.jpg")
           image = Image.open(source).convert("RGBA")
           # Square launcher art is required by Android's legacy mipmap resources.
           side = min(image.size)
