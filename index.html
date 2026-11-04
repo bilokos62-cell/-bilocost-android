@@ -613,10 +613,11 @@ async function bootCloud(){const nd=document.querySelector("nav .dot");if(nd)nd.
  F.onSnapshot(F.query(F.collection(db,"items"),F.orderBy("createdAt","desc"),F.limit(200)),s=>{S.cloudError="";S.allItems=s.docs.map(mapItem);applyItems();render();tryDeep();if(S.stack.length)renderPage()},e=>{S.cloudError="Impossible de lire les annonces : "+(e.code||e.message||"accès refusé");render();toast("Lecture des annonces impossible")});
  F.onSnapshot(F.query(F.collection(db,"events"),F.orderBy("startAt","asc"),F.limit(100)),s=>{S.events=s.docs.map(d=>{const x=d.data();return{id:d.id,title:x.title,desc:x.description||"",type:x.type,startAt:x.startAt,endAt:x.endAt,commune:x.commune,spot:x.spot||"",sellerId:x.sellerId,sellerName:x.sellerName,w:x.sellerPhone||"",p:x.photos||[]}});render();if(S.stack.length)renderPage();tryDeep()},()=>{});
  F.onSnapshot(F.query(F.collection(db,"rentalListings"),F.where("status","==","BOOKABLE"),F.limit(100)),s=>{S.rentals=s.docs.map(d=>{const x=d.data();return{id:d.id,t:x.title,cat:x.category,d:x.description||"",cond:x.condition||"",priceDay:x.priceDay,priceWeek:x.priceWeek||0,priceMonth:x.priceMonth||0,minDays:x.minDays||1,maxDays:x.maxDays||0,deposit:x.deposit,declaredValue:x.declaredValue||0,commune:x.commune,p:x.photos||[],owner:x.ownerName||"",ownerId:x.ownerId,ownerKyc:x.ownerKycStatus||"NOT_STARTED",blocked:x.blocked||[],handover:x.handover||""}});render()},e=>{S.cloudError="Locations indisponibles : "+(e.code||e.message||"accès refusé");render()});
- A.onAuthStateChanged(auth,async u=>{if(S.unChats){S.unChats();S.unChats=null}
+ A.onAuthStateChanged(auth,async u=>{if(S.unChats){S.unChats();S.unChats=null}if(S.unRentMine){S.unRentMine();S.unRentMine=null}
   if(u){try{S.user=await loadProfile(u)}catch(e){toast("Profil indisponible");S.user=null}S.auth=null;showAuth();applyItems();
+   S.unRentMine=F.onSnapshot(F.query(F.collection(db,"rentalListings"),F.where("ownerId","==",u.uid)),q=>{S.rdrafts=q.docs.map(d=>{const x=d.data();return{id:d.id,t:x.title,cat:x.category,d:x.description,cond:x.condition,priceDay:x.priceDay,priceWeek:x.priceWeek,priceMonth:x.priceMonth,minDays:x.minDays,maxDays:x.maxDays,deposit:x.deposit,declaredValue:x.declaredValue,commune:x.commune,handover:x.handover,serial:x.serial,authorized:x.authorized,rulesAccepted:x.rulesAccepted,p:x.photos||[],status:x.status}});if(S.stack.length&&S.stack[S.stack.length-1].n==="rentmine")renderPage()},e=>{S.cloudError="Impossible de charger vos brouillons de location : "+(e.code||"accès refusé");render()});
    S.unChats=F.onSnapshot(F.query(F.collection(db,"chats"),F.where("participants","array-contains",u.uid)),s=>{S.chats=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b.updatedAt&&b.updatedAt.seconds)||0)-((a.updatedAt&&a.updatedAt.seconds)||0));render()},()=>{})}
-  else{S.user=null;S.chats=[];applyItems();close_();if(S.stack.length)closePage()}
+  else{S.user=null;S.chats=[];S.rdrafts=[];applyItems();close_();if(S.stack.length)closePage()}
   render();if(S.stack.length)renderPage()})}
 let phoneConfirmation=null,phoneRecaptcha=null;
 async function socialAuth(provider){
@@ -924,7 +925,7 @@ function act(a,v,el){switch(a){
  case "rphpick":$("#rpf").click();break;
  case "rphdel":S.rphotos.splice(+v,1);$("#rphs").innerHTML=rphsHtml();break;
  case "rsave":saveRentDraft();break;
- case "rdraftdel":S.rdrafts=S.rdrafts.filter(d=>d.id!==v);save();renderPage();toast("Brouillon supprimé");break;
+ case "rdraftdel":if(CLOUD){FB.F.deleteDoc(FB.F.doc(FB.db,"rentalListings",v)).then(()=>toast("Brouillon supprimé")).catch(e=>toast("Suppression impossible : "+(e.code||"erreur")))}else toast("Connexion Firebase requise");break;
  case "clearrecent":S.recent=[];save();render();break;
  case "rs":S.q=v;S.tab="search";render();break}}
 /* ===== Messagerie intégrée (démo locale et Firebase), livraison négociable, service client ===== */
