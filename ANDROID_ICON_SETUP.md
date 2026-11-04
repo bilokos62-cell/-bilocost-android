@@ -1,11 +1,7 @@
-# Bilocost Android launcher icon
+# Bilocost Android launcher icon and APK build
 
-The official Bilocost green-and-white B artwork is stored at `resources/bilocost-icon.jpg`.
+The official Bilocost launcher artwork is stored at `resources/bilocost-icon.jpg`. Android launcher resources are staged under `android-resources/app/src/main/res`, including density-specific mipmap assets and Android adaptive-icon XML.
 
-Android launcher resources are prepared under `android-resources/app/src/main/res`:
-- `mipmap-mdpi`, `mipmap-hdpi`, `mipmap-xhdpi`, `mipmap-xxhdpi`, `mipmap-xxxhdpi`: launcher and round launcher artwork.
-- `mipmap-anydpi-v26`: adaptive launcher icon XML.
-- `drawable-nodpi`: adaptive foreground artwork.
-- `values/ic_launcher_background.xml`: adaptive icon background.
+The repository's GitHub Actions workflow at `.github/workflows/android-apk.yml` generates the Capacitor Android project, copies these launcher resources into the generated app, sets the launcher icon in the manifest, syncs Capacitor, and builds a debug APK. Run it from the Actions tab with **Build Bilocost Android APK** (or push a change to one of its watched paths).
 
-The repository has Capacitor configuration but does not yet contain a generated native Android Gradle project. These files are kept outside the `android/` directory so that `npx cap add android` can generate that project normally. After generation, copy the contents of `android-resources/app/src/main/res` into `android/app/src/main/res`, verify the manifest uses `@mipmap/ic_launcher`, then run `npx cap sync android` and rebuild the APK/AAB. The repository change prepares the icon assets; it does not itself build an APK.
+The APK is published as the workflow artifact named `Bilocost-Android-APK`. This is a debug APK for testing, not a signed Play Store release.
