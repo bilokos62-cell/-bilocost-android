@@ -1,0 +1,60 @@
+name: Build Bilocost iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Prepare web files
+        run: |
+          mkdir -p www/icons www/resources
+          cp index.html www/index.html
+          cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
+          cp 'IMG-20261024-WA0000~2.jpg' www/IMG-20261024-WA0000~2.jpg
+          if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
+          if [ -f sw.js ]; then cp sw.js www/; fi
+          if [ -d icons ]; then cp -R icons/. www/icons/; fi
+          test -s www/index.html
+          test -s www/IMG-20261024-WA0000.jpg
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Add and sync Capacitor iOS
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Build iOS Simulator app
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/ios \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload iOS Simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bilocost-iOS-Simulator
+          path: build/ios/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
+          retention-days: 14
