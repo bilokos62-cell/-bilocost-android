@@ -926,6 +926,7 @@ function act(a,v,el){switch(a){
  case "rphpick":$("#rpf").click();break;
  case "rphdel":S.rphotos.splice(+v,1);$("#rphs").innerHTML=rphsHtml();break;
  case "rsave":saveRentDraft();break;
+ case "rsubmit":submitRentListing();break;
  case "rdraftdel":if(CLOUD){FB.F.deleteDoc(FB.F.doc(FB.db,"rentalListings",v)).then(()=>toast("Brouillon supprimé")).catch(e=>toast("Suppression impossible : "+(e.code||"erreur")))}else toast("Connexion Firebase requise");break;
  case "clearrecent":S.recent=[];save();render();break;
  case "rs":S.q=v;S.tab="search";render();break}}
@@ -1053,7 +1054,8 @@ function rQuoteHtml(l,s,e){if(!s||!e)return `<div class="sub" style="margin:8px 
  catch(x){return `<div class="warn">${RERR[x.code]||"Dates invalides."}</div>`}}
 function rGateHtml(){
  if(!S.user)return `<div class="warn"><b>Connexion requise</b><br>Connectez-vous pour réserver.</div><button class="btn" data-auth="login">Se connecter</button>`;
- if(!KYC.ready||myKyc()!=="VERIFIED")return `<div class="warn"><b>${I("shield")} Réservation indisponible</b><br>Votre identité doit être vérifiée avant toute réservation. ${KYC.ready?"Statut : "+KSTAT[myKyc()]+".":"Le service de vérification d’identité n’est pas encore configuré."}</div><button class="btn out" data-go="rentkyc">Voir la vérification d’identité</button><button class="btn" disabled style="margin-top:10px">Réserver et payer</button>`;
+ if(!KYC.ready||myKyc()!=="VERIFIED")return `<div class="warn"><b>${I("shield")} Réservation indisponible</b><br>Votre identité doit être validée par l’équipe Bilocost. Statut : ${KSTAT[myKyc()]||"Non commencé"}.</div><button class="btn out" data-go="rentkyc">Voir la vérification d’identité</button><button class="btn" disabled style="margin-top:10px">Réserver et payer</button>`;
+ if(!PAY.endpoint)return `<div class="warn"><b>Paiement de location non disponible</b><br>La réservation restera bloquée jusqu’à l’intégration et aux tests du prestataire de paiement et du séquestre.</div><button class="btn" disabled>Réserver et payer</button>`;
  return `<button class="btn" data-act="rentpay">Réserver et payer</button>`}
 function rentBook(id){const l=S.rentals.find(x=>x.id==id);if(!l)return;S.rbk={id};
  sheet(`<h2>Réserver</h2><p class="sub">${esc(l.t)}</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label>Du</label><input class="f" id="rs" type="date" min="${todayISO()}"></div><div><label>Au (inclus)</label><input class="f" id="re" type="date" min="${todayISO()}"></div></div>
@@ -1063,6 +1065,20 @@ const rExtra=cat=>`${SERIAL_CATS.includes(cat)?`<label>${cat==="Véhicules"?"Pla
 const rphsHtml=()=>S.rphotos.map((p,i)=>`<div style="position:relative"><img src="${p}" alt="Photo ${i+1}"><button type="button" class="x" data-act="rphdel" data-v="${i}" aria-label="Retirer la photo">×</button></div>`).join("")+(S.rphotos.length<6?`<button type="button" class="add" data-act="rphpick">${I("camera","",24)}<small>Ajouter des photos</small></button>`:"");
 function addRPhotos(files){[...files].slice(0,6-S.rphotos.length).forEach(f=>readPhoto(f,600,u=>{S.rphotos.push(u);const e=$("#rphs");if(e)e.innerHTML=rphsHtml()}))}
 function rentIssues(d){const x=[];if((d.p||[]).length<3)x.push("au moins 3 photos");if(!d.d)x.push("description");if(!(d.priceDay>0))x.push("prix par jour");if(!(d.deposit>0))x.push("caution");if(d.declaredValue&&d.deposit>d.declaredValue)x.push("caution inférieure à la valeur déclarée");if(!(d.declaredValue>0))x.push("valeur du bien");if(SERIAL_CATS.includes(d.cat)&&!d.serial)x.push("numéro de série ou IMEI");if(!d.handover)x.push("conditions de remise et de retour");return x}
+async function submitRentListing(){
+ if(!CLOUD||!FB.F||!FB.O)return toast("Connexion Firebase requise");
+ if(needUser())return;
+ if(myKyc()!=="VERIFIED")return toast("Votre identité doit d’abord être validée par Bilocost");
+ const g=id=>(($(id)||{}).value||""),n=id=>Math.max(0,Math.round(+g(id)||0));
+ const d={t:g("#rt").trim(),cat:g("#rc"),d:g("#rd").trim(),cond:g("#rcnd"),priceDay:n("#rpd"),priceWeek:n("#rpw"),priceMonth:n("#rpm"),minDays:n("#rmin")||1,maxDays:n("#rmax"),deposit:n("#rdep"),declaredValue:n("#rval"),commune:g("#rcm"),handover:g("#rh").trim(),serial:g("#rser").trim(),authorized:!!($("#rauth")||{}).checked,rulesAccepted:!!($("#rrules")||{}).checked,p:S.rphotos.slice()};
+ const issues=rentIssues(d);if(!d.t)issues.unshift("titre");if(!d.authorized)issues.push("confirmation du droit de louer");if(!d.rulesAccepted)issues.push("acceptation des règles");if(issues.length)return toast("À compléter : "+issues.join(", "));
+ const btn=document.querySelector('[data-act="rsubmit"]');if(btn)btn.disabled=true;
+ try{const F=FB.F,O=FB.O,ref=F.doc(F.collection(FB.db,"rentalListings")),urls=[];
+  for(let k=0;k<d.p.length;k++){const path=O.ref(FB.st,"rentalListings/"+S.user.uid+"/"+ref.id+"/"+k+".jpg");await O.uploadString(path,d.p[k],"data_url");urls.push(await O.getDownloadURL(path))}
+  await F.setDoc(ref,{title:d.t,category:d.cat,description:d.d,condition:d.cond,priceDay:d.priceDay,priceWeek:d.priceWeek,priceMonth:d.priceMonth,minDays:d.minDays,maxDays:d.maxDays,deposit:d.deposit,declaredValue:d.declaredValue,commune:d.commune,handover:d.handover,serial:d.serial,authorized:d.authorized,rulesAccepted:d.rulesAccepted,photos:urls,ownerId:S.user.uid,ownerName:S.user.name,ownerKycStatus:"VERIFIED",status:"PENDING_REVIEW",createdAt:F.serverTimestamp(),updatedAt:F.serverTimestamp()});
+  S.rphotos=[];toast("Annonce envoyée à l’équipe Bilocost pour examen");back();
+ }catch(e){if(btn)btn.disabled=false;toast("Soumission impossible : "+(e.code||"vérifiez les règles Firebase"))}
+}
 async function saveRentDraft(){if(!CLOUD||!FB.F||!FB.O)return toast("Connexion Firebase requise : aucun brouillon local ne sera créé");if(needUser())return;
  const g=id=>(($(id)||{}).value||""),n=id=>Math.max(0,Math.round(+g(id)||0)),t=g("#rt").trim();if(!t)return toast("Donnez un titre à votre annonce");
  const d={status:"DRAFT",title:t,category:g("#rc"),description:g("#rd").trim(),condition:g("#rcnd"),priceDay:n("#rpd"),priceWeek:n("#rpw"),priceMonth:n("#rpm"),minDays:n("#rmin")||1,maxDays:n("#rmax"),deposit:n("#rdep"),declaredValue:n("#rval"),commune:g("#rcm"),handover:g("#rh").trim(),serial:g("#rser").trim(),authorized:!!($("#rauth")||{}).checked,rulesAccepted:!!($("#rrules")||{}).checked,ownerId:S.user.uid,ownerName:S.user.name,ownerKycStatus:myKyc(),createdAt:FB.F.serverTimestamp(),updatedAt:FB.F.serverTimestamp()};
