@@ -9,22 +9,25 @@
 
   function initGemini(){
     try {
-      if (typeof getAI !== "function" ||
-          typeof GoogleAIBackend !== "function" ||
-          typeof getGenerativeModel !== "function" ||
-          typeof a === "undefined") {
-        throw new Error("Firebase AI Logic non initialisé dans cette version.");
+      // The main Bilocost module initializes Firebase AI Logic locally and
+      // exposes the ready model on FB.aiModel. Reuse that exact instance.
+      if (typeof FB !== "undefined" && FB && FB.aiModel) {
+        geminiModel = FB.aiModel;
+        return true;
       }
-      const firebaseAI = getAI(a, { backend: new GoogleAIBackend() });
-      geminiModel = getGenerativeModel(firebaseAI, {
-        model: "gemini-2.5-flash",
-        generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
-      });
-      return true;
+      return false;
     } catch (error) {
       console.error("Bilocost Gemini initialization:", error);
       return false;
     }
+  }
+
+  async function waitForGemini(){
+    for (let attempt = 0; attempt < 30; attempt++) {
+      if (initGemini()) return true;
+      await new Promise(resolve => setTimeout(resolve, 400));
+    }
+    throw new Error("Firebase AI Logic n’a pas terminé son initialisation. Vérifiez Firebase AI Logic et App Check, puis rechargez Bilocost.");
   }
 
   function cleanText(value, max){
@@ -32,7 +35,7 @@
   }
 
   async function askGemini(prompt, purpose){
-    if (!geminiModel && !initGemini()) throw new Error("L’assistant IA est momentanément indisponible. Vérifiez la connexion Firebase.");
+    if (!geminiModel) await waitForGemini();
     const now = Date.now();
     if (requestBusy) throw new Error("Une réponse est déjà en cours. Patientez un instant.");
     if (now - lastRequestAt < 2500) throw new Error("Veuillez patienter quelques secondes avant une nouvelle demande.");
@@ -150,6 +153,6 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",addAssistant,{once:true});
   else addAssistant();
-  // Initialize at startup so configuration errors are visible in the browser console.
-  initGemini();
+  // Wait for the main app to finish its asynchronous Firebase initialization.
+  waitForGemini().catch(error => console.warn("Bilocost Gemini is waiting for Firebase:", error.message));
 })();
