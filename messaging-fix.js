@@ -1,11 +1,13 @@
 /* Bilocost messaging reliability patch — injected by the deployment workflow. */
-function chatErrorText(e){
+function chatErrorText(e,stage){
  const code=(e&&e.code)||"";
- if(code==="permission-denied")return "Accès Firestore refusé. Les règles de sécurité des collections chats/messages doivent autoriser uniquement les participants.";
- if(code==="unauthenticated")return "Votre session a expiré. Reconnectez-vous.";
- if(code==="failed-precondition")return "Index ou configuration Firestore manquant(e).";
- if(code==="unavailable"||code==="deadline-exceeded")return "Connexion Firebase indisponible. Réessayez.";
- return "Erreur messagerie"+(code?" ("+code+")":"")+". Vérifiez la connexion et les règles Firestore.";
+ const where=stage?" ["+stage+"]":"";
+ const detail=(e&&e.message)?String(e.message).slice(0,180):"";
+ if(code==="permission-denied")return "Accès Firestore refusé"+where+". Vérifiez les participants et les règles. ("+code+")";
+ if(code==="unauthenticated")return "Session Firebase expirée"+where+". Reconnectez-vous.";
+ if(code==="failed-precondition")return "Précondition Firestore manquante"+where+". ("+code+")";
+ if(code==="unavailable"||code==="deadline-exceeded")return "Connexion Firebase indisponible"+where+". Réessayez.";
+ return "Erreur messagerie"+where+(code?" ("+code+")":"")+(detail?": "+detail:"");
 }
 async function ensureChat(cid,i){
  const who=i.s||i.sellerName||"Vendeur",ttl=i.t||i.title||"Annonce";
@@ -52,7 +54,7 @@ async function startChat(id){
  if(ownItem(i))return toast("C’est votre propre annonce");
  const cid=i.id+"_"+myId();
  try{await ensureChat(cid,i);openChat(cid,i.s,i.t,{itemId:i.id,buyerId:myId(),sellerId:i.sellerId,iAmBuyer:true});}
- catch(e){console.error("Bilocost startChat:",e);toast(chatErrorText(e));}
+ catch(e){console.error("Bilocost startChat:",e);toast(chatErrorText(e,"ouverture conversation"));}
 }
 async function startEventChat(id){
  if(needUser())return;
@@ -60,7 +62,7 @@ async function startEventChat(id){
  if(CLOUD&&e.sellerId===S.user.uid)return toast("C’est votre événement");
  const cid="e_"+e.id+"_"+myId();
  try{await ensureChat(cid,e);openChat(cid,e.sellerName,e.title,{itemId:e.id,buyerId:myId(),sellerId:e.sellerId,iAmBuyer:true,event:true});}
- catch(e){console.error("Bilocost startEventChat:",e);toast(chatErrorText(e));}
+ catch(e){console.error("Bilocost startEventChat:",e);toast(chatErrorText(e,"envoi du message"));}
 }
 async function sendToSeller(i,text,offer){
  if(needUser())return;
@@ -68,7 +70,7 @@ async function sendToSeller(i,text,offer){
  if(containsPhoneNumber(text))return toast("Les numéros de téléphone sont interdits dans la messagerie Bilocost.");
  const cid=i.id+"_"+myId();
  try{await ensureChat(cid,i);await postMsg(cid,text,offer);close_();openChat(cid,i.s,i.t,{itemId:i.id,buyerId:myId(),sellerId:i.sellerId,iAmBuyer:true});}
- catch(e){console.error("Bilocost sendToSeller:",e);toast(chatErrorText(e));}
+ catch(e){console.error("Bilocost sendToSeller:",e);toast(chatErrorText(e,"préparation ou envoi"));}
 }
 function openChat(cid,other,ttl,info){
  S.chatId=cid;S.chatOther=other;S.chatTtl=ttl;
@@ -81,7 +83,7 @@ function openChat(cid,other,ttl,info){
  const F=FB.F;
  S.unChat=F.onSnapshot(F.query(F.collection(FB.db,"chats",cid,"messages"),F.orderBy("at","asc")),
   s=>renderChat(s.docs.map(d=>({id:d.id,...d.data()}))),
-  e=>{console.error("Bilocost chat listener:",e);const el=$("#ch");if(el)el.innerHTML='<p class="warn">'+esc(chatErrorText(e))+'</p>';});
+  e=>{console.error("Bilocost chat listener:",e);const el=$("#ch");if(el)el.innerHTML='<p class="warn">'+esc(chatErrorText(e,"écoute des messages"))+'</p>';});
 }
 async function sendMsg(){
  const field=$("#cm"),v=field?field.value.trim():"";if(!v)return;
