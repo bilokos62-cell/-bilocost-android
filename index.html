@@ -195,7 +195,7 @@ button.seller{background:var(--card);color:inherit}button.pm{width:100%;text-ali
 <div class="app"> 
 <header>
   <div class="logo"><img class="lg" width="38" height="38" alt=""><div><b>Bilocost</b><small>ACHAT À BAS PRIX</small></div></div>
-  <div style="display:flex;gap:8px;align-items:center"><button class="commune" id="communeBtn" aria-label="Choisir la commune"><svg class="i" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> <span id="communeLbl">Kinshasa</span> ▾</button><button class="ib" data-go="favs" aria-label="Favoris"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button class="ib" data-go="cart" aria-label="Panier"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><b class="dot" id="cc" style="display:none"></b></button><button class="av sm" id="hav" data-t="me" aria-label="Profil"></button></div>
+  <div style="display:flex;gap:8px;align-items:center"><button class="commune" id="communeBtn" aria-label="Choisir la commune"><svg class="i" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> <span id="communeLbl">Kinshasa</span> ▾</button><button class="ib" data-go="favs" aria-label="Favoris"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button class="ib" data-t="wallet" aria-label="Portefeuille" title="Mon portefeuille"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M16 14h2"/></svg></button><button class="ib" data-go="cart" aria-label="Panier"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><b class="dot" id="cc" style="display:none"></b></button><button class="av sm" id="hav" data-t="me" aria-label="Profil"></button></div>
 </header>
 <main id="view" class="wrap"><div class="empty" style="margin:24px 0">Chargement de Bilocost…</div></main>
 <nav aria-label="Navigation principale"><div>
@@ -237,8 +237,8 @@ const PAYLOGO={"mpesa": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBD
 /* Paiement : TOUT est désactivé tant qu’un prestataire n’est pas contracté, configuré et testé. */
 const PAY={escrow:{ready:false},endpoint:"",getToken:null,
  methods:[{id:"visa",n:"Visa",g:"Carte bancaire",ready:false},{id:"mastercard",n:"Mastercard",g:"Carte bancaire",ready:false},{id:"mpesa",n:"M-Pesa",g:"Mobile Money",ready:false},{id:"airtel",n:"Airtel Money",g:"Mobile Money",ready:false},{id:"orange",n:"Orange Money",g:"Mobile Money",ready:false}]};
-/* Mises en avant : montants repris de la maquette (à confirmer). Le serveur reste la référence (backend/functions/boostPlans.js). */
-const BOOSTS=[{id:"day",n:"24 heures",d:"pendant 24 h",cdf:1500},{id:"week",n:"Semaine",d:"pendant 7 jours",cdf:6900},{id:"month",n:"Mois",d:"pendant 30 jours",cdf:23000},{id:"star",n:"Vedette",d:"pendant 3 jours",cdf:2300,star:true}];
+/* Tarifs Bilocost validés : conversion de référence 1 USD = 2 300 CDF. */
+const BOOSTS=[{id:"day",n:"24 heures",d:"pendant 24 h",usd:0.50,cdf:1150},{id:"week",n:"7 jours",d:"pendant 7 jours",usd:3,cdf:6900},{id:"month",n:"1 mois",d:"pendant 30 jours",usd:10,cdf:23000},{id:"star",n:"Offre spéciale",d:"pendant 36 heures",usd:1.50,cdf:3450,star:true}];
 const live=i=>!!i.boostUntil&&i.boostUntil>Date.now();
 const rank=i=>live(i)?(i.boostPlan==="star"?2:1):0;
 const bbadge=i=>live(i)?`<span class="bst ${i.boostPlan==="star"?"star":""}">${i.boostPlan==="star"?"Vedette":"Sponsorisé"}</span>`:"";
@@ -1124,7 +1124,7 @@ document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return
  if(d.auth){doAuth(d.auth);return}
  if(d.soc){socialAuth(d.soc);return}
  if(d.eye){const i=$("#"+d.eye);i.type=i.type==="password"?"text":"password";return}
- if(d.t){if(["pub","msg","me"].includes(d.t)&&!S.user&&d.t!=="me"&&needUser())return;S.tab=d.t;render();window.scrollTo(0,0)}
+ if(d.t){if(["pub","msg","wallet"].includes(d.t)&&!S.user&&needUser())return;S.tab=d.t;render();window.scrollTo(0,0)}
  else if(d.cat){S.cat=d.cat;render()}
  else if(d.sort){S.sort=S.sort===d.sort?"":d.sort;render()}
  else if(d.new){S.newOnly=!S.newOnly;render()}
