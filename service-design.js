@@ -6,6 +6,23 @@
   const style = document.createElement("style");
   style.id = "bilocost-service-design";
   style.textContent = `
+    /* Horizontal, touch-scrollable home shortcuts */
+    .two[style*="margin:14px 0"]{
+      display:flex!important;flex-wrap:nowrap!important;align-items:stretch;
+      gap:10px!important;max-width:100%;overflow-x:auto;overflow-y:hidden;
+      padding:2px 1px 10px;margin:14px 0!important;
+      -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+      scrollbar-width:none;scroll-snap-type:x proximity;
+    }
+    .two[style*="margin:14px 0"]::-webkit-scrollbar{display:none}
+    .two[style*="margin:14px 0"]>.btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      flex:0 0 auto;width:auto;max-width:none;min-width:max-content;
+      white-space:nowrap;scroll-snap-align:start;padding:11px 16px;
+    }
+    .row:has(>h3){gap:10px;flex-wrap:wrap}
+    .row:has(>h3)>h3{min-width:0;overflow-wrap:anywhere}
+    .row:has(>h3)>.lnk{flex:0 0 auto;white-space:nowrap}
     .svc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0 20px}
     .svc-card{display:flex;flex-direction:column;min-width:0;max-width:100%;overflow:hidden;background:var(--card,#fff);border:1px solid var(--line,#e5e7eb);border-radius:18px;box-shadow:0 5px 18px rgba(20,40,28,.07)}
     .svc-card-media{width:100%;height:148px;display:grid;place-items:center;overflow:hidden;background:var(--panel,#f3f7f4)}
