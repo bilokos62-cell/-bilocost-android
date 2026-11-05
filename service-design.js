@@ -3,9 +3,31 @@
   if (window.__bilocostServiceDesignInstalled) return;
   window.__bilocostServiceDesignInstalled = true;
 
+  /* Give the Partners heading and its ad action their own horizontal strip. */
+  if (typeof adSlots === "function" && !window.__bilocostPartnerNavPatched) {
+    const originalAdSlots = adSlots;
+    adSlots = function(){
+      return originalAdSlots().replace(
+        '<div class="row"><h3>Partenaires Bilocost</h3>',
+        '<div class="row partner-nav"><h3>Partenaires Bilocost</h3>'
+      );
+    };
+    window.__bilocostPartnerNavPatched = true;
+  }
+
   const style = document.createElement("style");
   style.id = "bilocost-service-design";
   style.textContent = `
+    .partner-nav{
+      display:flex!important;flex-wrap:nowrap!important;align-items:center;
+      justify-content:space-between;gap:12px!important;max-width:100%;
+      overflow-x:auto;overflow-y:hidden;padding:3px 1px 8px;
+      -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+      scrollbar-width:none;
+    }
+    .partner-nav::-webkit-scrollbar{display:none}
+    .partner-nav>h3{flex:0 0 auto;white-space:nowrap;margin:0}
+    .partner-nav>.lnk{flex:0 0 auto;white-space:nowrap}
     /* Horizontal, touch-scrollable home shortcuts */
     .two[style*="margin:14px 0"]{
       display:flex!important;flex-wrap:nowrap!important;align-items:stretch;
