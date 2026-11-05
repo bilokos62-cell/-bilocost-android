@@ -40,7 +40,8 @@ jobs:
               raise SystemExit("Application script boundaries not found")
           messaging = Path("messaging-fix.js").read_text(encoding="utf-8")
           gemini = Path("gemini-assistant.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + gemini + "\n" + html[script_end:]
+          services = Path("service-design.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + gemini + "\n" + services + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging and Gemini patches injected for Android.")
           PY
