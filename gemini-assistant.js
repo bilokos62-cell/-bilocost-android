@@ -28,7 +28,7 @@
   }
 
   function cleanText(value, max){
-    return String(value || "").replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/g, "").trim().slice(0,max);
+    return String(value || "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0,max);
   }
 
   async function askGemini(prompt, purpose){
@@ -72,7 +72,7 @@
       JSON.stringify(input),
       "Amélioration d’annonce"
     );
-    const json = raw.replace(/^\u0060\u0060\u0060(?:json)?\\s*/i,"").replace(/\\s*\u0060\u0060\u0060$/,"");
+    const json = raw.replace(/^\u0060\u0060\u0060(?:json)?\s*/i,"").replace(/\s*\u0060\u0060\u0060$/,"");
     const parsed = JSON.parse(json);
     if (!parsed || typeof parsed.titre !== "string" || typeof parsed.description !== "string") {
       throw new Error("Réponse IA invalide. Réessayez.");
