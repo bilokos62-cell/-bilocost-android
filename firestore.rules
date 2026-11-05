@@ -1,0 +1,243 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+    function hasVerifiedIdentity(uid) {
+      return exists(/databases/$(database)/documents/identity_verifications/$(uid))
+        && get(/databases/$(database)/documents/identity_verifications/$(uid)).data.status == "verified";
+    }
+
+    // Public marketplace listings. Sensitive user profile fields remain private.
+    match /items/{itemId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.priceCDF is number
+        && request.resource.data.priceCDF >= 0
+        && request.resource.data.category is string
+        && request.resource.data.condition is string
+        && request.resource.data.commune is string
+        && request.resource.data.photos is list
+        && request.resource.data.photos.size() <= 4
+        && request.resource.data.status in ["active", "pending"]
+        && request.resource.data.rating == 0
+        && request.resource.data.ratingCount == 0;
+      allow update: if signedIn()
+        && resource.data.sellerId == request.auth.uid
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "priceCDF", "status", "renewedAt", "reserved", "photos"
+        ])
+        && (!("status" in request.resource.data)
+          || request.resource.data.status in ["active", "sold", "pending"]);
+      allow delete: if signedIn() && resource.data.sellerId == request.auth.uid;
+    }
+
+    // Private account document: never expose email, phone, or profile fields publicly.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if isOwner(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "name", "bio", "commune", "phone", "mode", "shop", "shopName",
+          "publicName", "bundle", "avatar", "updatedAt"
+        ]);
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Identity files are private in Storage; only the owner and trusted admins see metadata.
+    match /identity_verifications/{uid} {
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.status == "pending"
+        && request.resource.data.identity.docPath is string
+        && request.resource.data.identity.docPath.matches("private_identity/" + uid + "/.*");
+      allow read: if isOwner(uid) || isAdmin();
+      allow update: if isAdmin() || (
+        isOwner(uid)
+        && resource.data.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["identity", "submittedAt"])
+        && request.resource.data.identity.docPath.matches("private_identity/" + uid + "/.*")
+      );
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Integrated messaging: only the two declared participants can read or write.
+    match /chats/{chatId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.participants;
+      allow create: if signedIn()
+        && request.resource.data.buyerId == request.auth.uid
+        && request.resource.data.sellerId is string
+        && request.resource.data.sellerId != request.auth.uid
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() == 2
+        && request.resource.data.participants.hasAll([
+          request.auth.uid, request.resource.data.sellerId
+        ]);
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.participants == resource.data.participants
+        && request.resource.data.buyerId == resource.data.buyerId
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["lastMessage", "lastFrom", "updatedAt"])
+        && request.resource.data.lastFrom == request.auth.uid;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        function chatParticipant() {
+          return signedIn()
+            && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        }
+        allow read: if chatParticipant();
+        allow create: if chatParticipant()
+          && request.resource.data.from == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+        allow update: if chatParticipant()
+          && request.resource.data.from == resource.data.from
+          && request.resource.data.text == resource.data.text
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["offer"]);
+        allow delete: if false;
+      }
+    }
+
+    // Public events. Owner can remove their own event; only trusted admin can moderate.
+    match /events/{eventId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.endAt > request.resource.data.startAt;
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.sellerId == request.auth.uid
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["title", "description", "startAt", "endAt", "commune", "spot", "photos"])
+      );
+      allow delete: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
+    }
+
+    // Rentals: publication requires an identity actually approved by an administrator.
+    match /rentalListings/{listingId} {
+      allow read: if resource.data.status == "BOOKABLE"
+        || (signedIn() && resource.data.ownerId == request.auth.uid)
+        || isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.photos is list
+        && request.resource.data.photos.size() <= 8
+        && (
+          request.resource.data.status == "DRAFT"
+          || (
+            request.resource.data.status == "PENDING_REVIEW"
+            && hasVerifiedIdentity(request.auth.uid)
+            && request.resource.data.ownerKycStatus == "VERIFIED"
+            && request.resource.data.authorized == true
+            && request.resource.data.rulesAccepted == true
+          )
+        );
+      allow update: if isAdmin();
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid
+        && resource.data.status in ["DRAFT", "PENDING_REVIEW"];
+    }
+
+    match /services/{serviceId} {
+      allow read: if resource.data.status == "ACTIVE"
+        || (signedIn() && resource.data.ownerId == request.auth.uid)
+        || isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.status == "PENDING_SUBSCRIPTION"
+        && request.resource.data.subscriptionAmountUSD == 6
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.description is string
+        && request.resource.data.phone is string;
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "title", "description", "category", "commune", "phone",
+          "price", "currency", "photo", "updatedAt"
+        ])
+      );
+      allow delete: if isAdmin() || (signedIn() && resource.data.ownerId == request.auth.uid);
+    }
+
+    match /adCampaignRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.status == "PENDING_REVIEW"
+        && request.resource.data.title is string
+        && request.resource.data.url is string
+        && request.resource.data.url.matches("^https://.*");
+      allow read: if signedIn() && resource.data.ownerId == request.auth.uid || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /ads/{adId} {
+      allow read: if resource.data.status == "ACTIVE";
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /walletTransactions/{transactionId} {
+      allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+
+    match /serials/{serialId} {
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.itemId is string;
+      allow read, update, delete: if false;
+    }
+
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.byUid == request.auth.uid
+        && request.resource.data.status == "OPEN"
+        && request.resource.data.target is string;
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.byUid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /callbacks/{callbackId} {
+      allow create: if signedIn()
+        && request.resource.data.byUid == request.auth.uid
+        && request.resource.data.status == "OPEN";
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.byUid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Deny every collection not explicitly listed above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
