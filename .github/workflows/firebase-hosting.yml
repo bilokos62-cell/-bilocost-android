@@ -63,7 +63,7 @@ jobs:
           if "/* Bilocost responsive header and text containment */" not in html:
               if "</style>" not in html:
                   raise SystemExit("Stylesheet closing tag not found")
-              html = html.replace("</style>", responsive_css + "\\n</style>", 1)
+              html = html.replace("</style>", responsive_css + "\n</style>", 1)
           patch = Path("messaging-fix.js").read_text(encoding="utf-8")
           gemini = Path("gemini-assistant.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
