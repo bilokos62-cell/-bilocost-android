@@ -25,6 +25,26 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Inject shared Bilocost patches
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("index.html").read_text(encoding="utf-8")
+          marker = "const CLOUD="
+          pos = html.find(marker)
+          if pos < 0:
+              raise SystemExit("Application script marker not found")
+          script_start = html.rfind("<script", 0, pos)
+          script_end = html.find("</script>", pos)
+          if script_start < 0 or script_end < 0:
+              raise SystemExit("Application script boundaries not found")
+          messaging = Path("messaging-fix.js").read_text(encoding="utf-8")
+          gemini = Path("gemini-assistant.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\\n" + messaging + "\\n" + gemini + "\\n" + html[script_end:]
+          Path("index.html").write_text(html, encoding="utf-8")
+          print("Messaging and Gemini patches injected for Android.")
+          PY
+
       - name: Validate app JavaScript syntax
         run: |
           node -e 'const fs=require("fs"); const h=fs.readFileSync("index.html","utf8"); const p=h.indexOf("const CLOUD="); if(p<0) throw new Error("Application script missing"); const a=h.lastIndexOf("<script",p); const b=h.indexOf("</script>",p); if(a<0||b<0) throw new Error("Application script is incomplete"); fs.writeFileSync("/tmp/bilocost.js",h.slice(h.indexOf(">",a)+1,b));'
