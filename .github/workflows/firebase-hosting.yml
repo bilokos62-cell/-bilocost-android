@@ -18,6 +18,17 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           html = Path("index.html").read_text(encoding="utf-8")
+          # Publish the Gemini model immediately after Firebase AI Logic creation.
+          # Auth persistence may be slow; it must not block the assistant from seeing FB.aiModel.
+          old_init = ' auth.languageCode="fr";'
+          new_init = ' Object.assign(FB,{A,F,O,AC,AI,appCheck,ai,aiModel,auth,db:F.getFirestore(a),st:O.getStorage(a)}); auth.languageCode="fr";'
+          if old_init not in html:
+              raise SystemExit("Firebase initialization insertion point not found")
+          html = html.replace(old_init, new_init, 1)
+          old_assign = ' Object.assign(FB,{A,F,O,AC,AI,appCheck,ai,aiModel,auth,db:F.getFirestore(a),st:O.getStorage(a)})'
+          if old_assign not in html:
+              raise SystemExit("Original Firebase assignment not found")
+          html = html.replace(old_assign, '', 1)
           patch = Path("messaging-fix.js").read_text(encoding="utf-8")
           gemini = Path("gemini-assistant.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
