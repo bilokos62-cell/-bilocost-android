@@ -40,6 +40,42 @@ jobs:
           if old_assign not in html:
               raise SystemExit("Original Firebase assignment not found")
           html = html.replace(old_assign, '', 1)
+
+          # Correct the mobile header: keep wallet access inside the profile area.
+          import re
+          html, removed = re.subn(r'<button class="ib" data-t="wallet"[^>]*>.*?</button>', '', html, count=1, flags=re.S)
+          if removed != 1:
+              raise SystemExit("Header wallet control not found; refusing an unsafe layout patch")
+          responsive_css = """
+          /* Bilocost responsive header and text containment */
+          header { gap: 8px; min-width: 0; }
+          header .logo { flex: 0 0 auto; min-width: 0; }
+          header .logo b, header .logo small { white-space: nowrap; }
+          header > div:last-child { flex: 0 1 auto; min-width: 0; gap: 4px !important; }
+          header .ib { width: 34px; height: 34px; flex: 0 0 34px; }
+          header .commune { flex: 0 1 auto; min-width: 0; max-width: 104px; padding: 7px 8px; }
+          #view, #view * { min-width: 0; }
+          #view p, #view h1, #view h2, #view h3, #view small, #view b, #view span { overflow-wrap: anywhere; }
+          #view img { max-width: 100%; }
+          @media (max-width: 390px) {
+            header { padding: 10px 10px; gap: 5px; }
+            header .logo { gap: 6px; }
+            header .logo b { font-size: 18px; }
+            header .logo small { font-size: 8px; letter-spacing: .035em; }
+            header .commune { max-width: 34px; width: 34px; overflow: hidden; white-space: nowrap; padding: 7px; gap: 12px; }
+            header .commune #communeLbl { display: none; }
+          }
+          @media (max-width: 340px) {
+            header .logo img, header .logo .lg { width: 32px !important; height: 32px !important; }
+            header .logo b { font-size: 16px; }
+            header .logo small { font-size: 7px; }
+            header .ib { width: 32px; height: 32px; flex-basis: 32px; }
+          }
+          """
+          if "/* Bilocost responsive header and text containment */" not in html:
+              if "</style>" not in html:
+                  raise SystemExit("Stylesheet closing tag not found")
+              html = html.replace("</style>", responsive_css + "\\n</style>", 1)
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
