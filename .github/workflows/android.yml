@@ -75,7 +75,7 @@ jobs:
           if "/* Bilocost responsive header and text containment */" not in html:
               if "</style>" not in html:
                   raise SystemExit("Stylesheet closing tag not found")
-              html = html.replace("</style>", responsive_css + "\\n</style>", 1)
+              html = html.replace("</style>", responsive_css + "\n</style>", 1)
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
