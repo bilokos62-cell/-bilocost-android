@@ -66,6 +66,54 @@
   `;
   (document.head || document.documentElement).appendChild(style);
 
+  /* Locate the real rendered controls instead of relying on inline HTML selectors. */
+  const applyBilocostNavigation = () => {
+    const root = document.getElementById("view") || document;
+    const serviceButton = Array.from(root.querySelectorAll('button[data-t="services"]'))
+      .find(el => el.textContent.trim().includes("Trouver un professionnel"));
+    if (serviceButton && serviceButton.parentElement) {
+      serviceButton.parentElement.classList.add("bilocost-horizontal-nav");
+    }
+
+    const partnerTitle = Array.from(root.querySelectorAll("h3"))
+      .find(el => el.textContent.trim() === "Partenaires Bilocost");
+    if (partnerTitle && partnerTitle.parentElement) {
+      partnerTitle.parentElement.classList.add("partner-nav");
+    }
+  };
+
+  style.textContent += `
+    .bilocost-horizontal-nav{
+      display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+      align-items:stretch;gap:10px!important;width:100%!important;max-width:100%!important;
+      min-width:0!important;box-sizing:border-box;overflow-x:auto!important;
+      overflow-y:hidden!important;padding:2px 2px 10px!important;
+      -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+      scrollbar-width:none;touch-action:pan-x;
+    }
+    .bilocost-horizontal-nav::-webkit-scrollbar{display:none}
+    .bilocost-horizontal-nav>button{
+      flex:0 0 auto!important;width:max-content!important;max-width:none!important;
+      min-width:max-content!important;white-space:nowrap!important;
+    }
+    .partner-nav{
+      display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+      align-items:center;width:100%!important;max-width:100%!important;min-width:0!important;
+      box-sizing:border-box;overflow-x:auto!important;overflow-y:hidden!important;
+      justify-content:flex-start!important;gap:14px!important;
+      -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+      scrollbar-width:none;touch-action:pan-x;
+    }
+    .partner-nav::-webkit-scrollbar{display:none}
+    .partner-nav>h3,.partner-nav>.lnk{
+      flex:0 0 auto!important;white-space:nowrap!important;margin:0!important;
+    }
+  `;
+
+  applyBilocostNavigation();
+  const navigationObserver = new MutationObserver(applyBilocostNavigation);
+  navigationObserver.observe(document.documentElement,{childList:true,subtree:true});
+
   if (typeof serviceCards === "function") {
     serviceCards = function(){
       const cards = (S.services || []).filter(x => x.status === "ACTIVE");
