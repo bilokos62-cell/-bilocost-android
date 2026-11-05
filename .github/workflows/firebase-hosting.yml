@@ -20,6 +20,7 @@ jobs:
           html = Path("index.html").read_text(encoding="utf-8")
           patch = Path("messaging-fix.js").read_text(encoding="utf-8")
           gemini = Path("gemini-assistant.js").read_text(encoding="utf-8")
+          services = Path("service-design.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
@@ -28,7 +29,7 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + gemini + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + gemini + "\n" + services + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging patch injected into the application script.")
           PY
