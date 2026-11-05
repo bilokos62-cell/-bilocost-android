@@ -104,4 +104,4 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
-          firebase deploy --only hosting,firestore:rules,storage --project bilocost-a8136
+          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136
