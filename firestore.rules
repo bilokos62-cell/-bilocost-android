@@ -81,7 +81,12 @@ service cloud.firestore {
 
     // Integrated messaging: only the two declared participants can read or write.
     match /chats/{chatId} {
-      allow read: if signedIn() && request.auth.uid in resource.data.participants;
+      // The buyer must be allowed to check whether a deterministic chat ID exists
+      // before creating it. A missing document contains no private data.
+      allow get: if signedIn()
+        && (!exists(/databases/$(database)/documents/chats/$(chatId))
+          || request.auth.uid in resource.data.participants);
+      allow list: if signedIn() && request.auth.uid in resource.data.participants;
       allow create: if signedIn()
         && request.resource.data.buyerId == request.auth.uid
         && request.resource.data.sellerId is string
