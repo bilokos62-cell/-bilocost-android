@@ -142,7 +142,10 @@
       try {
         pending.textContent = await askGemini(question,"Assistance générale Bilocost");
       } catch(error) {
-        pending.textContent = error && error.message ? error.message : "Une erreur est survenue. Réessayez.";
+        console.error("Bilocost Gemini request failed:", error);
+        const code = error && (error.code || error.status || (error.customData && error.customData.httpStatus));
+        const detail = error && error.message ? error.message : "Erreur inconnue";
+        pending.textContent = "Échec IA" + (code ? " [" + code + "]" : "") + " : " + detail;
       } finally {
         send.disabled = false;
         log.scrollTop = log.scrollHeight;
