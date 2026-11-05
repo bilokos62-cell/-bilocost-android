@@ -992,7 +992,12 @@ function localPush(cid,m){const c=S.lchats[cid];if(!c)return;m.id="l"+Date.now()
 async function ensureChat(cid,i){const who=i.s||i.sellerName,ttl=i.t||i.title;
  if(!CLOUD){S.lchats[cid]=S.lchats[cid]||{id:cid,itemId:i.id,itemTitle:ttl,other:who,sellerId:i.sellerId||who,msgs:[],updatedAt:Date.now()};save();return}
  const F=FB.F,ref=F.doc(FB.db,"chats",cid);if(!(await F.getDoc(ref)).exists())await F.setDoc(ref,{participants:[S.user.uid,i.sellerId],buyerId:S.user.uid,sellerId:i.sellerId,buyerName:S.user.name,sellerName:who,itemId:i.id,itemTitle:ttl,lastMessage:"",lastFrom:"",updatedAt:F.serverTimestamp()})}
-function containsPhoneNumber(text){const z=String(text||"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));const compact=z.replace(/[\s().-]/g,"");return /(?:\+?243|00243)0?[89][0-9]{7,8}/i.test(compact)||/(?:^|\D)0[89][0-9]{7,8}(?:$|\D)/.test(z)||/(?:^|\D)\+243[0-9]{9}(?:$|\D)/i.test(z)}
+function containsPhoneNumber(text){
+ // Normalise les chiffres pleine chasse et arabes, puis retire les séparateurs pour détecter aussi « 0 8 », « 0-9 » et « +243 (0) 89… ».
+ const z=String(text||"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/[٠-٩]/g,c=>String("٠١٢٣٤٥٦٧٨٩".indexOf(c)));
+ const digits=z.replace(/[^0-9]/g,"");
+ return /(?:00243|243)0?[89][0-9]{7,8}|0[89][0-9]{7,8}/.test(digits);
+}
 async function postMsg(cid,text,offer){
  if(containsPhoneNumber(text))throw new Error("Les numéros de téléphone ne sont pas autorisés dans la messagerie Bilocost. Utilisez la conversation intégrée.");
  if(!CLOUD){localPush(cid,{from:"me",text,...(offer?{offer}:{})});return}
@@ -1043,7 +1048,7 @@ async function startTerms(){const m=document.querySelector("input[name=pm]:check
 async function setOfferStatus(id,st){const m=(S.chatMsgs||[]).find(x=>x.id===id);if(!m||!m.offer)return;
  if(!CLOUD){m.offer.status=st;save();renderChat(S.lchats[S.chatId].msgs);return}
  await FB.F.updateDoc(FB.F.doc(FB.db,"chats",S.chatId,"messages",id),{offer:{...m.offer,status:st}})}
-async function sendMsg(){const v=$("#cm").value.trim();if(!v)return;$("#cm").value="";try{await postMsg(S.chatId,v);if(!CLOUD)renderChat(S.lchats[S.chatId].msgs)}catch(e){toast("Message non envoyé")}}
+async function sendMsg(){const v=$("#cm").value.trim();if(!v)return;if(containsPhoneNumber(v))return toast("Envoi bloqué : les numéros congolais (243, 08…, 09…) sont interdits. Gardez vos échanges sur Bilocost.");$("#cm").value="";try{await postMsg(S.chatId,v);if(!CLOUD)renderChat(S.lchats[S.chatId].msgs)}catch(e){toast("Message non envoyé")}}
 function offerSheet(id,kind="price"){const i=findItem(id);if(!i)return;const del=kind==="delivery",base=del?defFee(i):i.cdf,sg=del?[0,0.5,0.75].map(f=>Math.round(base*f/100)*100):[5,10,15].map(p=>Math.round(i.cdf*(100-p)/100/100)*100);
  sheet(`<h2>${del?"Négocier la livraison":"Faire une offre"}</h2><p class="sub">${esc(i.t)} • ${del?"tarif affiché : "+(base?money(base):"gratuit"):"prix demandé : "+money(i.cdf)}</p><label>${del?"Tarif de livraison proposé (CDF)":"Votre offre (CDF)"}</label><input class="f" id="of" type="number" inputmode="numeric" min="${del?0:1}" placeholder="${base}"><div class="sort" style="margin-top:8px">${[...new Set(sg)].map(v=>`<button class="chip" data-act="ofset" data-v="${v}">${v?fmt(v)+" CDF":"Gratuite"}</button>`).join("")}</div><button class="btn" style="margin-top:14px" data-act="ofsend" data-v="${i.id}|${kind}">Envoyer</button><div class="sub" style="margin-top:8px">${CLOUD?"L’autre personne accepte, refuse ou contre-propose dans la messagerie.":"Mode démonstration : le message reste sur cet appareil."}</div>`)}
 function msgCloud(){if(!S.user)return `<h2>Messages</h2><div class="empty">${I("chat","",44)}<b>Connectez-vous</b><br>pour discuter avec les vendeurs.</div><button class="btn" data-auth="login">Se connecter</button>`;
