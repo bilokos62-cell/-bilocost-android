@@ -648,33 +648,45 @@ async function sendBilocostOtp(){
  }catch(e){toast(errMsg(e));if(phoneRecaptcha){try{phoneRecaptcha.clear()}catch(x){}phoneRecaptcha=null}}
 }
 async function verifyBilocostOtp(){try{const code=((document.querySelector("#otpCode")||{}).value||"").trim();if(!/^\d{6}$/.test(code))return toast("Entrez le code à 6 chiffres");await phoneConfirmation.confirm(code);phoneConfirmation=null;S.seen=true;save();close_();toast("Numéro vérifié") }catch(e){toast(e.code==="auth/invalid-verification-code"?"Code incorrect":"Vérification impossible : "+errMsg(e))}}
+// Limitation progressive des actions d'authentification sur cet appareil.
+// Firebase conserve ses propres protections serveur; ce contrôle ajoute une friction locale.
+const authLimitKey=(action,email)=>"bilocost_auth_"+action+"_"+encodeURIComponent((email||"").toLowerCase());
+function authLimitBlocked(action,email){try{const x=JSON.parse(localStorage.getItem(authLimitKey(action,email))||"null");if(x&&x.until>Date.now()){const m=Math.ceil((x.until-Date.now())/60000);toast("Trop de tentatives. Réessayez dans "+m+" minute(s).");return true}}catch(e){}return false}
+function authLimitFail(action,email,max,windowMs){try{const k=authLimitKey(action,email),now=Date.now(),x=JSON.parse(localStorage.getItem(k)||"null");const a=x&&now-x.start<windowMs?x:{start:now,count:0};a.count++;if(a.count>=max){a.until=now+windowMs;localStorage.setItem(k,JSON.stringify(a));toast("Trop de tentatives. Réessayez dans "+Math.ceil(windowMs/60000)+" minute(s).")}else localStorage.setItem(k,JSON.stringify(a))}catch(e){}}
+function authLimitClear(action,email){try{localStorage.removeItem(authLimitKey(action,email))}catch(e){}}
+
 async function cloudSignup(n,p,w){
  const em=((($("#ae")||{}).value)||"").trim().toLowerCase();
  if(!em.includes("@")||em.lastIndexOf(".")<em.indexOf("@")+2||em.endsWith("."))return toast("Adresse e-mail invalide");
+ if(authLimitBlocked("signup",em))return;
  if(!FB.A||!FB.auth)return toast("Firebase Authentication n'est pas initialisé. Réessayez dans quelques secondes.");
  try{
   S.pendingName=n;S.pendingPhone=p;
   const c=await FB.A.createUserWithEmailAndPassword(FB.auth,em,w);
+  authLimitClear("signup",em);
   await FB.A.updateProfile(c.user,{displayName:n});
   try{await FB.A.sendEmailVerification(c.user);toast("Compte créé. Un lien de vérification a été envoyé à "+em)}
   catch(e){toast("Compte créé, mais l'e-mail de vérification n'a pas pu être envoyé : "+errMsg(e))}
   S.seen=true;save();
- }catch(e){toast(errMsg(e))}
+ }catch(e){authLimitFail("signup",em,4,60*60*1000);toast(errMsg(e))}
 }
 
 async function cloudLogin(){
  const em=((($("#le")||{}).value)||"").trim().toLowerCase(),w=(($("#lw")||{}).value)||"";
  if(!em||w.length<6)return toast("Entrez votre e-mail et votre mot de passe");
+ if(authLimitBlocked("login",em))return;
  if(!FB.A||!FB.auth)return toast("Connexion Firebase en cours. Réessayez dans quelques secondes.");
- try{await FB.A.signInWithEmailAndPassword(FB.auth,em,w);S.seen=true;save();toast("Connexion réussie")}
- catch(e){toast(errMsg(e))}
+ try{await FB.A.signInWithEmailAndPassword(FB.auth,em,w);authLimitClear("login",em);S.seen=true;save();toast("Connexion réussie")}
+ catch(e){authLimitFail("login",em,5,15*60*1000);toast(errMsg(e))}
 }
 
 async function cloudReset(){
  const em=((($("#le")||{}).value)||"").trim().toLowerCase();
  if(!em)return toast("Entrez votre e-mail dans le champ de connexion");
- try{await FB.A.sendPasswordResetEmail(FB.auth,em);toast("Lien de réinitialisation envoyé à "+em)}
- catch(e){toast(errMsg(e))}
+ if(authLimitBlocked("reset",em))return;
+ if(!FB.A||!FB.auth)return toast("Firebase Authentication n'est pas initialisé. Réessayez dans quelques secondes.");
+ try{await FB.A.sendPasswordResetEmail(FB.auth,em);authLimitFail("reset",em,3,15*60*1000);toast("Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé.")}
+ catch(e){authLimitFail("reset",em,3,15*60*1000);toast(errMsg(e))}
 }
 
 async function cloudResend(){try{await FB.A.sendEmailVerification(FB.auth.currentUser);toast("E-mail envoyé")}catch(e){toast(errMsg(e))}}
