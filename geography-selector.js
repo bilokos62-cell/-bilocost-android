@@ -1,4 +1,5 @@
 /* Bilocost — RDC location hierarchy.
+ * Shared source: injected by Firebase Hosting and Android APK workflows.
  * Source: Open Admin Data, DR Congo (CC BY 4.0), with Kinshasa's 24 communes listed explicitly.
  * The selector remains usable with manual entry if the remote reference is unavailable.
  */
