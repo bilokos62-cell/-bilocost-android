@@ -258,7 +258,8 @@ function applyUiLanguage(root){
  root.querySelectorAll("input,textarea,button,[title],[aria-label]").forEach(el=>attrs.forEach(attr=>{if(!el.hasAttribute(attr))return;const key="__bilo_"+attr;if(el[key]===undefined)el[key]=el.getAttribute(attr);let v=el[key];if(S.lang!=="fr")keys.forEach(k=>v=v.split(k).join(dict[k]));el.setAttribute(attr,v)}));
 }
 function setUiLanguage(lang){if(!LANG_NAMES[lang])return;S.lang=lang;try{localStorage.setItem("bilocost_lang_v1",lang)}catch(e){}document.documentElement.lang=({fr:"fr",ln:"ln",en:"en",sw:"sw",tsh:"lu"})[lang]||"fr";render();if(S.stack.length)renderPage();toast("Langue : "+LANG_NAMES[lang])}
-let biloLangObserver=null;\nfunction startBiloLanguageObserver(){if(biloLangObserver||!document.body||!window.MutationObserver)return;biloLangObserver=new MutationObserver(records=>{if(S.lang==="fr")return;for(const rec of records){for(const node of rec.addedNodes||[]){if(node.nodeType===1)applyUiLanguage(node);else if(node.nodeType===3&&node.parentElement)applyUiLanguage(node.parentElement)}}});biloLangObserver.observe(document.body,{childList:true,subtree:true});}
+let biloLangObserver=null;
+function startBiloLanguageObserver(){if(biloLangObserver||!document.body||!window.MutationObserver)return;biloLangObserver=new MutationObserver(records=>{if(S.lang==="fr")return;for(const rec of records){for(const node of rec.addedNodes||[]){if(node.nodeType===1)applyUiLanguage(node);else if(node.nodeType===3&&node.parentElement)applyUiLanguage(node.parentElement)}}});biloLangObserver.observe(document.body,{childList:true,subtree:true});}
 document.addEventListener("DOMContentLoaded",startBiloLanguageObserver,{once:true});
 
 
