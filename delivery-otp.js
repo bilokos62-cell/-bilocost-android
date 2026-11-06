@@ -122,7 +122,7 @@ function biloInboxCategory(type) {
 function biloInboxCard(n) {
   const date = n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString("fr-FR") : "Récemment";
   const code = n.type === "delivery_code" && n.code ? '<div class="card" style="padding:12px;margin-top:10px"><b>Code de remise</b><div style="font-size:30px;letter-spacing:8px;font-weight:800;text-align:center;padding:10px 0">' + esc(n.code) + '</div><div class="sub">À communiquer au vendeur uniquement après avoir reçu et vérifié l’article.</div></div>' : "";
-  const order = n.orderId ? '<button class="lnk" data-inbox-order="' + esc(n.orderId) + '" style="margin-top:8px">Voir la commande</button>' : "";
+  const order = n.orderId ? '<button class="lnk" data-inbox-order="' + esc(n.orderId) + '" data-inbox-side="' + esc(n.side || "buy") + '" style="margin-top:8px">Voir la commande</button>' : "";
   const chat = n.chatId ? '<button class="lnk" data-inbox-chat="' + esc(n.chatId) + '" style="margin-top:8px">Ouvrir les messages</button>' : "";
   return '<article class="card" style="padding:13px;margin:9px 0;border-left:3px solid ' + (n.read ? "var(--line)" : "var(--pri)") + '"><div class="row"><b>' + esc(n.title || "Notification Bilocost") + '</b><span class="chip">' + (n.read ? "Lue" : "Nouvelle") + '</span></div><p style="margin:8px 0">' + esc(n.body || "") + '</p>' + code + '<div class="sub" style="margin-top:8px">' + esc(date) + '</div>' + order + chat + (!n.read ? '<button class="lnk" data-inbox-read="' + esc(n.id) + '" style="margin-left:12px">Marquer comme lue</button>' : "") + '</article>';
 }
@@ -158,5 +158,5 @@ document.addEventListener("click", e => {
   if (e.target.closest("[data-inbox-refresh]")) { e.preventDefault(); biloOpenInbox(); return; }
   if (e.target.closest("[data-inbox-chat]")) { e.preventDefault(); close_(); const nav = document.querySelector('nav button[data-t="msg"]'); if (nav) nav.click(); return; }
   const order = e.target.closest("[data-inbox-order]");
-  if (order) { e.preventDefault(); biloLoadOrders("buy"); return; }
+  if (order) { e.preventDefault(); biloLoadOrders(order.dataset.inboxSide || "buy"); return; }
 });
