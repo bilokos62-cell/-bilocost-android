@@ -59,79 +59,98 @@
     const overlay=document.createElement("div");
     overlay.id="biloLocationOverlay";
     overlay.style.cssText="position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:12px";
-    overlay.innerHTML='<section role="dialog" aria-modal="true" aria-label="Choisir votre localisation" style="width:min(100%,520px);max-height:90vh;overflow:auto;background:var(--card,#fff);color:var(--text,#18231d);border-radius:22px;padding:20px;box-shadow:0 15px 50px #0004"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 style="margin:0;font-size:20px">Votre localisation</h2><button type="button" data-loc-close aria-label="Fermer" style="border:0;background:transparent;font-size:24px">×</button></div><p class="sub" style="margin:8px 0 14px">Sélectionnez votre province, puis votre ville ou territoire et votre commune ou entité locale.</p><label for="biloProvince" style="display:block;margin:12px 0 6px;font-weight:700">1. Province</label><select id="biloProvince" class="f" style="width:100%;padding:13px;border-radius:12px"><option value="">Chargement des provinces…</option></select><label for="biloTerritory" style="display:block;margin:12px 0 6px;font-weight:700">2. Ville ou territoire</label><select id="biloTerritory" class="f" style="width:100%;padding:13px;border-radius:12px" disabled><option value="">Choisissez d’abord une province</option></select><div id="biloLocalWrap"><label for="biloLocal" id="biloLocalLabel" style="display:block;margin:12px 0 6px;font-weight:700">3. Commune, secteur ou chefferie</label><select id="biloLocal" class="f" style="width:100%;padding:13px;border-radius:12px" disabled><option value="">Choisissez d’abord une ville ou un territoire</option></select></div><label for="biloManual" style="display:block;margin:12px 0 6px;font-weight:700">Localité / quartier (facultatif)</label><input id="biloManual" class="f" style="width:100%;padding:13px;border-radius:12px" placeholder="Ex. : Kinsuka, quartier…" value="'+esc(saved.neighborhood||"")+'"><p class="sub" id="biloGeoNotice" style="font-size:11px;margin-top:9px">Données géographiques : Open Admin Data (CC BY 4.0). Si votre localité manque, indiquez-la dans le champ libre.</p><button type="button" data-loc-save class="btn" style="width:100%;margin-top:14px">Enregistrer ma localisation</button></section>';
+    overlay.innerHTML='<section role="dialog" aria-modal="true" aria-label="Choisir votre localisation" style="width:min(100%,520px);max-height:90vh;overflow:auto;background:var(--card,#fff);color:var(--text,#18231d);border-radius:22px;padding:18px;box-shadow:0 15px 50px #0004"><div style="display:flex;align-items:center;gap:10px"><button type="button" id="biloLocBack" aria-label="Retour" style="display:none;border:0;background:var(--panel,#f2f4f3);border-radius:12px;width:40px;height:40px;font-size:20px">‹</button><div style="flex:1"><h2 id="biloLocTitle" style="margin:0;font-size:20px">Choisir une province</h2><p id="biloLocPath" class="sub" style="margin:4px 0 0;font-size:12px">République démocratique du Congo</p></div><button type="button" data-loc-close aria-label="Fermer" style="border:0;background:transparent;font-size:24px">×</button></div><input id="biloLocSearch" class="f" type="search" placeholder="Rechercher…" style="width:100%;padding:12px;margin:14px 0 8px;border-radius:12px"><div id="biloLocList" style="display:grid;gap:7px;max-height:52vh;overflow:auto"></div><div id="biloLocManualWrap" style="display:none;margin-top:12px"><label for="biloLocManual" style="display:block;font-weight:700;margin-bottom:6px">Quartier ou localité</label><input id="biloLocManual" class="f" style="width:100%;padding:12px" placeholder="Ex. : Kinsuka, quartier…"></div><p class="sub" id="biloGeoNotice" style="font-size:11px;margin:12px 0 0">Sélectionnez une province, puis votre localité.</p><button type="button" data-loc-save class="btn" style="width:100%;margin-top:14px" disabled>Enregistrer ma localisation</button></section>';
     document.body.appendChild(overlay);
-    const $=id=>overlay.querySelector("#"+id);
-    const province=$("biloProvince"),territory=$("biloTerritory"),local=$("biloLocal"),localLabel=$("biloLocalLabel"),manual=$("biloManual");
-    const option=(value,text)=>'<option value="'+esc(value)+'">'+esc(text)+'</option>';
-    const fill=(select,items,placeholder,selected)=>{select.innerHTML=option("",placeholder)+items.map(x=>'<option value="'+esc(getId(x))+'" '+(getId(x)===String(selected||"")?"selected":"")+'>'+esc(getName(x))+'</option>').join("");select.disabled=!items.length;};
-    function children(items,parentId){return sortNames(items.filter(x=>getParent(x)===String(parentId)));}
-    function updateLocal(){
-      const pid=territory.value;
-      if(!reference||!pid){fill(local,[],"Choisissez d’abord une ville ou un territoire");return;}
-      if(province.options[province.selectedIndex]?.text==="Kinshasa"){
-        localLabel.textContent="3. Commune";
-        const kinItems=kinshasaCommunes.map((name,i)=>({id:"KIN-COM-"+(i+1),name_local:name,parent_id:pid}));
-        const previous=saved.localId||(saved.commune?getId(kinItems.find(x=>getName(x)===saved.commune)):"");
-        fill(local,kinItems,"Sélectionner une commune",previous);
-      }else{
-        localLabel.textContent="3. Secteur ou chefferie (si répertorié)";
-        fill(local,children(reference.sector,pid),"Sélectionner une entité locale",saved.localId);
-      }
+    const $=id=>overlay.querySelector("#"+id),list=$("biloLocList"),search=$("biloLocSearch"),back=$("biloLocBack"),manualWrap=$("biloLocManualWrap"),manual=$("biloLocManual"),saveBtn=overlay.querySelector("[data-loc-save");
+    const state={step:"province",province:null,territory:null,local:null,manual:saved.neighborhood||""};
+    let provinces=[],territories=[],locals=[];
+    const children=(items,parentId)=>sortNames(items.filter(x=>getParent(x)===String(parentId)));
+    const btn=(id,name,selected)=>'<button type="button" data-pick="'+esc(id)+'" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 13px;border:1px solid var(--line,#e5e7eb);border-radius:13px;background:'+(selected?'var(--mint,#e8f7ee)':'var(--panel,#fff)')+';color:inherit;text-align:left;font:600 14px Inter,system-ui;cursor:pointer"><span>'+esc(name)+'</span><span style="opacity:.55;font-size:18px">›</span></button>';
+    function selectedName(x){return x?getName(x):"";}
+    function refresh(){
+      const q=search.value.trim().toLocaleLowerCase("fr");
+      const data=state.step==="province"?provinces:state.step==="territory"?territories:locals;
+      $("biloLocTitle").textContent=state.step==="province"?"Choisir une province":state.step==="territory"?"Choisir une ville ou un territoire":"Choisir une commune ou un quartier";
+      $("biloLocPath").textContent=[selectedName(state.province),selectedName(state.territory)].filter(Boolean).join(" · ")||"République démocratique du Congo";
+      back.style.display=state.step==="province"?"none":"block";
+      search.placeholder=state.step==="province"?"Rechercher une province…":"Rechercher une localité…";
+      list.innerHTML=data.filter(x=>getName(x).toLocaleLowerCase("fr").includes(q)).map(x=>btn(getId(x),getName(x),state.local&&getId(state.local)===getId(x))).join("")||'<p class="sub" style="padding:12px">Aucun résultat dans cette liste.</p>';
+      manualWrap.style.display=state.step==="local"?"block":"none";
+      manual.value=state.manual;
+      saveBtn.disabled=!(state.province&&(state.step==="local"&&(state.local||state.manual.trim())||!reference&&state.manual.trim()));
+      $("biloGeoNotice").textContent=reference?"Touchez une province, puis votre ville et votre commune/quartier.":"Référentiel momentanément indisponible : sélectionnez une province et saisissez votre ville ou quartier.";
     }
-    function updateTerritories(){
-      const selected=province.value;
-      const items=reference?children(reference.territory,selected):[];
-      const previous=saved.territoryId||(saved.province==="Kinshasa"?getId(items.find(x=>getName(x)==="Kinshasa")):"");
-      fill(territory,items,"Sélectionner une ville ou un territoire",previous);
-      if(previous&&!saved.territoryId)saved.territoryId=previous;
-      updateLocal();
+    function showTerritories(){
+      state.step="territory";
+      territories=reference?children(reference.territory,getId(state.province)):[];
+      if(state.province&&getName(state.province)==="Kinshasa"&&reference){
+        state.territory={id:"KIN-CITY",name_local:"Kinshasa"};
+        showLocals();
+        return;
+      }
+      refresh();
+    }
+    function showLocals(){
+      state.step="local";
+      if(reference&&state.territory){
+        if(getName(state.province)==="Kinshasa"){
+          locals=kinshasaCommunes.map((name,i)=>({id:"KIN-COM-"+(i+1),name_local:name,parent_id:"KIN-CITY"}));
+        }else locals=children(reference.sector,getId(state.territory));
+      }else locals=[];
+      refresh();
     }
     (async()=>{
       reference=await loadReference();
-      const provinces=reference?sortNames(reference.province):provinceFallback.map((name,i)=>({id:"fallback-"+i,name_local:name}));
-      fill(province,provinces,"Sélectionner une province",saved.provinceId);
-      if(!saved.provinceId&&saved.province){
-        const legacy=[...province.options].find(o=>o.textContent===saved.province);
-        if(legacy){province.value=legacy.value;saved.provinceId=legacy.value;}
+      provinces=reference?sortNames(reference.province):provinceFallback.map((name,i)=>({id:"fallback-"+i,name_local:name}));
+      if(saved.province){
+        state.province=provinces.find(x=>getName(x)===saved.province)||null;
+        if(state.province&&reference){
+          if(getName(state.province)==="Kinshasa"){showTerritories();state.local=locals.find(x=>getName(x)===saved.commune)||null;}
+          else{
+            territories=children(reference.territory,getId(state.province));
+            state.territory=territories.find(x=>getName(x)===saved.territory)||null;
+            if(state.territory){showLocals();state.local=locals.find(x=>getName(x)===saved.commune)||null;}
+          }
+        }
       }
-      if(!reference){
-        $("biloGeoNotice").textContent="Référentiel détaillé momentanément indisponible. Sélectionnez la province et indiquez votre ville, territoire ou commune dans le champ libre.";
-        territory.disabled=false;territory.innerHTML=option("manual","Saisir ma ville ou mon territoire");
-        local.disabled=true;local.innerHTML=option("","Saisie manuelle");
-      }else{
-        if(saved.provinceId)updateTerritories();
-      }
+      if(!reference)$("biloGeoNotice").textContent="Référentiel détaillé indisponible. Vous pouvez saisir votre ville ou quartier manuellement.";
+      refresh();
     })();
-    province.addEventListener("change",()=>{
-      saved.provinceId=province.value;
-      saved.province=getName(province.selectedOptions[0]);
-      saved.territoryId="";saved.territory="";saved.localId="";saved.commune="";
-      if(reference)updateTerritories();
-      else{territory.disabled=false;territory.innerHTML=option("manual","Saisir ma ville ou mon territoire");}
+    list.addEventListener("click",e=>{
+      const item=e.target.closest("[data-pick]");
+      if(!item)return;
+      const id=item.dataset.pick;
+      if(state.step==="province"){
+        state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;
+        if(reference)showTerritories();else{state.step="local";refresh();}
+      }else if(state.step==="territory"){
+        state.territory=territories.find(x=>getId(x)===id)||null;state.local=null;showLocals();
+      }else{
+        state.local=locals.find(x=>getId(x)===id)||null;refresh();
+      }
     });
-    territory.addEventListener("change",()=>{
-      saved.territoryId=territory.value;
-      saved.territory=territory.selectedOptions[0]?.textContent||"";
-      saved.localId="";saved.commune="";
-      updateLocal();
+    search.addEventListener("input",refresh);
+    manual.addEventListener("input",()=>{state.manual=manual.value;refresh()});
+    back.addEventListener("click",()=>{
+      if(state.step==="local"&&getName(state.province)!=="Kinshasa"){state.step="territory";state.local=null;}
+      else{state.step="province";state.province=null;state.territory=null;state.local=null;}
+      search.value="";refresh();
     });
     overlay.addEventListener("click",e=>{
       if(e.target===overlay||e.target.closest("[data-loc-close]")){overlay.remove();return;}
       if(!e.target.closest("[data-loc-save]"))return;
-      const p=province.selectedOptions[0]?.textContent||"";
-      if(!province.value){alert("Sélectionnez une province.");return;}
-      const t=territory.selectedOptions[0]?.textContent||"";
-      const l=local.selectedOptions[0]?.textContent||"";
-      const free=manual.value.trim();
-      if(reference&&!territory.value){alert("Sélectionnez une ville ou un territoire.");return;}
-      if(reference&&local.options.length>1&&!local.value&&!free){alert("Sélectionnez une commune ou une entité locale, ou indiquez votre localité.");return;}
-      saved.province=p;
-      saved.territory=reference?t:free;
-      saved.commune=reference?(local.value?l:free):"";
-      saved.localId=local.value||"";
-      saved.neighborhood=free;
-      saved.location=[p,...(saved.territory===p?[]:[saved.territory]),saved.commune,free&&reference?free:""].filter(Boolean).join(" · ");
+      if(!state.province){alert("Sélectionnez une province.");return;}
+      if(reference&&state.step!=="local"){alert("Choisissez aussi votre commune ou quartier.");return;}
+      if(reference&&!state.local&&!state.manual.trim()){alert("Sélectionnez une commune ou saisissez votre quartier.");return;}
+      if(!reference&&!state.manual.trim()){alert("Saisissez votre ville ou quartier.");return;}
+      saved.province=getName(state.province);
+      saved.provinceId=getId(state.province);
+      saved.territory=state.territory?getName(state.territory):state.manual.trim();
+      saved.territoryId=state.territory?getId(state.territory):"";
+      saved.commune=state.local?getName(state.local):state.manual.trim();
+      saved.localId=state.local?getId(state.local):"";
+      saved.neighborhood=state.manual.trim();
+      saved.location=[saved.province,saved.territory!==saved.province?saved.territory:"",saved.commune,saved.neighborhood&&saved.neighborhood!==saved.commune?saved.neighborhood:""].filter(Boolean).join(" · ");
       localStorage.setItem(STORE,JSON.stringify(saved));
       if(typeof S!=="undefined"&&S){S.province=saved.province;S.territory=saved.territory;S.commune=saved.commune;S.location=saved.location;}
       window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));
