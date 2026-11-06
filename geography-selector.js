@@ -21,7 +21,7 @@
     "Ndjili","Ngaba","Ngaliema","Ngiri-Ngiri","Nsele","Selembao"
   ];
   const read=(k,fallback)=>{try{return JSON.parse(localStorage.getItem(k)||"null")||fallback}catch(_){return fallback}};
-  const saved=read(STORE,{});
+  const saved=read(STORE,read("bilocost_location_v1",{}));
   const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let reference=null;
   const getName=x=>x?.name_local||x?.name?.local||x?.name_en||x?.name?.en||"";
@@ -71,7 +71,9 @@
       if(!reference||!pid){fill(local,[],"Choisissez d’abord une ville ou un territoire");return;}
       if(province.options[province.selectedIndex]?.text==="Kinshasa"){
         localLabel.textContent="3. Commune";
-        fill(local,kinshasaCommunes.map((name,i)=>({id:"KIN-COM-"+(i+1),name_local:name,parent_id:pid})),"Sélectionner une commune",saved.localId);
+        const kinItems=kinshasaCommunes.map((name,i)=>({id:"KIN-COM-"+(i+1),name_local:name,parent_id:pid}));
+        const previous=saved.localId||(saved.commune?getId(kinItems.find(x=>getName(x)===saved.commune)):"");
+        fill(local,kinItems,"Sélectionner une commune",previous);
       }else{
         localLabel.textContent="3. Secteur ou chefferie (si répertorié)";
         fill(local,children(reference.sector,pid),"Sélectionner une entité locale",saved.localId);
@@ -80,7 +82,9 @@
     function updateTerritories(){
       const selected=province.value;
       const items=reference?children(reference.territory,selected):[];
-      fill(territory,items,"Sélectionner une ville ou un territoire",saved.territoryId);
+      const previous=saved.territoryId||(saved.province==="Kinshasa"?getId(items.find(x=>getName(x)==="Kinshasa")):"");
+      fill(territory,items,"Sélectionner une ville ou un territoire",previous);
+      if(previous&&!saved.territoryId)saved.territoryId=previous;
       updateLocal();
     }
     (async()=>{
