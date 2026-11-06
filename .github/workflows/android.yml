@@ -71,7 +71,8 @@ jobs:
               raise SystemExit("Application script boundaries not found")
           messaging = Path("messaging-fix.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + html[script_end:]
+          geography = Path("geography-selector.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + geography + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging patch injected for Android.")
           PY
