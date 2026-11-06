@@ -111,6 +111,7 @@ jobs:
           #bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 34%,#075d36 0%,#023a25 44%,#001b13 100%);color:#fff;opacity:1;transition:opacity .48s ease}
           #bilocost-native-loader .bl-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#001b13}
           #bilocost-native-loader .bl-video[hidden]{display:none}
+          #bilocost-native-loader.bl-video-active .bl-wrap,#bilocost-native-loader.bl-video-active:before,#bilocost-native-loader.bl-video-active:after{display:none}
           #bilocost-native-loader:before,#bilocost-native-loader:after{content:"";position:absolute;width:72vw;height:72vw;max-width:520px;max-height:520px;border:1px solid rgba(74,255,145,.12);border-radius:50%;animation:bilocost-loader-orbit 7s linear infinite}
           #bilocost-native-loader:after{width:105vw;height:105vw;max-width:760px;max-height:760px;animation-direction:reverse;opacity:.55}
           #bilocost-native-loader .bl-wrap{position:relative;z-index:1;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 18px}
@@ -189,6 +190,7 @@ jobs:
               fallbackTimer = window.setTimeout(close, 900);
             } else {
               video.play().then(() => {
+                layer.classList.add("bl-video-active");
                 fallbackTimer = window.setTimeout(close, 30000);
               }).catch(() => {
                 video.remove();
