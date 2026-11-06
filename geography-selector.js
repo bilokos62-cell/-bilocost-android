@@ -3,7 +3,7 @@
   if(window.__biloNationalLocationInstalled) return;
   window.__biloNationalLocationInstalled = true;
   const provinces = [
-    "Bas-Uele","Équateur","Haut-Katanga","Haut-Lomami","Haut-Uele","Ituri",
+    "Bas-Uélé","Équateur","Haut-Katanga","Haut-Lomami","Haut-Uélé","Ituri",
     "Kasaï","Kasaï-Central","Kasaï-Oriental","Kinshasa","Kongo Central",
     "Kwango","Kwilu","Lomami","Lualaba","Mai-Ndombe","Maniema","Mongala",
     "Nord-Kivu","Nord-Ubangi","Sankuru","Sud-Kivu","Sud-Ubangi","Tanganyika",
