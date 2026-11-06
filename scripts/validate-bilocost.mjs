@@ -7,6 +7,7 @@ const firestoreRules = readFileSync("firestore.rules", "utf8");
 const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
+const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
   console.error("Bilocost validation failed: " + message);
@@ -51,6 +52,31 @@ if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "walletTra
 if (!firestoreRules.includes("match /{document=**}") || !firestoreRules.includes("allow read, write: if false")) fail("Firestore default-deny rule is missing");
 if (!firestoreRules.includes("match /chats/{chatId}") || !firestoreRules.includes("match /identity_verifications/{uid}")) fail("Critical Firestore access rules are missing");
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow read: if isOwner(uid) || isAdmin()")) fail("Private identity Storage rules are missing");
+
+try {
+  new vm.Script(functionsSource, { filename: "functions/index.js" });
+} catch (error) {
+  fail("Cloud Functions JavaScript syntax error: " + error.message);
+}
+
+const functionChecks = [
+  ["Buyer delivery-code callable", /exports\\.getBuyerDeliveryCode\\s*=\\s*onCall/],
+  ["Seller delivery confirmation callable", /exports\\.confirmDeliveryCode\\s*=\\s*onCall/],
+  ["Five-attempt OTP limit", /MAX_ATTEMPTS\\s*=\\s*5/],
+  ["Server-side delivery status", /status:\\s*"DELIVERED"/],
+  ["No automatic escrow release", /fundsReleased:\\s*false/],
+];
+for (const [label, pattern] of functionChecks) {
+  if (!pattern.test(functionsSource)) fail(label + " is missing");
+}
+if (firebaseConfig.functions?.source !== "functions" || firebaseConfig.functions?.runtime !== "nodejs22") {
+  fail("Firebase Functions source or Node.js runtime is not configured");
+}
+if (!firestoreRules.includes("match /secureOrders/{orderId}") ||
+    !firestoreRules.includes("match /userInbox/{uid}/messages/{messageId}") ||
+    !firestoreRules.includes("allow create, update, delete: if false")) {
+  fail("Secure orders or private inbox rules are missing");
+}
 
 console.log("Bilocost source validation passed.");
 console.log("JavaScript syntax: valid");
