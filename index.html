@@ -254,12 +254,16 @@ sw:{"Accueil":"Mwanzo","Recherche":"Tafuta","Publier":"Weka tangazo","Messages":
 tsh:{"Accueil":"Dîyi","Recherche":"Londa","Publier":"Tudila ku mutanda","Messages":"Milandu","Profil":"Dîbu","Paramètres":"Mibelu","Langue":"Ndinga","Favoris":"Bintu biudi munanga","Panier":"Kapu","Acheter":"Sumba","Discuter":"Ambila","Se connecter":"Njila","Créer un compte":"Tungila compte","Mes annonces":"Bintu bienu","Ma boutique":"Duka dienu","Enregistrer":"Bika","Fermer":"Kanga","Envoyer":"Tuma"}
 };
 function applyUiLanguage(root){
- if(!root)return;const dict=UI_TRANSLATIONS[S.lang]||{},keys=Object.keys(dict).sort((a,b)=>b.length-a.length),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
+ if(!root)return;
+ const dict=UI_TRANSLATIONS[S.lang]||{},keys=Object.keys(dict).sort((a,b)=>b.length-a.length);
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
  while(w.nextNode()){const n=w.currentNode,p=n.parentElement;if(p&&!/^(SCRIPT|STYLE|TEXTAREA|INPUT|CODE|PRE)$/.test(p.tagName)&&n.nodeValue.trim())nodes.push(n)}
- nodes.forEach(n=>{if(n.__biloOriginal===undefined)n.__biloOriginal=n.nodeValue;if(S.lang==="fr"){n.nodeValue=n.__biloOriginal;return}let v=n.__biloOriginal;keys.forEach(k=>v=v.split(k).join(dict[k]));n.nodeValue=v});
+ nodes.forEach(n=>{if(n.__biloOriginal===undefined)n.__biloOriginal=n.nodeValue;let v=n.__biloOriginal;if(S.lang!=="fr")keys.forEach(k=>v=v.split(k).join(dict[k]));n.nodeValue=v});
+ const attrs=["placeholder","title","aria-label"];
+ root.querySelectorAll("input,textarea,button,[title],[aria-label]").forEach(el=>attrs.forEach(attr=>{if(!el.hasAttribute(attr))return;const key="__bilo_"+attr;if(el[key]===undefined)el[key]=el.getAttribute(attr);let v=el[key];if(S.lang!=="fr")keys.forEach(k=>v=v.split(k).join(dict[k]));el.setAttribute(attr,v)}));
 }
 function setUiLanguage(lang){if(!LANG_NAMES[lang])return;S.lang=lang;try{localStorage.setItem("bilocost_lang_v1",lang)}catch(e){}document.documentElement.lang=({fr:"fr",ln:"ln",en:"en",sw:"sw",tsh:"lu"})[lang]||"fr";render();if(S.stack.length)renderPage();toast("Langue : "+LANG_NAMES[lang])}
-try{const l=localStorage.getItem("bilocost_lang_v1");if(l&&LANG_NAMES[l])S.lang=l}catch(e){}
+
 
 const P={
 flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.2-.2-4.1 1-5 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.4 1-3 .3 1 .8 2 1.5 2.5z"/>',
@@ -325,6 +329,7 @@ const ETATS=["Neuf","Comme neuf","Très bon état","Bon état","État acceptable
 const MSG=[]; // Aucun faux message ni contact de démonstration.
 let items=[];
 let S={sPhotos:[],services:[],ads:[],walletTx:[],lang:"fr",tab:"home",cat:"Tout",q:"",sort:"",etat:"",commune:"Kinshasa",favs:new Set(),newOnly:false,user:null,seen:false,auth:null,photos:[],cart:[],follow:new Set(),recent:[],prefs:{notifMsg:true,notifFav:true,notifPromo:false,notifArea:false,pubProfile:true,showCommune:true,showPhone:false},accounts:[],reports:[],stack:[],pmin:0,pmax:0,stab:"ads",mtab:"on",chats:[],chatId:null,pendingItems:[],allItems:[],pubBoost:null,cur:"CDF",alerts:[],swapOnly:false,deep:null,csv:null,photoFor:null,pubMode:"item",events:[],remind:new Set(),gemsOnly:false,etab:"live",deepE:null,lchats:{},readAt:{},viewed:[],callbacks:[],recv:{},chatInfo:null,chatMsgs:[],offerInChat:false,counterOf:null,mode:"buy",rcat:"Tout",rq:"",rentals:[],rdrafts:[],rphotos:[],cloudError:"",rtab:"loc",kycInterest:false,rbk:null};
+try{const savedLang=localStorage.getItem("bilocost_lang_v1");if(savedLang&&LANG_NAMES[savedLang])S.lang=savedLang}catch(e){}
 if(CLOUD)items=[];
 try{const v=JSON.parse(localStorage.getItem("bilo")||"null");if(v){if(!CLOUD)items=[...(v.mine||v.items||[]).filter(i=>i.mine),...items];S.favs=new Set(v.favs||[1]);S.commune=v.commune||"Kinshasa";if(!CLOUD){S.accounts=v.accounts||[];S.user=S.accounts.find(a=>v.user&&a.phone===v.user.phone)||v.user||null;if(S.user&&!S.accounts.includes(S.user))S.accounts.push(S.user)}S.seen=!!v.seen;S.cart=v.cart||[];S.follow=new Set(v.follow||[]);S.recent=v.recent||[];S.prefs={...S.prefs,...(v.prefs||{})};S.reports=v.reports||[];S.cur=v.cur||"CDF";S.alerts=v.alerts||[];S.events=v.events||[];S.remind=new Set(v.remind||[]);S.lchats=v.lchats||{};S.readAt=v.readAt||{};S.viewed=v.viewed||[];S.callbacks=v.callbacks||[];S.rdrafts=v.rdrafts||[];S.kycInterest=!!v.kycInterest;S.mode=v.mode||"buy"}}catch(e){}
 try{S.seen=S.seen||localStorage.getItem("bilocost_onboarding_seen_v1")==="1"}catch(e){}
@@ -450,7 +455,7 @@ function render(){
  const cc=$("#cc");cc.textContent=S.cart.length;cc.style.display=S.cart.length?"block":"none";h.style.background=S.user?col(S.user.name):"var(--panel)";
  const q=$("#q");if(q&&S.tab==="search"){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
  logos();
- applyUiLanguage($("#view"));applyUiLanguage(document.querySelector("nav"));
+ applyUiLanguage(document.body);
  const ge=$("#goe");if(ge){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};ge.onclick=publishEvent}
  const p=$("#pp");if(p){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};
   const u=()=>{const v=+p.value||0,c=$("#pcur").value;$("#eq").textContent="Équivalent : ≈ "+(c==="CDF"?fmt(v/RATE)+" $":fmt(v*RATE)+" CDF")+` (taux indicatif : 1 $ = ${RATE} CDF)`};p.oninput=u;$("#pcur").onchange=u;
