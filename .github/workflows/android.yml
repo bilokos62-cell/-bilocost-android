@@ -95,9 +95,12 @@ jobs:
           cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
           # Optional user-provided startup video: bundled in Android WebView only.
-          if [ -s resources/13774.mp4 ]; then
+          if [ -s "écran de chargement .mp4" ]; then
+            cp "écran de chargement .mp4" www/bilocost-launch.mp4
+            echo "Bilocost startup video found at repository root and bundled for Android."
+          elif [ -s resources/13774.mp4 ]; then
             cp resources/13774.mp4 www/bilocost-launch.mp4
-            echo "Bilocost startup video found and bundled for Android."
+            echo "Bilocost startup video found in resources and bundled for Android."
           else
             echo "Bilocost startup video not present in repository; animated fallback will be used."
           fi
