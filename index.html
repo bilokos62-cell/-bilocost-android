@@ -246,6 +246,22 @@ const rank=i=>live(i)?(i.boostPlan==="star"?2:1):0;
 const bbadge=i=>live(i)?`<span class="bst ${i.boostPlan==="star"?"star":""}">${i.boostPlan==="star"?"Vedette":"Sponsorisé"}</span>`:"";
 const I18N={fr:{buy:"Acheter en toute sécurité",recap:"Récapitulatif de la commande",pay:"Moyen de paiement",pending:"Séquestre en attente de configuration",notReady:"Paiement sécurisé indisponible pour le moment",report:"Signaler un problème avec cette commande"}};
 const t=k=>(I18N[S.lang]||I18N.fr)[k]||I18N.fr[k]||k;
+const LANG_NAMES={fr:"Français",ln:"Lingála",en:"English",sw:"Kiswahili",tsh:"Tshiluba"};
+const UI_TRANSLATIONS={
+ln:{"Accueil":"Ndako","Recherche":"Luka","Publier":"Tia na zando","Messages":"Bansango","Profil":"Profil","Paramètres":"Bongisa","Langue":"Lokota","Favoris":"Biloko olingi","Panier":"Kitunga","Acheter":"Somba","Discuter":"Solola","Se connecter":"Kota","Créer un compte":"Fungola compte","Mes annonces":"Biloko na ngai","Ma boutique":"Magasin na ngai","Enregistrer":"Bomba","Fermer":"Kanga","Envoyer":"Tinda"},
+en:{"Accueil":"Home","Recherche":"Search","Publier":"Sell","Messages":"Messages","Profil":"Profile","Paramètres":"Settings","Langue":"Language","Favoris":"Favorites","Panier":"Cart","Acheter":"Buy","Discuter":"Chat","Se connecter":"Log in","Créer un compte":"Create an account","Mes annonces":"My listings","Ma boutique":"My shop","Enregistrer":"Save","Fermer":"Close","Envoyer":"Send"},
+sw:{"Accueil":"Mwanzo","Recherche":"Tafuta","Publier":"Weka tangazo","Messages":"Ujumbe","Profil":"Wasifu","Paramètres":"Mipangilio","Langue":"Lugha","Favoris":"Vipendwa","Panier":"Kikapu","Acheter":"Nunua","Discuter":"Zungumza","Se connecter":"Ingia","Créer un compte":"Fungua akaunti","Mes annonces":"Matangazo yangu","Ma boutique":"Duka langu","Enregistrer":"Hifadhi","Fermer":"Funga","Envoyer":"Tuma"},
+tsh:{"Accueil":"Dîyi","Recherche":"Londa","Publier":"Tudila ku mutanda","Messages":"Milandu","Profil":"Dîbu","Paramètres":"Mibelu","Langue":"Ndinga","Favoris":"Bintu biudi munanga","Panier":"Kapu","Acheter":"Sumba","Discuter":"Ambila","Se connecter":"Njila","Créer un compte":"Tungila compte","Mes annonces":"Bintu bienu","Ma boutique":"Duka dienu","Enregistrer":"Bika","Fermer":"Kanga","Envoyer":"Tuma"}
+};
+function applyUiLanguage(root){
+ const dict=UI_TRANSLATIONS[S.lang];if(!dict||!root)return;
+ const keys=Object.keys(dict).sort((a,b)=>b.length-a.length),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
+ while(w.nextNode()){const n=w.currentNode,p=n.parentElement;if(p&&!/^(SCRIPT|STYLE|TEXTAREA|INPUT|CODE|PRE)$/.test(p.tagName)&&n.nodeValue.trim())nodes.push(n)}
+ nodes.forEach(n=>{let v=n.nodeValue;keys.forEach(k=>v=v.split(k).join(dict[k]));n.nodeValue=v});
+}
+function setUiLanguage(lang){if(!LANG_NAMES[lang])return;S.lang=lang;try{localStorage.setItem("bilocost_lang_v1",lang)}catch(e){}document.documentElement.lang=({fr:"fr",ln:"ln",en:"en",sw:"sw",tsh:"lu"})[lang]||"fr";render();if(S.stack.length)renderPage();toast("Langue : "+LANG_NAMES[lang])}
+try{const l=localStorage.getItem("bilocost_lang_v1");if(l&&LANG_NAMES[l])S.lang=l}catch(e){}
+
 const P={
 flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.2-.2-4.1 1-5 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.4 1-3 .3 1 .8 2 1.5 2.5z"/>',
 shirt:'<path d="M20.4 4.5 16 3a4 4 0 0 1-8 0L3.6 4.5 2 9l4 1.5V21h12V10.5L22 9z"/>',
@@ -841,7 +857,7 @@ const PG={
   +GR("Assistance",R("chat","Service client",'data-go="support"')+R("help","Centre d’aide",'data-go="help"')+R("shield","Conseils de sécurité",'data-go="safety"')+R("flag","Signaler un problème avec l’app",'data-act="report" data-v="app"')+R("shield","Confidentialité et fichiers",'data-go="privacy"'))
   +GR("Zone sensible",R("logout","Se déconnecter","data-logout")+R("trash","Supprimer mon compte",'data-act="delacc"'))
   +`<p class="sub" style="text-align:center;margin-top:14px">Bilocost • version 1.0 (démo)<br>Taux indicatif : 1 $ = ${RATE} CDF</p>`]},
- lang(){return ["Langue",GR("",["Français","Lingála","English","Kiswahili","Tshiluba"].map((l,i)=>`<div class="lr"><span class="lt">${l}</span>${i?'<span class="tag">Bientôt</span>':I("check","ok",20)}</div>`).join(""))]},
+ lang(){return ["Choisir la langue",GR("",Object.entries(LANG_NAMES).map(([code,name])=>'<button type="button" class="lr" data-lang="'+code+'" aria-pressed="'+(S.lang===code)+'" style="width:100%;border:0;background:'+(S.lang===code?"var(--mint)":"transparent")+';color:inherit;text-align:left;cursor:pointer;padding:14px 10px;border-radius:12px"><span class="lt">'+name+'</span>'+(S.lang===code?I("check","ok",20):'<span class="tag">'+code.toUpperCase()+'</span>')+'</button>').join(""))+'<p class="sub">La langue choisie est mémorisée sur cet appareil.</p>']},
  notifset(){return ["Notifications",GR("",SW("notifMsg","Messages","Nouveaux messages des acheteurs et vendeurs")+SW("notifFav","Favoris","Prix en baisse sur vos favoris")+SW("notifArea","Nouveautés","Nouveaux articles dans ma commune")+SW("notifPromo","Actualités Bilocost"))+`<div class="warn">Les notifications seront envoyées à l’ouverture du serveur. Vos choix sont déjà enregistrés.</div>`]},
  privacy(){return ["Confidentialité",GR("",SW("pubProfile","Profil public","Les acheteurs peuvent voir mon profil")+SW("showCommune","Afficher ma commune")+SW("showPhone","Afficher mon numéro dans mes annonces","Désactivé par défaut : la discussion se fait dans l’application"))+"<section class=\"card\" style=\"padding:16px;margin-top:14px\"><h3>Protection de vos fichiers</h3><p><b>Votre autorisation est obligatoire.</b> Bilocost demandera confirmation avant d’ouvrir le sélecteur de fichiers.</p><ul><li>Aucun parcours automatique de la galerie, des téléchargements ou des documents.</li><li>Seuls les fichiers que vous choisissez expressément sont lus et envoyés.</li><li>Le motif est indiqué : annonce, location, profil, justificatif d’identité ou import CSV.</li><li>Aucune autre utilisation ni aucun partage sans autorisation distincte, sauf obligation légale.</li><li>Les justificatifs d’identité restent privés et ne sont jamais destinés à une annonce publique.</li><li>Vous pouvez demander leur suppression, sous réserve des obligations légales de conservation.</li></ul><p class=\"sub\">Choisir un fichier ne vaut pas consentement à sa publication publique.</p></section>" ]},
  notifs(){return ["Notifications",`<div class="empty">${I("bell","",44)}<b>Aucune notification</b><br>Vous serez prévenu des messages, favoris et commandes.</div><button class="btn ghost" data-go="notifset">Réglages des notifications</button>`]},
@@ -1149,7 +1165,7 @@ async function saveRentDraft(){if(!CLOUD||!FB.F||!FB.O)return toast("Connexion F
 // Auth controls are handled directly inside the fixed auth layer for reliable taps on mobile WebViews.
 const authRoot=document.querySelector("#auth");
 authRoot.addEventListener("click",e=>{const b=e.target.closest("[data-auth]");if(!b)return;e.preventDefault();e.stopPropagation();try{doAuth(b.dataset.auth)}catch(err){console.error("Bilocost auth action failed",err);toast("Action impossible : "+(err&&err.message||"erreur inattendue"))}},true);
-const SEL="[data-go],[data-back],[data-act],[data-checkout],[data-sec],[data-t],[data-cat],[data-sort],[data-new],[data-open],[data-fav],[data-close],[data-buy],[data-sheet],[data-chat],[data-c],[data-auth],[data-soc],[data-eye],[data-reset],[data-send],[data-share],[data-rm],[data-pick],[data-logout],#communeBtn,#theme,#sheet";
+const SEL="[data-lang],[data-go],[data-back],[data-act],[data-checkout],[data-sec],[data-t],[data-cat],[data-sort],[data-new],[data-open],[data-fav],[data-close],[data-buy],[data-sheet],[data-chat],[data-c],[data-auth],[data-soc],[data-eye],[data-reset],[data-send],[data-share],[data-rm],[data-pick],[data-logout],#communeBtn,#theme,#sheet";
 document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return;const d=t.dataset;
  if("back" in d){back();return}
  if(d.go){close_();go(d.go,d.arg);return}
