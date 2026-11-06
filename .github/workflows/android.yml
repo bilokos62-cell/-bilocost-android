@@ -31,10 +31,6 @@ jobs:
           from pathlib import Path
           html = Path("index.html").read_text(encoding="utf-8")
           # Correct the mobile header: keep wallet access inside the profile area.
-          import re
-          html, removed = re.subn(r'<button class="ib" data-t="wallet"[^>]*>.*?</button>', '', html, count=1, flags=re.S)
-          if removed != 1:
-              raise SystemExit("Header wallet control not found; refusing an unsafe layout patch")
           responsive_css = """
           /* Bilocost responsive header and text containment */
           header { gap: 8px; min-width: 0; }
