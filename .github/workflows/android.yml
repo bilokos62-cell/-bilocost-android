@@ -179,11 +179,9 @@ jobs:
             layer.insertBefore(video, layer.firstChild);
             document.body.appendChild(layer);
             let closed = false;
-            let fallbackTimer = 0;
             const close = () => {
               if (closed) return;
               closed = true;
-              if (fallbackTimer) window.clearTimeout(fallbackTimer);
               layer.classList.add("bl-out");
               window.setTimeout(() => layer.remove(), 520);
             };
@@ -219,7 +217,6 @@ jobs:
                 video.remove();
               });
             }
-            fallbackTimer = window.setTimeout(close, 45000);
             waitUntilReady();
             window.addEventListener("pagehide", close, { once: true });
           })();
