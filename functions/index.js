@@ -19,6 +19,7 @@ const notifyInbox = (uid, payload) => db.collection("inboxNotifications").add({
   ownerId: uid, type: payload.type, title: String(payload.title || "Bilocost").slice(0, 100),
   body: String(payload.body || "").slice(0, 400), read: false,
   ...(payload.orderId ? { orderId: payload.orderId } : {}),
+  ...(payload.side ? { side: payload.side } : {}),
   ...(payload.code ? { code: payload.code } : {}),
   createdAt: FieldValue.serverTimestamp()
 });
@@ -62,8 +63,8 @@ exports.createDeliveryOrder = onCall(async request => {
     createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
   });
   await Promise.all([
-    notifyInbox(uid, { type: "order_created", title: "Commande enregistrée", body: "Votre commande est créée. Le paiement n’est pas encore activé.", orderId: orderRef.id }),
-    notifyInbox(item.sellerId, { type: "order_created", title: "Nouvelle commande", body: "Un acheteur vient d’enregistrer une commande pour votre article.", orderId: orderRef.id })
+    notifyInbox(uid, { type: "order_created", title: "Commande enregistrée", body: "Votre commande est créée. Le paiement n’est pas encore activé.", orderId: orderRef.id, side: "buy" }),
+    notifyInbox(item.sellerId, { type: "order_created", title: "Nouvelle commande", body: "Un acheteur vient d’enregistrer une commande pour votre article.", orderId: orderRef.id, side: "sell" })
   ]);
   return { orderId: orderRef.id, status: "AWAITING_PAYMENT", totalCDF: priceCDF + deliveryFeeCDF };
 });
@@ -88,11 +89,11 @@ exports.confirmOrderPayment = onCall(async request => {
       deliveryCodeHash: hashCode(code), deliveryCodeExpiresAt: expiresAt, deliveryCodeAttempts: 0, deliveryNotificationId: inboxRef.id, updatedAt: FieldValue.serverTimestamp() });
     tx.create(inboxRef, { ownerId: order.buyerId, type: "delivery_code", title: "Votre code de remise est prêt",
       body: "Paiement confirmé. Présentez ce code au vendeur uniquement après avoir reçu et vérifié l’article.",
-      code, orderId, read: false, createdAt: FieldValue.serverTimestamp() });
+      code, orderId, side: "sell", read: false, createdAt: FieldValue.serverTimestamp() });
     const sellerNotice = db.collection("inboxNotifications").doc();
     tx.create(sellerNotice, { ownerId: order.sellerId, type: "order_paid", title: "Paiement confirmé",
       body: "Le paiement de cette commande a été confirmé. Vous pouvez organiser la remise de l’article.",
-      orderId, read: false, createdAt: FieldValue.serverTimestamp() });
+      orderId, side: "buy", read: false, createdAt: FieldValue.serverTimestamp() });
     tx.set(db.collection("deliveryCodes").doc(orderId), {
       ownerId: order.buyerId, code, expiresAt, createdAt: FieldValue.serverTimestamp(), usedAt: null
     });
