@@ -49,7 +49,8 @@
     const province=saved.province||"RDC";
     const local=saved.commune||saved.territory||"Choisir une localité";
     const label=document.getElementById("communeLbl");
-    if(label)label.textContent=saved.province?(saved.province==="Kinshasa"&&saved.commune?saved.commune:local):"RDC";
+    const visible=saved.province?(saved.province==="Kinshasa"&&saved.commune?saved.commune:local):"RDC";
+    if(label&&label.textContent!==visible)label.textContent=visible;
     const chip=document.querySelector("header .commune");
     if(chip)chip.title=saved.province?[province,saved.territory,saved.commune].filter(Boolean).join(" · "):"Choisir votre province et votre localité";
   }
@@ -72,7 +73,7 @@
         localLabel.textContent="3. Commune";
         fill(local,kinshasaCommunes.map((name,i)=>({id:"KIN-COM-"+(i+1),name_local:name,parent_id:pid})),"Sélectionner une commune",saved.localId);
       }else{
-        localLabel.textContent="3. Secteur, chefferie ou entité locale";
+        localLabel.textContent="3. Secteur ou chefferie (si répertorié)";
         fill(local,children(reference.sector,pid),"Sélectionner une entité locale",saved.localId);
       }
     }
@@ -123,10 +124,10 @@
       if(reference&&local.options.length>1&&!local.value&&!free){alert("Sélectionnez une commune ou une entité locale, ou indiquez votre localité.");return;}
       saved.province=p;
       saved.territory=reference?t:free;
-      saved.commune=reference?(local.value?l:free):(free||"");
+      saved.commune=reference?(local.value?l:free):"";
       saved.localId=local.value||"";
       saved.neighborhood=free;
-      saved.location=[p,saved.territory,saved.commune].filter(Boolean).join(" · ");
+      saved.location=[p,saved.territory,saved.commune,free&&reference?free:""].filter(Boolean).join(" · ");
       localStorage.setItem(STORE,JSON.stringify(saved));
       if(typeof S!=="undefined"&&S){S.province=saved.province;S.territory=saved.territory;S.commune=saved.commune;S.location=saved.location;}
       window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));
