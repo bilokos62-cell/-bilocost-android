@@ -51,6 +51,7 @@ jobs:
               html = html.replace("</style>", responsive_css + "\n</style>", 1)
           patch = Path("messaging-fix.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
+          delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
@@ -59,9 +60,9 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
-          print("Messaging patch injected into the application script.")
+          print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
 
       - name: Validate Bilocost source and integrations
@@ -94,4 +95,8 @@ jobs:
           fi
           if ! firebase deploy --only firestore:rules --project bilocost-a8136; then
             echo "::warning::Firestore rules were not deployed. Grant the deployment service account the Firebase Rules Admin role, then rerun this workflow."
+          fi
+          npm --prefix functions install --no-audit --no-fund
+          if ! firebase deploy --only functions --project bilocost-a8136; then
+            echo "::warning::Cloud Functions were not deployed. Confirm that the Firebase project uses the Blaze plan and that the service account has Cloud Functions, Cloud Build, Artifact Registry, and Service Account User permissions."
           fi

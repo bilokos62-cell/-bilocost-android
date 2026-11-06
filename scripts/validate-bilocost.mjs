@@ -7,6 +7,8 @@ const firestoreRules = readFileSync("firestore.rules", "utf8");
 const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
+const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
+const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
   console.error("Bilocost validation failed: " + message);
@@ -52,6 +54,14 @@ if (!firestoreRules.includes("match /{document=**}") || !firestoreRules.includes
 if (!firestoreRules.includes("match /chats/{chatId}") || !firestoreRules.includes("match /identity_verifications/{uid}")) fail("Critical Firestore access rules are missing");
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow read: if isOwner(uid) || isAdmin()")) fail("Private identity Storage rules are missing");
 
+try { new vm.Script(deliveryPatch, { filename: "delivery-otp.js" }); } catch (error) { fail("Delivery OTP patch syntax error: " + error.message); }
+try { new vm.Script(functionsSource, { filename: "functions/index.js" }); } catch (error) { fail("Cloud Functions syntax error: " + error.message); }
+if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions source is not configured in firebase.json");
+if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.includes("match /deliveryCodes/{orderId}")) fail("Secure order and delivery-code rules are missing");
+if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource.includes("exports.confirmDelivery") || !functionsSource.includes("exports.confirmOrderPayment")) fail("Delivery OTP backend functions are incomplete");
+if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
+if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "sellerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Seller order-history index is missing");
+console.log("Delivery OTP module and backend syntax: valid.");
 console.log("Bilocost source validation passed.");
 console.log("JavaScript syntax: valid");
 console.log("Core integrations detected: " + checks.length);
