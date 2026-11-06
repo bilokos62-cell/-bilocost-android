@@ -50,5 +50,7 @@
   css.textContent="@media(max-width:390px){header .commune{max-width:42px!important;width:42px!important}header .commune #communeLbl{display:none!important}}";
   document.head.appendChild(css);
   label();
+  const locationObserver=new MutationObserver(label);
+  locationObserver.observe(document.documentElement,{childList:true,subtree:true});
   window.bilocostGetLocation=()=>({...saved});
 })();
