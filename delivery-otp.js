@@ -151,8 +151,12 @@ function biloEnsureInboxEntry() {
   if(source&&target&&source.textContent){target.textContent=source.textContent;target.style.display=source.style.display==="none"?"none":"inline-block";}
 }
 document.addEventListener("click",e=>{
-  const messages=e.target.closest('nav button[data-t="msg"]');
-  if(messages){BILO_SHOW_INBOX_ENTRY=true;setTimeout(biloEnsureInboxEntry,120);}
+  const navItem=e.target.closest("nav button[data-t]");
+  if(navItem){
+    BILO_SHOW_INBOX_ENTRY=navItem.dataset.t==="msg";
+    if(!BILO_SHOW_INBOX_ENTRY){const old=document.getElementById("biloInboxEntry");if(old)old.remove();}
+    else setTimeout(biloEnsureInboxEntry,120);
+  }
 });
 const biloOriginalRender = render;
 render = function() { biloOriginalRender(); biloRefreshInboxBadge(); biloEnsureInboxEntry(); };
