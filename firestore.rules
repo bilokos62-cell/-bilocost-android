@@ -240,6 +240,19 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Orders are server-created and server-updated. Participants can only read their own orders.
+    match /orders/{orderId} {
+      allow get, list: if signedIn()
+        && (resource.data.buyerId == request.auth.uid || resource.data.sellerId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    // The plaintext delivery code is visible only to the buyer. All writes stay server-side.
+    match /deliveryCodes/{orderId} {
+      allow get: if signedIn() && resource.data.ownerId == request.auth.uid;
+      allow list, create, update, delete: if false;
+    }
+
     // Deny every collection not explicitly listed above.
     match /{document=**} {
       allow read, write: if false;
