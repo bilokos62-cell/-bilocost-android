@@ -89,7 +89,7 @@ exports.confirmOrderPayment = onCall(async request => {
       deliveryCodeHash: hashCode(code), deliveryCodeExpiresAt: expiresAt, deliveryCodeAttempts: 0, deliveryNotificationId: inboxRef.id, updatedAt: FieldValue.serverTimestamp() });
     tx.create(inboxRef, { ownerId: order.buyerId, type: "delivery_code", title: "Votre code de remise est prêt",
       body: "Paiement confirmé. Présentez ce code au vendeur uniquement après avoir reçu et vérifié l’article.",
-      code, orderId, side: "sell", read: false, createdAt: FieldValue.serverTimestamp() });
+      code, orderId, side: "buy", read: false, createdAt: FieldValue.serverTimestamp() });
     const sellerNotice = db.collection("inboxNotifications").doc();
     tx.create(sellerNotice, { ownerId: order.sellerId, type: "order_paid", title: "Paiement confirmé",
       body: "Le paiement de cette commande a été confirmé. Vous pouvez organiser la remise de l’article.",
