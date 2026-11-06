@@ -261,6 +261,7 @@ function setUiLanguage(lang){if(!LANG_NAMES[lang])return;S.lang=lang;try{localSt
 let biloLangObserver=null;
 function startBiloLanguageObserver(){if(biloLangObserver||!document.body||!window.MutationObserver)return;biloLangObserver=new MutationObserver(records=>{if(S.lang==="fr")return;for(const rec of records){for(const node of rec.addedNodes||[]){if(node.nodeType===1)applyUiLanguage(node);else if(node.nodeType===3&&node.parentElement)applyUiLanguage(node.parentElement)}}});biloLangObserver.observe(document.body,{childList:true,subtree:true});}
 document.addEventListener("DOMContentLoaded",startBiloLanguageObserver,{once:true});
+startBiloLanguageObserver();
 
 
 const P={
