@@ -82,6 +82,10 @@
       reference=await loadReference();
       const provinces=reference?sortNames(reference.province):provinceFallback.map((name,i)=>({id:"fallback-"+i,name_local:name}));
       fill(province,provinces,"Sélectionner une province",saved.provinceId);
+      if(!saved.provinceId&&saved.province){
+        const legacy=[...province.options].find(o=>o.textContent===saved.province);
+        if(legacy){province.value=legacy.value;saved.provinceId=legacy.value;}
+      }
       if(!reference){
         $("biloGeoNotice").textContent="Référentiel détaillé momentanément indisponible. Sélectionnez la province et indiquez votre ville, territoire ou commune dans le champ libre.";
         territory.disabled=false;territory.innerHTML=option("manual","Saisir ma ville ou mon territoire");
