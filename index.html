@@ -621,7 +621,7 @@ async function initFirebase(){const V="11.10.0",u=m=>`https://www.gstatic.com/fi
  auth.languageCode="fr";
  Object.assign(FB,{A,F,O,AC,appCheck,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
 
-const mapItem=d=>{const x=d.data();return{id:d.id,t:x.title,cdf:x.priceCDF,cat:x.category,e:x.condition,c:x.commune,r:x.rating||0,n:x.ratingCount||0,p:x.photos||[],bg:"#eef2f7",s:x.sellerName,sellerId:x.sellerId,w:x.sellerPhone||"",d:x.description||"",serial:x.serial||"",refCDF:x.refCDF||0,reserved:!!x.reserved,delivery:x.delivery||{mode:"pickup",fee:0,negotiable:false},attrs:x.attrs||{},swap:!!x.swap,swapWant:x.swapWant||"",bundle:x.bundle||0,at:(x.createdAt&&x.createdAt.seconds?x.createdAt.seconds*1000:Date.now()),renewedAt:x.renewedAt||0,sold:x.status==="sold",pending:x.status==="pending",boostUntil:(x.boostUntil&&x.boostUntil.seconds?x.boostUntil.seconds*1000:(typeof x.boostUntil==="number"?x.boostUntil:0)),boostPlan:x.boostPlan||""}};
+const mapItem=d=>{const x=d.data();return{id:d.id,t:x.title,cdf:x.priceCDF,cat:x.category,e:x.condition,c:x.commune,province:x.province||"",territory:x.territory||"",locality:x.locality||"",locationLabel:x.locationLabel||"",neighborhood:x.neighborhood||"",r:x.rating||0,n:x.ratingCount||0,p:x.photos||[],bg:"#eef2f7",s:x.sellerName,sellerId:x.sellerId,w:x.sellerPhone||"",d:x.description||"",serial:x.serial||"",refCDF:x.refCDF||0,reserved:!!x.reserved,delivery:x.delivery||{mode:"pickup",fee:0,negotiable:false},attrs:x.attrs||{},swap:!!x.swap,swapWant:x.swapWant||"",bundle:x.bundle||0,at:(x.createdAt&&x.createdAt.seconds?x.createdAt.seconds*1000:Date.now()),renewedAt:x.renewedAt||0,sold:x.status==="sold",pending:x.status==="pending",boostUntil:(x.boostUntil&&x.boostUntil.seconds?x.boostUntil.seconds*1000:(typeof x.boostUntil==="number"?x.boostUntil:0)),boostPlan:x.boostPlan||""}};
 async function loadProfile(u){
  const F=FB.F,ref=F.doc(FB.db,"users",u.uid);let d=await F.getDoc(ref);
  if(!d.exists()){
@@ -730,7 +730,7 @@ async function publishCloud(f){const {F}=FB,ref=F.doc(F.collection(FB.db,"items"
   if(!response.ok||!result.secure_url)throw new Error(result.error?.message||"Échec du téléversement Cloudinary");
   urls.push(result.secure_url);
  }
- await F.setDoc(ref,{serial,...(f.refCDF?{refCDF:f.refCDF}:{}),title:f.t,priceCDF:f.cdf,category:f.cat,condition:f.e,commune:f.c,description:f.d,sellerId:S.user.uid,sellerName:S.user.name,sellerPhone:(S.prefs.showPhone?f.w:""),attrs:f.attrs||{},swap:!!f.swap,swapWant:f.swapWant||"",bundle:f.bundle||0,delivery:f.delivery||{mode:"pickup",fee:0,negotiable:false},photos:urls,status:f.boost?"pending":"active",rating:0,ratingCount:0,createdAt:F.serverTimestamp()});return ref.id}
+ await F.setDoc(ref,{serial,...(f.refCDF?{refCDF:f.refCDF}:{}),title:f.t,priceCDF:f.cdf,category:f.cat,condition:f.e,commune:f.c,province:f.province||"",territory:f.territory||"",locality:f.locality||"",locationLabel:f.locationLabel||"",neighborhood:f.neighborhood||"",description:f.d,sellerId:S.user.uid,sellerName:S.user.name,sellerPhone:(S.prefs.showPhone?f.w:""),attrs:f.attrs||{},swap:!!f.swap,swapWant:f.swapWant||"",bundle:f.bundle||0,delivery:f.delivery||{mode:"pickup",fee:0,negotiable:false},photos:urls,status:f.boost?"pending":"active",rating:0,ratingCount:0,createdAt:F.serverTimestamp()});return ref.id}
 async function cloudReport(v){try{await FB.F.addDoc(FB.F.collection(FB.db,"reports"),{byUid:S.user.uid,target:v,reason:(document.querySelector("input[name=rr]:checked")||{}).value||"Autre",detail:($("#rd")||{}).value||"",status:"OPEN",at:FB.F.serverTimestamp()});toast("Signalement envoyé au support")}catch(e){toast("Envoi impossible")}}
 async function cloudDelete(){const u=FB.auth.currentUser,F=FB.F,pw=($("#dpw")||{}).value||"";
  try{await FB.A.reauthenticateWithCredential(u,FB.A.EmailAuthProvider.credential(u.email,pw));
@@ -1208,6 +1208,60 @@ document.addEventListener("change",e=>{if(e.target.matches&&e.target.matches('in
  if(e.target.id==="avf"&&e.target.files[0]){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,200/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);S.user.avatar=c.toDataURL("image/jpeg",.75);if(CLOUD)FB.F.updateDoc(FB.F.doc(FB.db,"users",S.user.uid),{avatar:S.user.avatar}).catch(()=>{});save();$("#epav").innerHTML=avh(S.user,"big");render()};im.src=r.result};r.readAsDataURL(e.target.files[0])}});
 render();showAuth();if(CLOUD)bootCloud();
 if(Q.get("a")){S.deep=Q.get("a");setTimeout(tryDeep,300)}if(Q.get("e")){S.deepE=Q.get("e");setTimeout(tryDeep,300)}if(Q.get("v"))go("seller",Q.get("v"));
+
+/* Bilocost — connect national location selector to listings and catalogue filters. */
+(function(){
+  if(window.__biloListingLocationInstalled) return;
+  window.__biloListingLocationInstalled = true;
+  const getLocation=()=>{try{return typeof window.bilocostGetLocation==="function"?window.bilocostGetLocation():JSON.parse(localStorage.getItem("bilocost_location_v2")||"{}")}catch(_){return {}}};
+  const locationValue=loc=>String(loc.commune||loc.territory||loc.neighborhood||"").trim();
+  function syncPublicationLocation(){
+    const loc=getLocation(),value=locationValue(loc),select=document.getElementById("pcm");
+    if(select&&value){
+      select.innerHTML='<option value="'+esc(value)+'">'+esc(value)+'</option>';
+      select.value=value;
+      const label=select.previousElementSibling;
+      if(label&&label.tagName==="LABEL")label.textContent="Localité de l’annonce *";
+      select.title=[loc.province,loc.territory,loc.commune,loc.neighborhood].filter(Boolean).join(" · ");
+    }
+  }
+  const originalList=list;
+  list=function(){
+    const loc=getLocation();
+    if(!loc.province)return originalList();
+    const previous=S.commune;
+    S.commune=locationValue(loc)||"Kinshasa";
+    try{
+      return originalList().filter(item=>{
+        if(item.province){
+          if(item.province!==loc.province)return false;
+          if(loc.territory&&item.territory!==loc.territory)return false;
+          if(loc.commune&&item.locality!==loc.commune)return false;
+          return true;
+        }
+        if(loc.province==="Kinshasa")return !loc.commune||item.c===loc.commune;
+        return false;
+      });
+    }finally{S.commune=previous;}
+  };
+  const originalPublishCloud=publishCloud;
+  publishCloud=async function(form){
+    const loc=getLocation(),value=locationValue(loc);
+    if(!loc.province||!value)throw new Error("Choisissez votre province et votre localité avant de publier.");
+    form.c=value;form.province=loc.province||"";form.territory=loc.territory||"";
+    form.locality=loc.commune||"";
+    form.locationLabel=loc.location||[loc.province,loc.territory,loc.commune].filter(Boolean).join(" · ");
+    form.neighborhood=loc.neighborhood||"";
+    return originalPublishCloud(form);
+  };
+  const originalRender=render;
+  render=function(){originalRender();syncPublicationLocation();};
+  window.addEventListener("bilocost:locationChanged",()=>{
+    const loc=getLocation();S.commune=locationValue(loc)||"Kinshasa";
+    syncPublicationLocation();if(typeof render==="function")render();
+  });
+  syncPublicationLocation();
+})();
 </script>
 
 <script>
