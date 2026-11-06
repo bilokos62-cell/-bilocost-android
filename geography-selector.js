@@ -127,7 +127,7 @@
       saved.commune=reference?(local.value?l:free):"";
       saved.localId=local.value||"";
       saved.neighborhood=free;
-      saved.location=[p,saved.territory,saved.commune,free&&reference?free:""].filter(Boolean).join(" · ");
+      saved.location=[p,...(saved.territory===p?[]:[saved.territory]),saved.commune,free&&reference?free:""].filter(Boolean).join(" · ");
       localStorage.setItem(STORE,JSON.stringify(saved));
       if(typeof S!=="undefined"&&S){S.province=saved.province;S.territory=saved.territory;S.commune=saved.commune;S.location=saved.location;}
       window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));
