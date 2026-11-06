@@ -107,14 +107,15 @@ async function biloRefreshInboxBadge() {
   if (BILO_INBOX_BADGE_BUSY || !CLOUD || !S.user || !FB.F || !FB.db) return;
   BILO_INBOX_BADGE_BUSY = true;
   try {
-    const F = FB.F, q = F.query(F.collection(FB.db, "inboxNotifications"), F.where("ownerId", "==", S.user.uid), F.where("read", "==", false), F.limit(50));
-    const snap = await F.getDocs(q), badge = document.getElementById("biloInboxBadge");
-    if (badge) { badge.textContent = snap.size > 99 ? "99+" : String(snap.size); badge.style.display = snap.size ? "block" : "none"; }
+    const F = FB.F, q = F.query(F.collection(FB.db, "inboxNotifications"), F.where("ownerId", "==", S.user.uid), F.orderBy("createdAt", "desc"), F.limit(80));
+    const snap = await F.getDocs(q), count = snap.docs.filter(d => d.data().read !== true).length, badge = document.getElementById("biloInboxBadge");
+    if (badge) { badge.textContent = count > 99 ? "99+" : String(count); badge.style.display = count ? "block" : "none"; }
   } catch (e) { console.warn("Bilocost inbox badge", e); }
   finally { BILO_INBOX_BADGE_BUSY = false; }
 }
 function biloInboxCategory(type) {
   if (type === "delivery_code" || type.indexOf("order_") === 0) return "orders";
+  if (type === "chat_message") return "messages";
   if (type === "promotion") return "promos";
   return "system";
 }
@@ -122,17 +123,18 @@ function biloInboxCard(n) {
   const date = n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString("fr-FR") : "Récemment";
   const code = n.type === "delivery_code" && n.code ? '<div class="card" style="padding:12px;margin-top:10px"><b>Code de remise</b><div style="font-size:30px;letter-spacing:8px;font-weight:800;text-align:center;padding:10px 0">' + esc(n.code) + '</div><div class="sub">À communiquer au vendeur uniquement après avoir reçu et vérifié l’article.</div></div>' : "";
   const order = n.orderId ? '<button class="lnk" data-inbox-order="' + esc(n.orderId) + '" style="margin-top:8px">Voir la commande</button>' : "";
-  return '<article class="card" style="padding:13px;margin:9px 0;border-left:3px solid ' + (n.read ? "var(--line)" : "var(--pri)") + '"><div class="row"><b>' + esc(n.title || "Notification Bilocost") + '</b><span class="chip">' + (n.read ? "Lue" : "Nouvelle") + '</span></div><p style="margin:8px 0">' + esc(n.body || "") + '</p>' + code + '<div class="sub" style="margin-top:8px">' + esc(date) + '</div>' + order + (!n.read ? '<button class="lnk" data-inbox-read="' + esc(n.id) + '" style="margin-left:12px">Marquer comme lue</button>' : "") + '</article>';
+  const chat = n.chatId ? '<button class="lnk" data-inbox-chat="' + esc(n.chatId) + '" style="margin-top:8px">Ouvrir les messages</button>' : "";
+  return '<article class="card" style="padding:13px;margin:9px 0;border-left:3px solid ' + (n.read ? "var(--line)" : "var(--pri)") + '"><div class="row"><b>' + esc(n.title || "Notification Bilocost") + '</b><span class="chip">' + (n.read ? "Lue" : "Nouvelle") + '</span></div><p style="margin:8px 0">' + esc(n.body || "") + '</p>' + code + '<div class="sub" style="margin-top:8px">' + esc(date) + '</div>' + order + chat + (!n.read ? '<button class="lnk" data-inbox-read="' + esc(n.id) + '" style="margin-left:12px">Marquer comme lue</button>' : "") + '</article>';
 }
 async function biloOpenInbox(filter) {
   if (!S.user || !CLOUD) { sheet('<h2>Boîte de réception</h2><p class="sub">Connectez-vous pour recevoir vos codes et notifications Bilocost.</p>'); return; }
   BILO_INBOX_FILTER = filter || BILO_INBOX_FILTER || "all";
-  sheet('<h2>Boîte de réception</h2><p class="sub">Vos codes de remise, informations de commande et promotions sont réunis ici.</p><div class="tabs" style="margin-top:12px"><button data-inbox-filter="all" aria-pressed="' + (BILO_INBOX_FILTER === "all") + '">Tout</button><button data-inbox-filter="orders" aria-pressed="' + (BILO_INBOX_FILTER === "orders") + '">Commandes</button><button data-inbox-filter="system" aria-pressed="' + (BILO_INBOX_FILTER === "system") + '">Infos</button><button data-inbox-filter="promos" aria-pressed="' + (BILO_INBOX_FILTER === "promos") + '">Promos</button></div><div class="sub" style="padding:12px 0">Chargement…</div>');
+  sheet('<h2>Boîte de réception</h2><p class="sub">Vos codes de remise, informations de commande et promotions sont réunis ici.</p><div class="tabs" style="margin-top:12px"><button data-inbox-filter="all" aria-pressed="' + (BILO_INBOX_FILTER === "all") + '">Tout</button><button data-inbox-filter="orders" aria-pressed="' + (BILO_INBOX_FILTER === "orders") + '">Commandes</button><button data-inbox-filter="messages" aria-pressed="' + (BILO_INBOX_FILTER === "messages") + '">Messages</button><button data-inbox-filter="system" aria-pressed="' + (BILO_INBOX_FILTER === "system") + '">Infos</button><button data-inbox-filter="promos" aria-pressed="' + (BILO_INBOX_FILTER === "promos") + '">Promos</button></div><div class="sub" style="padding:12px 0">Chargement…</div>');
   try {
     const F = FB.F, q = F.query(F.collection(FB.db, "inboxNotifications"), F.where("ownerId", "==", S.user.uid), F.orderBy("createdAt", "desc"), F.limit(80));
     const snap = await F.getDocs(q), all = snap.docs.map(d => Object.assign({id:d.id}, d.data()));
     const filtered = BILO_INBOX_FILTER === "all" ? all : all.filter(n => biloInboxCategory(n.type) === BILO_INBOX_FILTER);
-    const tabs = '<div class="tabs" style="margin-top:12px"><button data-inbox-filter="all" aria-pressed="' + (BILO_INBOX_FILTER === "all") + '">Tout</button><button data-inbox-filter="orders" aria-pressed="' + (BILO_INBOX_FILTER === "orders") + '">Commandes</button><button data-inbox-filter="system" aria-pressed="' + (BILO_INBOX_FILTER === "system") + '">Infos</button><button data-inbox-filter="promos" aria-pressed="' + (BILO_INBOX_FILTER === "promos") + '">Promos</button></div>';
+    const tabs = '<div class="tabs" style="margin-top:12px"><button data-inbox-filter="all" aria-pressed="' + (BILO_INBOX_FILTER === "all") + '">Tout</button><button data-inbox-filter="orders" aria-pressed="' + (BILO_INBOX_FILTER === "orders") + '">Commandes</button><button data-inbox-filter="messages" aria-pressed="' + (BILO_INBOX_FILTER === "messages") + '">Messages</button><button data-inbox-filter="system" aria-pressed="' + (BILO_INBOX_FILTER === "system") + '">Infos</button><button data-inbox-filter="promos" aria-pressed="' + (BILO_INBOX_FILTER === "promos") + '">Promos</button></div>';
     sheet('<h2>Boîte de réception</h2><p class="sub">Codes de remise, commandes, informations et promotions Bilocost.</p>' + tabs + (filtered.map(biloInboxCard).join("") || '<div class="empty" style="margin-top:14px">Aucun message dans cette rubrique.</div>') + '<button class="btn out" style="margin-top:10px" data-inbox-refresh>Actualiser</button>');
     biloRefreshInboxBadge();
   } catch (e) {
@@ -154,6 +156,7 @@ document.addEventListener("click", e => {
   const read = e.target.closest("[data-inbox-read]");
   if (read) { e.preventDefault(); biloMarkInboxRead(read.dataset.inboxRead); return; }
   if (e.target.closest("[data-inbox-refresh]")) { e.preventDefault(); biloOpenInbox(); return; }
+  if (e.target.closest("[data-inbox-chat]")) { e.preventDefault(); close_(); const nav = document.querySelector('nav button[data-t="msg"]'); if (nav) nav.click(); return; }
   const order = e.target.closest("[data-inbox-order]");
   if (order) { e.preventDefault(); biloLoadOrders("buy"); return; }
 });
