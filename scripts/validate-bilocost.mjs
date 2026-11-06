@@ -38,8 +38,6 @@ const checks = [
   ["Bilocost messaging", /async function postMsg\s*\(/],
   ["Phone-number moderation", /function containsPhoneNumber\s*\(/],
   ["Rental module", /function rentHome\s*\(/],
-  ["Gemini integration", /gemini-2\.5-flash/],
-  ["AI listing helper", /improveListingWithAI/],
 ];
 
 for (const [label, pattern] of checks) {
@@ -57,4 +55,6 @@ if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !stora
 console.log("Bilocost source validation passed.");
 console.log("JavaScript syntax: valid");
 console.log("Core integrations detected: " + checks.length);
+if (/gemini|aiModel|improveListingWithAI/i.test(html)) fail("Optional AI integration is still present");
+console.log("Optional AI integration: removed.");
 console.log("Note: this validates source structure only; it does not prove live Firebase, payment, escrow, or device behavior.");
