@@ -94,6 +94,13 @@ jobs:
           # Add the brand mark to the Android-only WebView bundle.
           cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
+          # Optional user-provided startup video: bundled in Android WebView only.
+          if [ -s resources/13774.mp4 ]; then
+            cp resources/13774.mp4 www/bilocost-launch.mp4
+            echo "Bilocost startup video found and bundled for Android."
+          else
+            echo "Bilocost startup video not present in repository; animated fallback will be used."
+          fi
           # Inject the animated launch screen into Android output only (never into Firebase Hosting).
           python3 - <<'PY'
           from pathlib import Path
@@ -102,6 +109,8 @@ jobs:
           style = r"""
           <style id="bilocost-native-loader-style">
           #bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 34%,#075d36 0%,#023a25 44%,#001b13 100%);color:#fff;opacity:1;transition:opacity .48s ease}
+          #bilocost-native-loader .bl-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#001b13}
+          #bilocost-native-loader .bl-video[hidden]{display:none}
           #bilocost-native-loader:before,#bilocost-native-loader:after{content:"";position:absolute;width:72vw;height:72vw;max-width:520px;max-height:520px;border:1px solid rgba(74,255,145,.12);border-radius:50%;animation:bilocost-loader-orbit 7s linear infinite}
           #bilocost-native-loader:after{width:105vw;height:105vw;max-width:760px;max-height:760px;animation-direction:reverse;opacity:.55}
           #bilocost-native-loader .bl-wrap{position:relative;z-index:1;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 18px}
@@ -153,16 +162,39 @@ jobs:
                 <div class="bl-track"><div class="bl-fill"></div></div>
                 <div class="bl-caption">Préparation de votre espace Bilocost…</div>
               </div>`;
+            const video = document.createElement("video");
+            video.className = "bl-video";
+            video.src = "bilocost-launch.mp4";
+            video.autoplay = true;
+            video.muted = true;
+            video.playsInline = true;
+            video.preload = "auto";
+            video.setAttribute("aria-hidden", "true");
+            video.addEventListener("error", () => { video.remove(); }, { once: true });
+            video.addEventListener("ended", () => close(), { once: true });
+            layer.insertBefore(video, layer.firstChild);
             document.body.appendChild(layer);
             let closed = false;
+            let fallbackTimer = 0;
             const close = () => {
               if (closed) return;
               closed = true;
+              if (fallbackTimer) window.clearTimeout(fallbackTimer);
               layer.classList.add("bl-out");
               window.setTimeout(() => layer.remove(), 520);
             };
             const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            window.setTimeout(close, reduced ? 1400 : 6900);
+            if (reduced) {
+              video.remove();
+              fallbackTimer = window.setTimeout(close, 900);
+            } else {
+              video.play().then(() => {
+                fallbackTimer = window.setTimeout(close, 30000);
+              }).catch(() => {
+                video.remove();
+                fallbackTimer = window.setTimeout(close, 6900);
+              });
+            }
             window.addEventListener("pagehide", close, { once: true });
           })();
           </script>
