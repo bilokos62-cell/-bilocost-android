@@ -1,4 +1,5 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
@@ -14,6 +15,14 @@ const requireAuth = request => {
   if (!request.auth) throw new HttpsError("unauthenticated", "Connectez-vous à Bilocost.");
   return request.auth.uid;
 };
+const notifyInbox = (uid, payload) => db.collection("inboxNotifications").add({
+  ownerId: uid, type: payload.type, title: String(payload.title || "Bilocost").slice(0, 100),
+  body: String(payload.body || "").slice(0, 400), read: false,
+  ...(payload.orderId ? { orderId: payload.orderId } : {}),
+  ...(payload.side ? { side: payload.side } : {}),
+  ...(payload.code ? { code: payload.code } : {}),
+  createdAt: FieldValue.serverTimestamp()
+});
 const requireAdmin = request => {
   const uid = requireAuth(request);
   if (request.auth.token.admin !== true) throw new HttpsError("permission-denied", "Action réservée à l’administration Bilocost.");
@@ -53,6 +62,10 @@ exports.createDeliveryOrder = onCall(async request => {
     paymentStatus: "NOT_CONFIGURED", escrowStatus: "NOT_ACTIVE", status: "AWAITING_PAYMENT",
     createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
   });
+  await Promise.all([
+    notifyInbox(uid, { type: "order_created", title: "Commande enregistrée", body: "Votre commande est créée. Le paiement n’est pas encore activé.", orderId: orderRef.id, side: "buy" }),
+    notifyInbox(item.sellerId, { type: "order_created", title: "Nouvelle commande", body: "Un acheteur vient d’enregistrer une commande pour votre article.", orderId: orderRef.id, side: "sell" })
+  ]);
   return { orderId: orderRef.id, status: "AWAITING_PAYMENT", totalCDF: priceCDF + deliveryFeeCDF };
 });
 
@@ -64,6 +77,7 @@ exports.confirmOrderPayment = onCall(async request => {
   if (typeof orderId !== "string" || !orderId) throw new HttpsError("invalid-argument", "Commande invalide.");
   const orderRef = db.collection("orders").doc(orderId), code = String(crypto.randomInt(100000, 1000000));
   const expiresAt = Timestamp.fromMillis(Date.now() + CODE_TTL_MS);
+  const inboxRef = db.collection("inboxNotifications").doc();
   await db.runTransaction(async tx => {
     const snap = await tx.get(orderRef);
     if (!snap.exists) throw new HttpsError("not-found", "Commande introuvable.");
@@ -72,7 +86,14 @@ exports.confirmOrderPayment = onCall(async request => {
       throw new HttpsError("failed-precondition", "La commande n’attend pas une confirmation de paiement.");
     }
     tx.update(orderRef, { paymentStatus: "CONFIRMED", escrowStatus: "NOT_ACTIVE", status: "READY_FOR_DELIVERY",
-      deliveryCodeHash: hashCode(code), deliveryCodeExpiresAt: expiresAt, deliveryCodeAttempts: 0, updatedAt: FieldValue.serverTimestamp() });
+      deliveryCodeHash: hashCode(code), deliveryCodeExpiresAt: expiresAt, deliveryCodeAttempts: 0, deliveryNotificationId: inboxRef.id, updatedAt: FieldValue.serverTimestamp() });
+    tx.create(inboxRef, { ownerId: order.buyerId, type: "delivery_code", title: "Votre code de remise est prêt",
+      body: "Paiement confirmé. Présentez ce code au vendeur uniquement après avoir reçu et vérifié l’article.",
+      code, orderId, side: "buy", read: false, createdAt: FieldValue.serverTimestamp() });
+    const sellerNotice = db.collection("inboxNotifications").doc();
+    tx.create(sellerNotice, { ownerId: order.sellerId, type: "order_paid", title: "Paiement confirmé",
+      body: "Le paiement de cette commande a été confirmé. Vous pouvez organiser la remise de l’article.",
+      orderId, side: "sell", read: false, createdAt: FieldValue.serverTimestamp() });
     tx.set(db.collection("deliveryCodes").doc(orderId), {
       ownerId: order.buyerId, code, expiresAt, createdAt: FieldValue.serverTimestamp(), usedAt: null
     });
@@ -103,8 +124,79 @@ exports.confirmDelivery = onCall(async request => {
     tx.update(orderRef, { status: "DELIVERED", deliveredAt: FieldValue.serverTimestamp(), deliveryConfirmedBy: uid,
       deliveryCodeUsedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() });
     tx.update(secretRef, { usedAt: FieldValue.serverTimestamp(), code: FieldValue.delete() });
+    if (order.deliveryNotificationId) {
+      tx.update(db.collection("inboxNotifications").doc(order.deliveryNotificationId), {
+        code: FieldValue.delete(), read: true, usedAt: FieldValue.serverTimestamp()
+      });
+    }
+    const buyerNotice = db.collection("inboxNotifications").doc();
+    tx.create(buyerNotice, { ownerId: order.buyerId, type: "order_delivered", title: "Livraison confirmée",
+      body: "La remise de votre article a été confirmée. Conservez votre preuve de commande.",
+      orderId, side: "buy", read: false, createdAt: FieldValue.serverTimestamp() });
+    const sellerNotice = db.collection("inboxNotifications").doc();
+    tx.create(sellerNotice, { ownerId: order.sellerId, type: "order_delivered", title: "Vente terminée",
+      body: "La remise de l’article a été confirmée avec le code à usage unique.",
+      orderId, side: "sell", read: false, createdAt: FieldValue.serverTimestamp() });
     return { ok: true };
   });
   if (!result.ok) throw new HttpsError("permission-denied", "Code incorrect. " + result.attemptsLeft + " essai(s) restant(s).");
   return { status: "DELIVERED" };
+});
+
+
+/* User-scoped inbox actions. Clients never write notification documents directly. */
+exports.markInboxNotificationRead = onCall(async request => {
+  const uid = requireAuth(request), { notificationId } = request.data || {};
+  if (typeof notificationId !== "string" || !notificationId) throw new HttpsError("invalid-argument", "Notification invalide.");
+  const ref = db.collection("inboxNotifications").doc(notificationId);
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "Notification introuvable.");
+    if (snap.data().ownerId !== uid) throw new HttpsError("permission-denied", "Cette notification ne vous appartient pas.");
+    tx.update(ref, { read: true, readAt: FieldValue.serverTimestamp() });
+  });
+  return { ok: true };
+});
+
+exports.broadcastBilocostPromotion = onCall(async request => {
+  requireAdmin(request);
+  const { title, body } = request.data || {};
+  if (typeof title !== "string" || !title.trim() || title.length > 100 ||
+      typeof body !== "string" || !body.trim() || body.length > 400) {
+    throw new HttpsError("invalid-argument", "Le titre (100 caractères) et le message (400 caractères) sont obligatoires.");
+  }
+  const users = await db.collection("users").select().get();
+  let batch = db.batch(), count = 0, pending = 0;
+  for (const user of users.docs) {
+    const ref = db.collection("inboxNotifications").doc();
+    batch.create(ref, { ownerId: user.id, type: "promotion", title: title.trim(), body: body.trim(), read: false, createdAt: FieldValue.serverTimestamp() });
+    count++; pending++;
+    if (pending === 450) { await batch.commit(); batch = db.batch(); pending = 0; }
+  }
+  if (pending) await batch.commit();
+  return { sent: count };
+});
+
+
+/* Notify the other participant when a new chat message is created. */
+exports.notifyChatMessage = onDocumentCreated("chats/{chatId}/messages/{messageId}", async event => {
+  const message = event.data && event.data.data();
+  if (!message || typeof message.from !== "string") return;
+  const chatSnap = await db.collection("chats").doc(event.params.chatId).get();
+  if (!chatSnap.exists) return;
+  const chat = chatSnap.data();
+  const recipientIds = (Array.isArray(chat.participants) ? chat.participants : [])
+    .filter(uid => typeof uid === "string" && uid !== message.from);
+  const preview = typeof message.text === "string" && message.text.trim()
+    ? message.text.trim().slice(0, 180) : "Vous avez reçu un nouveau message.";
+  for (const uid of recipientIds) {
+    const ref = db.collection("inboxNotifications").doc(event.params.messageId + "_" + uid);
+    try {
+      await ref.create({ ownerId: uid, type: "chat_message", title: "Nouveau message",
+        body: preview, chatId: event.params.chatId, read: false,
+        createdAt: FieldValue.serverTimestamp() });
+    } catch (error) {
+      if (error.code !== 6 && error.code !== "already-exists") throw error;
+    }
+  }
 });

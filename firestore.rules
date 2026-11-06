@@ -253,7 +253,7 @@ service cloud.firestore {
       allow list, create, update, delete: if false;
     }
 
-    // Deny every collection not explicitly listed above.
+    // In-app inbox: each account can only read its own notifications; all writes are server-side.\n    match /inboxNotifications/{notificationId} {\n      allow get, list: if signedIn() && resource.data.ownerId == request.auth.uid;\n      allow create, update, delete: if false;\n    }\n\n    // Deny every collection not explicitly listed above.
     match /{document=**} {
       allow read, write: if false;
     }
