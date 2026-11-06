@@ -90,18 +90,7 @@ document.addEventListener("click", e => {
 let BILO_INBOX_FILTER = "all";
 let BILO_INBOX_BADGE_BUSY = false;
 function biloInstallInboxIcon() {
-  const controls = document.querySelector("header > div:last-child");
-  const profile = document.getElementById("hav");
-  if (!controls || !profile || document.getElementById("biloInboxButton")) return;
-  const button = document.createElement("button");
-  button.id = "biloInboxButton";
-  button.className = "ib";
-  button.type = "button";
-  button.setAttribute("aria-label", "Boîte de réception");
-  button.title = "Boîte de réception";
-  button.style.position = "relative";
-  button.innerHTML = '<svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><b id="biloInboxBadge" style="display:none;position:absolute;right:-3px;top:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:12px;background:var(--pri);color:#fff;font-size:10px;line-height:17px;text-align:center"></b>';
-  controls.insertBefore(button, profile);
+  // The inbox is accessed from the Messages area, not as another permanent header icon.
 }
 async function biloRefreshInboxBadge() {
   if (BILO_INBOX_BADGE_BUSY || !CLOUD || !S.user || !FB.F || !FB.db) return;
@@ -146,8 +135,31 @@ async function biloMarkInboxRead(notificationId) {
   try { await biloDeliveryCall("markInboxNotificationRead", {notificationId}); biloOpenInbox(); biloRefreshInboxBadge(); }
   catch (e) { toast(e.message || "Impossible de mettre à jour le message."); }
 }
+let BILO_SHOW_INBOX_ENTRY = false;
+function biloEnsureInboxEntry() {
+  const view = document.getElementById("view");
+  if (!BILO_SHOW_INBOX_ENTRY || !view || view.querySelector("#biloInboxEntry")) return;
+  const button = document.createElement("button");
+  button.id = "biloInboxEntry";
+  button.type = "button";
+  button.className = "btn out";
+  button.style.cssText = "width:100%;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between";
+  button.innerHTML = '<span>Boîte de réception · Codes et notifications</span><b id="biloInboxEntryBadge" style="display:none;background:var(--pri);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px"></b>';
+  button.addEventListener("click",()=>biloOpenInbox("all"));
+  view.prepend(button);
+  const source=document.getElementById("biloInboxBadge"), target=document.getElementById("biloInboxEntryBadge");
+  if(source&&target&&source.textContent){target.textContent=source.textContent;target.style.display=source.style.display==="none"?"none":"inline-block";}
+}
+document.addEventListener("click",e=>{
+  const navItem=e.target.closest("nav button[data-t]");
+  if(navItem){
+    BILO_SHOW_INBOX_ENTRY=navItem.dataset.t==="msg";
+    if(!BILO_SHOW_INBOX_ENTRY){const old=document.getElementById("biloInboxEntry");if(old)old.remove();}
+    else setTimeout(biloEnsureInboxEntry,120);
+  }
+});
 const biloOriginalRender = render;
-render = function() { biloOriginalRender(); biloInstallInboxIcon(); biloRefreshInboxBadge(); };
+render = function() { biloOriginalRender(); biloRefreshInboxBadge(); biloEnsureInboxEntry(); };
 document.addEventListener("click", e => {
   const inbox = e.target.closest("#biloInboxButton");
   if (inbox) { e.preventDefault(); biloOpenInbox("all"); return; }

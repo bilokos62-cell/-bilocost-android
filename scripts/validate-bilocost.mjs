@@ -8,6 +8,7 @@ const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
+const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
@@ -55,6 +56,7 @@ if (!firestoreRules.includes("match /chats/{chatId}") || !firestoreRules.include
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow read: if isOwner(uid) || isAdmin()")) fail("Private identity Storage rules are missing");
 
 try { new vm.Script(deliveryPatch, { filename: "delivery-otp.js" }); } catch (error) { fail("Delivery OTP patch syntax error: " + error.message); }
+try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
 try { new vm.Script(functionsSource, { filename: "functions/index.js" }); } catch (error) { fail("Cloud Functions syntax error: " + error.message); }
 if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions source is not configured in firebase.json");
 if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.includes("match /deliveryCodes/{orderId}")) fail("Secure order and delivery-code rules are missing");
