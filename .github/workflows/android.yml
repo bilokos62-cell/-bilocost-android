@@ -130,10 +130,10 @@ jobs:
           #bilocost-native-loader .bl-step{width:29px;height:29px;border:1px solid rgba(102,255,168,.3);border-radius:50%;display:grid;place-items:center;background:rgba(0,40,25,.55);color:#7cbd98;font:700 14px system-ui,sans-serif;animation:bilocost-loader-step 1.05s ease-in-out infinite}
           #bilocost-native-loader .bl-step:nth-child(2){animation-delay:.15s}#bilocost-native-loader .bl-step:nth-child(3){animation-delay:.3s}#bilocost-native-loader .bl-step:nth-child(4){animation-delay:.45s}#bilocost-native-loader .bl-step:nth-child(5){animation-delay:.6s}#bilocost-native-loader .bl-step:nth-child(6){animation-delay:.75s}
           #bilocost-native-loader .bl-track{height:4px;width:min(74vw,300px);border-radius:10px;background:rgba(150,255,190,.2);overflow:hidden;margin-top:14px;box-shadow:0 0 10px rgba(0,255,115,.16)}
-          #bilocost-native-loader .bl-fill{height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#25b85f,#baff65);box-shadow:0 0 10px #4cff91;animation:bilocost-loader-progress 6.6s cubic-bezier(.35,.02,.2,1) forwards}
+          #bilocost-native-loader .bl-fill{height:100%;width:32%;border-radius:10px;background:linear-gradient(90deg,#25b85f,#baff65);box-shadow:0 0 10px #4cff91;animation:bilocost-loader-progress 1.15s ease-in-out infinite alternate}
           #bilocost-native-loader .bl-caption{font:500 11px/1.4 system-ui,sans-serif;letter-spacing:.5px;color:#b8e9ca;margin-top:12px}
           #bilocost-native-loader.bl-out{opacity:0;pointer-events:none}
-          @keyframes bilocost-loader-draw{to{stroke-dashoffset:0}}@keyframes bilocost-loader-progress{to{width:100%}}@keyframes bilocost-loader-float{50%{transform:translateY(-5px)}}@keyframes bilocost-loader-pop{0%{opacity:0;transform:scale(.65)}100%{opacity:1;transform:scale(1)}}@keyframes bilocost-loader-step{0%,100%{color:#74ad8b;border-color:rgba(102,255,168,.25);box-shadow:none;transform:scale(.92)}45%{color:#fff;border-color:#51ff9a;background:rgba(0,190,85,.4);box-shadow:0 0 13px rgba(43,255,131,.7);transform:scale(1.12)}}@keyframes bilocost-loader-twinkle{to{opacity:.4;transform:scale(.8)}}@keyframes bilocost-loader-orbit{to{transform:rotate(360deg)}}
+          @keyframes bilocost-loader-draw{to{stroke-dashoffset:0}}@keyframes bilocost-loader-progress{from{transform:translateX(-25%)}to{transform:translateX(220%)}}@keyframes bilocost-loader-float{50%{transform:translateY(-5px)}}@keyframes bilocost-loader-pop{0%{opacity:0;transform:scale(.65)}100%{opacity:1;transform:scale(1)}}@keyframes bilocost-loader-step{0%,100%{color:#74ad8b;border-color:rgba(102,255,168,.25);box-shadow:none;transform:scale(.92)}45%{color:#fff;border-color:#51ff9a;background:rgba(0,190,85,.4);box-shadow:0 0 13px rgba(43,255,131,.7);transform:scale(1.12)}}@keyframes bilocost-loader-twinkle{to{opacity:.4;transform:scale(.8)}}@keyframes bilocost-loader-orbit{to{transform:rotate(360deg)}}
           @media(prefers-reduced-motion:reduce){#bilocost-native-loader *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
           </style>
           """
@@ -173,9 +173,9 @@ jobs:
             video.muted = true;
             video.playsInline = true;
             video.preload = "auto";
+            video.loop = true;
             video.setAttribute("aria-hidden", "true");
             video.addEventListener("error", () => { video.remove(); }, { once: true });
-            video.addEventListener("ended", () => close(), { once: true });
             layer.insertBefore(video, layer.firstChild);
             document.body.appendChild(layer);
             let closed = false;
@@ -187,19 +187,40 @@ jobs:
               layer.classList.add("bl-out");
               window.setTimeout(() => layer.remove(), 520);
             };
+            const readyForApp = () => {
+              const view = document.getElementById("view");
+              const interfaceReady = !!view && (view.childElementCount > 0 || view.textContent.trim().length > 0);
+              let servicesReady = true;
+              try {
+                servicesReady = (typeof CLOUD === "undefined" || !CLOUD) || (typeof FB !== "undefined" && !!FB.db);
+              } catch (_) { servicesReady = false; }
+              return document.readyState === "complete" && interfaceReady && servicesReady;
+            };
+            const startedAt = Date.now();
+            let readySince = 0;
+            const waitUntilReady = () => {
+              if (closed) return;
+              if (readyForApp()) {
+                if (!readySince) readySince = Date.now();
+                if (Date.now() - readySince >= 700) { close(); return; }
+              } else {
+                readySince = 0;
+              }
+              if (Date.now() - startedAt >= 45000) { close(); return; }
+              window.setTimeout(waitUntilReady, 180);
+            };
             const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             if (reduced) {
               video.remove();
-              fallbackTimer = window.setTimeout(close, 900);
             } else {
               video.play().then(() => {
                 layer.classList.add("bl-video-active");
-                fallbackTimer = window.setTimeout(close, 30000);
               }).catch(() => {
                 video.remove();
-                fallbackTimer = window.setTimeout(close, 6900);
               });
             }
+            fallbackTimer = window.setTimeout(close, 45000);
+            waitUntilReady();
             window.addEventListener("pagehide", close, { once: true });
           })();
           </script>
