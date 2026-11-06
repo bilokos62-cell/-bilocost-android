@@ -451,6 +451,7 @@ function render(){
  const cc=$("#cc");cc.textContent=S.cart.length;cc.style.display=S.cart.length?"block":"none";h.style.background=S.user?col(S.user.name):"var(--panel)";
  const q=$("#q");if(q&&S.tab==="search"){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
  logos();
+ applyUiLanguage($("#view"));applyUiLanguage(document.querySelector("nav"));
  const ge=$("#goe");if(ge){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};ge.onclick=publishEvent}
  const p=$("#pp");if(p){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};
   const u=()=>{const v=+p.value||0,c=$("#pcur").value;$("#eq").textContent="Équivalent : ≈ "+(c==="CDF"?fmt(v/RATE)+" $":fmt(v*RATE)+" CDF")+` (taux indicatif : 1 $ = ${RATE} CDF)`};p.oninput=u;$("#pcur").onchange=u;
