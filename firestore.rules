@@ -210,6 +210,20 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Secure order data is written only by trusted payment webhooks / server functions.
+    match /secureOrders/{orderId} {
+      allow read: if signedIn()
+        && (resource.data.buyerId == request.auth.uid
+          || resource.data.sellerId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    // Private in-app inbox. Only the recipient can read; trusted backend writes messages.
+    match /userInbox/{uid}/messages/{messageId} {
+      allow read: if isOwner(uid);
+      allow create, update, delete: if false;
+    }
+
     match /walletTransactions/{transactionId} {
       allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
       allow create, update, delete: if false;
