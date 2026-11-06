@@ -93,7 +93,7 @@ exports.confirmOrderPayment = onCall(async request => {
     const sellerNotice = db.collection("inboxNotifications").doc();
     tx.create(sellerNotice, { ownerId: order.sellerId, type: "order_paid", title: "Paiement confirmé",
       body: "Le paiement de cette commande a été confirmé. Vous pouvez organiser la remise de l’article.",
-      orderId, side: "buy", read: false, createdAt: FieldValue.serverTimestamp() });
+      orderId, side: "sell", read: false, createdAt: FieldValue.serverTimestamp() });
     tx.set(db.collection("deliveryCodes").doc(orderId), {
       ownerId: order.buyerId, code, expiresAt, createdAt: FieldValue.serverTimestamp(), usedAt: null
     });
@@ -124,6 +124,19 @@ exports.confirmDelivery = onCall(async request => {
     tx.update(orderRef, { status: "DELIVERED", deliveredAt: FieldValue.serverTimestamp(), deliveryConfirmedBy: uid,
       deliveryCodeUsedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() });
     tx.update(secretRef, { usedAt: FieldValue.serverTimestamp(), code: FieldValue.delete() });
+    if (order.deliveryNotificationId) {
+      tx.update(db.collection("inboxNotifications").doc(order.deliveryNotificationId), {
+        code: FieldValue.delete(), read: true, usedAt: FieldValue.serverTimestamp()
+      });
+    }
+    const buyerNotice = db.collection("inboxNotifications").doc();
+    tx.create(buyerNotice, { ownerId: order.buyerId, type: "order_delivered", title: "Livraison confirmée",
+      body: "La remise de votre article a été confirmée. Conservez votre preuve de commande.",
+      orderId, side: "buy", read: false, createdAt: FieldValue.serverTimestamp() });
+    const sellerNotice = db.collection("inboxNotifications").doc();
+    tx.create(sellerNotice, { ownerId: order.sellerId, type: "order_delivered", title: "Vente terminée",
+      body: "La remise de l’article a été confirmée avec le code à usage unique.",
+      orderId, side: "sell", read: false, createdAt: FieldValue.serverTimestamp() });
     return { ok: true };
   });
   if (!result.ok) throw new HttpsError("permission-denied", "Code incorrect. " + result.attemptsLeft + " essai(s) restant(s).");
