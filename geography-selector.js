@@ -32,7 +32,11 @@
     const cached=read(CACHE,null);
     if(cached?.savedAt&&Date.now()-cached.savedAt<30*86400000&&cached.data?.province?.length)return cached.data;
     try{
-      const response=await fetch("https://api.openadmindata.org/api/v1/countries/cd.json",{headers:{Accept:"application/json"}});
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),8000);
+      let response;
+      try{response=await fetch("https://api.openadmindata.org/api/v1/countries/cd.json",{headers:{Accept:"application/json"},signal:controller.signal});}
+      finally{clearTimeout(timeout);}
       if(!response.ok)throw new Error("Référentiel indisponible");
       const payload=await response.json();
       const data=payload.data||payload;
