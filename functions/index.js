@@ -1,4 +1,5 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
@@ -75,6 +76,7 @@ exports.confirmOrderPayment = onCall(async request => {
   if (typeof orderId !== "string" || !orderId) throw new HttpsError("invalid-argument", "Commande invalide.");
   const orderRef = db.collection("orders").doc(orderId), code = String(crypto.randomInt(100000, 1000000));
   const expiresAt = Timestamp.fromMillis(Date.now() + CODE_TTL_MS);
+  const inboxRef = db.collection("inboxNotifications").doc();
   await db.runTransaction(async tx => {
     const snap = await tx.get(orderRef);
     if (!snap.exists) throw new HttpsError("not-found", "Commande introuvable.");
@@ -159,4 +161,28 @@ exports.broadcastBilocostPromotion = onCall(async request => {
   }
   if (pending) await batch.commit();
   return { sent: count };
+});
+
+
+/* Notify the other participant when a new chat message is created. */
+exports.notifyChatMessage = onDocumentCreated("chats/{chatId}/messages/{messageId}", async event => {
+  const message = event.data && event.data.data();
+  if (!message || typeof message.from !== "string") return;
+  const chatSnap = await db.collection("chats").doc(event.params.chatId).get();
+  if (!chatSnap.exists) return;
+  const chat = chatSnap.data();
+  const recipientIds = (Array.isArray(chat.participants) ? chat.participants : [])
+    .filter(uid => typeof uid === "string" && uid !== message.from);
+  const preview = typeof message.text === "string" && message.text.trim()
+    ? message.text.trim().slice(0, 180) : "Vous avez reçu un nouveau message.";
+  for (const uid of recipientIds) {
+    const ref = db.collection("inboxNotifications").doc(event.params.messageId + "_" + uid);
+    try {
+      await ref.create({ ownerId: uid, type: "chat_message", title: "Nouveau message",
+        body: preview, chatId: event.params.chatId, read: false,
+        createdAt: FieldValue.serverTimestamp() });
+    } catch (error) {
+      if (error.code !== 6 && error.code !== "already-exists") throw error;
+    }
+  }
 });
