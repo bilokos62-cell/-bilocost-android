@@ -30,17 +30,6 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           html = Path("index.html").read_text(encoding="utf-8")
-          # Expose the AI model as soon as it exists; do not wait for Auth persistence.
-          old_auth = ' const auth=A.getAuth(a);'
-          new_auth = ' const auth=A.getAuth(a); Object.assign(FB,{A,F,O,AC,AI,appCheck,ai,auth,db:F.getFirestore(a),st:O.getStorage(a),aiModel});'
-          if old_auth not in html:
-              raise SystemExit("Firebase Auth initialization point not found")
-          html = html.replace(old_auth, new_auth, 1)
-          old_assign = ' Object.assign(FB,{A,F,O,AC,AI,appCheck,ai,aiModel,auth,db:F.getFirestore(a),st:O.getStorage(a)})'
-          if old_assign not in html:
-              raise SystemExit("Original Firebase assignment not found")
-          html = html.replace(old_assign, '', 1)
-
           # Correct the mobile header: keep wallet access inside the profile area.
           import re
           html, removed = re.subn(r'<button class="ib" data-t="wallet"[^>]*>.*?</button>', '', html, count=1, flags=re.S)
@@ -85,11 +74,10 @@ jobs:
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
           messaging = Path("messaging-fix.js").read_text(encoding="utf-8")
-          gemini = Path("gemini-assistant.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + gemini + "\n" + services + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
-          print("Messaging and Gemini patches injected for Android.")
+          print("Messaging patch injected for Android.")
           PY
 
       - name: Validate Bilocost source and integrations
