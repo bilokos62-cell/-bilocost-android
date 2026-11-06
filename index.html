@@ -870,7 +870,7 @@ const PG={
  shop(){const u=S.user||{},sh=u.shop||{};return ["Mon nom public",`<div class="prof" style="padding:8px 0">${I("store","",38)}<b>Choisissez le nom affiché aux acheteurs</b><p class="sub">Ce pseudo sera visible sur vos annonces et votre profil. Vous pouvez utiliser le nom de votre boutique ou un nom personnel.</p></div><label>Nom public / nom de boutique</label><input class="f" id="sn" maxlength="60" value="${esc(u.shopName||sh.name||u.name||"")}" placeholder="Ex. : Junior Fashion"><label>Description publique (facultatif)</label><textarea class="f" id="sd" maxlength="300" placeholder="Présentez votre activité">${esc(sh.desc||"")}</textarea><button class="btn" style="margin-top:16px" data-act="saveshop">Enregistrer mon nom public</button>${GR("Ma vitrine",R("link","Copier le lien",'data-act="copyshop"')+R("chat","Partager sur WhatsApp",'data-act="waShop"')+R("qr","Afficher le QR code",'data-act="qrshop"'))}${mode()==="pro"?GR("Outils pro",R("upload","Importer des produits (CSV)",'data-go="csvimport"')):""}<div class="warn">Le nom public ne remplace pas vos informations légales, qui restent dans les paramètres privés.</div>`]}
 };
 function renderPage(){const c=S.stack[S.stack.length-1];if(!c)return;const p=$("#page"),sc=p.scrollTop,[title,body]=PG[c.n](c.a);
- p.innerHTML=`<div class="pw"><div class="pbar"><button data-back aria-label="Retour">←</button><h2>${title}</h2></div><div class="pbody">${body}</div></div>`;p.style.display="block";logos();p.scrollTop=sc}
+ p.innerHTML=`<div class="pw"><div class="pbar"><button data-back aria-label="Retour">←</button><h2>${title}</h2></div><div class="pbody">${body}</div></div>`;p.style.display="block";logos();applyUiLanguage(p);p.scrollTop=sc}
 function go(n,a){S.stack.push({n,a});renderPage();$("#page").scrollTop=0}
 function closePage(){S.stack=[];const p=$("#page");p.style.display="none";p.innerHTML="";render()}
 function back(){S.stack.pop();S.stack.length?renderPage():closePage()}
@@ -1167,6 +1167,7 @@ const authRoot=document.querySelector("#auth");
 authRoot.addEventListener("click",e=>{const b=e.target.closest("[data-auth]");if(!b)return;e.preventDefault();e.stopPropagation();try{doAuth(b.dataset.auth)}catch(err){console.error("Bilocost auth action failed",err);toast("Action impossible : "+(err&&err.message||"erreur inattendue"))}},true);
 const SEL="[data-lang],[data-go],[data-back],[data-act],[data-checkout],[data-sec],[data-t],[data-cat],[data-sort],[data-new],[data-open],[data-fav],[data-close],[data-buy],[data-sheet],[data-chat],[data-c],[data-auth],[data-soc],[data-eye],[data-reset],[data-send],[data-share],[data-rm],[data-pick],[data-logout],#communeBtn,#theme,#sheet";
 document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return;const d=t.dataset;
+ if(d.lang){setUiLanguage(d.lang);return}
  if("back" in d){back();return}
  if(d.go){close_();go(d.go,d.arg);return}
  if(d.act){act(d.act,d.v,t);return}
