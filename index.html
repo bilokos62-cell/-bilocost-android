@@ -360,7 +360,7 @@ const V={
  <label>Catégorie *</label><select class="f" id="pc">${CATS.slice(1).map(c=>`<option>${c[0]}</option>`).join("")}</select>
  <label>État *</label><select class="f" id="pe">${ETATS.map(c=>`<option>${c}</option>`).join("")}</select>
  <label>Description</label><textarea class="f" id="pd" placeholder="Détails, accessoires, garantie…"></textarea>
- <button class="btn ghost" type="button" id="bilocostAiWrite" style="margin-top:8px">✦ Améliorer avec l’IA Bilocost</button><div class="sub" id="bilocostAiStatus" style="margin:6px 0 10px">L’IA peut proposer un titre et une description à partir des informations saisies.</div>
+
  <label>Prix *</label><div class="two"><input class="f" id="pp" type="number" inputmode="numeric" min="0" placeholder="0"><select class="f" id="pcur"><option>CDF</option><option>USD</option></select></div>
  <div class="sub" id="eq" style="margin-top:6px">Équivalent : ≈ 0 (taux indicatif : 1 $ = ${RATE} CDF)</div>
  <label class="pm" style="margin-top:12px"><input type="checkbox" id="pgem"><span style="flex:1"><b>Pépite à saisir</b><small class="sub">Prix cassé : indiquez le prix habituel</small></span></label><input class="f" id="prf" type="number" inputmode="numeric" min="0" placeholder="Prix habituel (même devise)" style="display:none;margin-top:6px">
@@ -436,7 +436,6 @@ function render(){
  logos();
  const ge=$("#goe");if(ge){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};ge.onclick=publishEvent}
  const p=$("#pp");if(p){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};
-  const aiBtn=$("#bilocostAiWrite");if(aiBtn)aiBtn.onclick=improveListingWithAI;
   const u=()=>{const v=+p.value||0,c=$("#pcur").value;$("#eq").textContent="Équivalent : ≈ "+(c==="CDF"?fmt(v/RATE)+" $":fmt(v*RATE)+" CDF")+` (taux indicatif : 1 $ = ${RATE} CDF)`};p.oninput=u;$("#pcur").onchange=u;
   const run=async(bst)=>{const t=$("#pt").value.trim(),w=$("#pw").value.trim();let v=+p.value;
    if(!S.photos.length){toast("Ajoutez au moins une photo");return}if(!t||!v||!w){toast("Remplissez titre, prix et WhatsApp");return}
@@ -606,22 +605,20 @@ const nid=v=>/^\d+$/.test(String(v))?+v:v;
 const ERR={"auth/email-already-in-use":"Cette adresse e-mail est déjà utilisée","auth/invalid-email":"Adresse e-mail invalide","auth/weak-password":"Mot de passe trop faible (6 caractères minimum)","auth/invalid-credential":"E-mail ou mot de passe incorrect","auth/wrong-password":"E-mail ou mot de passe incorrect","auth/user-not-found":"E-mail ou mot de passe incorrect","auth/too-many-requests":"Trop de tentatives, réessayez plus tard","auth/network-request-failed":"Connexion impossible, vérifiez votre réseau","auth/requires-recent-login":"Reconnectez-vous puis réessayez","auth/operation-not-allowed":"Activez ce fournisseur dans Firebase Authentication","auth/unauthorized-domain":"Ajoutez le domaine du site dans les domaines autorisés Firebase","auth/captcha-check-failed":"Vérification anti-robot échouée, réessayez","auth/invalid-phone-number":"Numéro de téléphone invalide","auth/quota-exceeded":"Quota SMS Firebase dépassé","auth/missing-phone-number":"Entrez votre numéro de téléphone","auth/invalid-verification-code":"Code SMS incorrect"};
 const errMsg=e=>ERR[e&&e.code]||"Une erreur est survenue ("+((e&&e.code)||"inconnue")+")";
 async function initFirebase(){const V="11.10.0",u=m=>`https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
- const [app,A,F,O,AC,AI]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage")),import(u("app-check")),import(u("ai"))]);
+ const [app,A,F,O,AC]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage")),import(u("app-check"))]);
  const a=app.getApps().length?app.getApp():app.initializeApp(window.BILO_FIREBASE);
- // App Check must start before Auth, Firestore, Storage and Firebase AI Logic.
+ // App Check must start before Auth, Firestore and Storage.
  let appCheck=null;
  if(window.BILO_APPCHECK_SITE_KEY){
   try{appCheck=AC.initializeAppCheck(a,{provider:new AC.ReCaptchaV3Provider(window.BILO_APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true})}
   catch(e){console.warn("Firebase App Check initialization",e)}
  }
- const ai=AI.getAI(a,{backend:new AI.GoogleAIBackend()});
- const aiModel=AI.getGenerativeModel(ai,{model:"gemini-2.5-flash"});
  const auth=A.getAuth(a);
  // Persist sessions across Android app restarts and browser refreshes.
  try{await A.setPersistence(auth,A.indexedDBLocalPersistence)}
  catch(e){try{await A.setPersistence(auth,A.browserLocalPersistence)}catch(x){console.warn("Firebase Auth persistence fallback",x)}}
  auth.languageCode="fr";
- Object.assign(FB,{A,F,O,AC,AI,appCheck,ai,aiModel,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
+ Object.assign(FB,{A,F,O,AC,appCheck,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
 
 const mapItem=d=>{const x=d.data();return{id:d.id,t:x.title,cdf:x.priceCDF,cat:x.category,e:x.condition,c:x.commune,r:x.rating||0,n:x.ratingCount||0,p:x.photos||[],bg:"#eef2f7",s:x.sellerName,sellerId:x.sellerId,w:x.sellerPhone||"",d:x.description||"",serial:x.serial||"",refCDF:x.refCDF||0,reserved:!!x.reserved,delivery:x.delivery||{mode:"pickup",fee:0,negotiable:false},attrs:x.attrs||{},swap:!!x.swap,swapWant:x.swapWant||"",bundle:x.bundle||0,at:(x.createdAt&&x.createdAt.seconds?x.createdAt.seconds*1000:Date.now()),renewedAt:x.renewedAt||0,sold:x.status==="sold",pending:x.status==="pending",boostUntil:(x.boostUntil&&x.boostUntil.seconds?x.boostUntil.seconds*1000:(typeof x.boostUntil==="number"?x.boostUntil:0)),boostPlan:x.boostPlan||""}};
 async function loadProfile(u){
@@ -723,29 +720,6 @@ async function cloudRecheck(){try{await FB.auth.currentUser.reload();S.user.emai
 async function saveIdentity(){if(!CLOUD||!S.user||!S.user.uid)return toast("Connectez-vous pour vérifier votre identité");const val=id=>(($(id)||{}).value||"").trim();const docType=val("#idtype"),docNumber=val("#idnumber"),birthDate=val("#idbirth"),birthPlace=val("#idplace"),file=(($("#iddoc")||{}).files||[])[0];if(!docType||!docNumber||!birthDate||!birthPlace)return toast("Remplissez tous les champs obligatoires");let docPath=(S.user.identity||{}).docPath||"";if(file){if(file.size>8*1024*1024)return toast("Document trop volumineux : maximum 8 Mo");if(!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(file.type))return toast("Format accepté : JPG, PNG, WEBP ou PDF");const path="private_identity/"+S.user.uid+"/document_"+Date.now();const ref=FB.O.ref(FB.st,path);await FB.O.uploadBytes(ref,file,{contentType:file.type});docPath=path}if(!docPath)return toast("Ajoutez la photo ou le scan de votre document");const identity={docType,docNumber,birthDate,birthPlace,docPath,submittedAt:Date.now()};await FB.F.setDoc(FB.F.doc(FB.db,"identity_verifications",S.user.uid),{uid:S.user.uid,identity,status:"pending",submittedAt:FB.F.serverTimestamp()},{merge:true});S.user.identity=identity;S.user.verificationStatus="pending";renderPage();toast("Dossier envoyé. Vérification humaine en attente.")}
 function cloudUpdate(id,patch){FB.F.updateDoc(FB.F.doc(FB.db,"items",id),patch).catch(e=>toast("Action refusée : "+(e.code||"erreur")))}
 async function cloudDelItem(id){const i=findItem(id);try{for(const u of (i&&i.p)||[]){try{await FB.O.deleteObject(FB.O.ref(FB.st,u))}catch(e){}}await FB.F.deleteDoc(FB.F.doc(FB.db,"items",id));toast("Annonce supprimée")}catch(e){toast("Suppression refusée")}}
-async function improveListingWithAI(){
- const btn=$("#bilocostAiWrite"),status=$("#bilocostAiStatus");
- if(!btn||!status)return;
- if(!FB.aiModel){toast("Service IA non initialisé. Rechargez la page.");return}
- const title=( $("#pt")?.value||"" ).trim(),description=( $("#pd")?.value||"" ).trim();
- const category=$("#pc")?.value||"",condition=$("#pe")?.value||"";
- if(!title&&!description){toast("Saisissez au moins le nom de l’article ou quelques détails.");return}
- const previous=btn.textContent;btn.disabled=true;btn.textContent="Génération en cours…";status.textContent="Bilocost prépare une proposition…";
- try{
-  const prompt=`Tu es l’assistant de rédaction de Bilocost, une marketplace en RDC. À partir uniquement des informations fournies, propose un titre clair et une description commerciale honnête en français. N’invente jamais marque, modèle, capacité, accessoires, garantie, état détaillé, provenance ou caractéristiques non fournies. Si une information manque, ne la suppose pas. Garde les réserves et défauts explicitement mentionnés. Réponds uniquement en JSON valide avec les clés "title" et "description".
-Catégorie: ${category}
-État déclaré: ${condition}
-Titre saisi: ${title}
-Détails saisis: ${description}`;
-  const result=await FB.aiModel.generateContent(prompt),raw=result.response.text();
-  let data;try{const clean=raw.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/i,"");data=JSON.parse(clean)}catch(e){throw new Error("Réponse IA non exploitable. Réessayez.")}
-  if(typeof data.title!=="string"||typeof data.description!=="string")throw new Error("Réponse IA incomplète. Réessayez.");
-  if(data.title.trim())$("#pt").value=data.title.trim().slice(0,120);
-  if(data.description.trim())$("#pd").value=data.description.trim().slice(0,2500);
-  status.textContent="Proposition générée. Relisez et corrigez avant de publier.";toast("Texte proposé par l’IA Bilocost");
- }catch(e){console.error("Bilocost AI",e);status.textContent="L’IA n’a pas pu répondre. Vérifiez la connexion et réessayez.";toast("Génération IA impossible : "+(e.message||"erreur"))}
- finally{btn.disabled=false;btn.textContent=previous}
-}
 async function publishCloud(f){const {F}=FB,ref=F.doc(F.collection(FB.db,"items")),urls=[];const serial=await claimSerial(ref.id);
  for(let k=0;k<f.photos.length;k++){
   const data=f.photos[k];if(!data||typeof data!=="string"||!data.startsWith("data:image/"))throw new Error("Photo invalide");
