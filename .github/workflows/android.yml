@@ -72,7 +72,8 @@ jobs:
           messaging = Path("messaging-fix.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + geography + "\n" + html[script_end:]
+          ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + geography + "\n" + ui_refinement + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging patch injected for Android.")
           PY
@@ -174,7 +175,7 @@ jobs:
             video.muted = true;
             video.playsInline = true;
             video.preload = "auto";
-            video.loop = true;
+            video.loop = false;
             video.setAttribute("aria-hidden", "true");
             video.addEventListener("error", () => { video.remove(); }, { once: true });
             layer.insertBefore(video, layer.firstChild);
@@ -186,14 +187,11 @@ jobs:
               layer.classList.add("bl-out");
               window.setTimeout(() => layer.remove(), 520);
             };
+            video.addEventListener("ended", close, { once: true });
             const readyForApp = () => {
               const view = document.getElementById("view");
               const interfaceReady = !!view && (view.childElementCount > 0 || view.textContent.trim().length > 0);
-              let servicesReady = true;
-              try {
-                servicesReady = (typeof CLOUD === "undefined" || !CLOUD) || (typeof FB !== "undefined" && !!FB.db);
-              } catch (_) { servicesReady = false; }
-              return document.readyState === "complete" && interfaceReady && servicesReady;
+              return document.readyState !== "loading" && interfaceReady;
             };
             const startedAt = Date.now();
             let readySince = 0;
@@ -205,7 +203,7 @@ jobs:
               } else {
                 readySince = 0;
               }
-              if (Date.now() - startedAt >= 45000) { close(); return; }
+              if (Date.now() - startedAt >= 9000) { close(); return; }
               window.setTimeout(waitUntilReady, 180);
             };
             const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
