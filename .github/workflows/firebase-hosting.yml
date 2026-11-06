@@ -18,6 +18,14 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           html = Path("index.html").read_text(encoding="utf-8")
+          # Preserve geographic metadata from Firestore and attach it to newly published listings.
+          map_old = "c:x.commune,r:x.rating"
+          map_new = "c:x.commune,province:x.province||\"\",territory:x.territory||\"\",locality:x.locality||\"\",locationLabel:x.locationLabel||\"\",neighborhood:x.neighborhood||\"\",r:x.rating"
+          save_old = "commune:f.c,description:f.d"
+          save_new = "commune:f.c,province:f.province||\"\",territory:f.territory||\"\",locality:f.locality||\"\",locationLabel:f.locationLabel||\"\",neighborhood:f.neighborhood||\"\",description:f.d"
+          if html.count(map_old) != 1 or html.count(save_old) != 1:
+              raise SystemExit("National listing location integration markers changed; refusing unsafe patch.")
+          html = html.replace(map_old, map_new, 1).replace(save_old, save_new, 1)
           # Correct the mobile header: keep wallet access inside the profile area.
           responsive_css = """
           /* Bilocost responsive header and text containment */
@@ -53,6 +61,7 @@ jobs:
           services = Path("service-design.js").read_text(encoding="utf-8")
           delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
+          listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
@@ -61,7 +70,7 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
