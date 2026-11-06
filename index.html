@@ -254,10 +254,9 @@ sw:{"Accueil":"Mwanzo","Recherche":"Tafuta","Publier":"Weka tangazo","Messages":
 tsh:{"Accueil":"Dîyi","Recherche":"Londa","Publier":"Tudila ku mutanda","Messages":"Milandu","Profil":"Dîbu","Paramètres":"Mibelu","Langue":"Ndinga","Favoris":"Bintu biudi munanga","Panier":"Kapu","Acheter":"Sumba","Discuter":"Ambila","Se connecter":"Njila","Créer un compte":"Tungila compte","Mes annonces":"Bintu bienu","Ma boutique":"Duka dienu","Enregistrer":"Bika","Fermer":"Kanga","Envoyer":"Tuma"}
 };
 function applyUiLanguage(root){
- const dict=UI_TRANSLATIONS[S.lang];if(!dict||!root)return;
- const keys=Object.keys(dict).sort((a,b)=>b.length-a.length),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
+ if(!root)return;const dict=UI_TRANSLATIONS[S.lang]||{},keys=Object.keys(dict).sort((a,b)=>b.length-a.length),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
  while(w.nextNode()){const n=w.currentNode,p=n.parentElement;if(p&&!/^(SCRIPT|STYLE|TEXTAREA|INPUT|CODE|PRE)$/.test(p.tagName)&&n.nodeValue.trim())nodes.push(n)}
- nodes.forEach(n=>{let v=n.nodeValue;keys.forEach(k=>v=v.split(k).join(dict[k]));n.nodeValue=v});
+ nodes.forEach(n=>{if(n.__biloOriginal===undefined)n.__biloOriginal=n.nodeValue;if(S.lang==="fr"){n.nodeValue=n.__biloOriginal;return}let v=n.__biloOriginal;keys.forEach(k=>v=v.split(k).join(dict[k]));n.nodeValue=v});
 }
 function setUiLanguage(lang){if(!LANG_NAMES[lang])return;S.lang=lang;try{localStorage.setItem("bilocost_lang_v1",lang)}catch(e){}document.documentElement.lang=({fr:"fr",ln:"ln",en:"en",sw:"sw",tsh:"lu"})[lang]||"fr";render();if(S.stack.length)renderPage();toast("Langue : "+LANG_NAMES[lang])}
 try{const l=localStorage.getItem("bilocost_lang_v1");if(l&&LANG_NAMES[l])S.lang=l}catch(e){}
