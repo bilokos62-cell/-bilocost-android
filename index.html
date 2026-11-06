@@ -592,21 +592,88 @@ async function startCheckout(ids){const blocked=String(ids).split(",").map(k=>it
  try{const tk=await PAY.getToken(),out=[];for(const id of String(ids).split(",")){const r=await fetch(PAY.endpoint+"/createOrder",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tk},body:JSON.stringify({itemId:id,method:m.value})});if(!r.ok)throw 0;out.push(await r.json())}
   sheet(`<h2>Commande(s) créée(s)</h2>${out.map(o=>`<p>Statut officiel : <b>${esc(o.status)}</b></p>`).join("")}<div class="warn">Le paiement n’est considéré comme réussi qu’après confirmation du prestataire.</div>`)}catch(e){toast(t("notReady"))}}
 const STL={AWAITING_PAYMENT:"En attente de paiement",PAYMENT_CONFIRMED:"Paiement confirmé",PREPARING:"À préparer",SHIPPED:"Expédiées",DELIVERED:"Livrées",RELEASE_PENDING:"Fonds en attente de libération",RELEASED:"Paiements libérés",DISPUTED:"Contestées",CANCELLED:"Annulées",ALL:"Historique"};
-function secure(k){const L=(a)=>`<ul class="steps">${a.map(x=>`<li>${x}</li>`).join("")}</ul>`;
- const empty=`<div class="empty" style="padding:24px 8px">${I("inbox","",40)}<b>Aucune commande pour le moment</b><br>Les commandes apparaîtront ici dès l’ouverture du paiement sécurisé.</div>`;
- const chips=a=>`<div class="sort">${a.map(x=>`<span class="chip">${x} • 0</span>`).join("")}</div>`;
- const T={buy:["Mes achats sécurisés",chips(["En attente de paiement","Paiement confirmé","En livraison","À confirmer","Contestées","Terminées"])+empty+handoverCard("buy")],
- sell:["Mes ventes sécurisées",chips(Object.values(STL))+empty+handoverCard("sell")],
- pbuy:["Protection acheteur",`<p class="sub">Parcours prévu : vérifier la commande, payer via le prestataire, suivre la livraison, confirmer la réception, puis demander la libération des fonds.</p>${L(["Produit non conforme","Colis non reçu","Produit endommagé","Demande d’annulation ou de remboursement","Photos et preuves ajoutées au dossier"])}<button class="btn out" disabled>${t("report")}</button><div class="warn">Disponible dès que vous avez une commande payée. Bilocost ne promet aucun remboursement automatique : chaque demande suit la politique de remboursement et les conditions du prestataire.</div>`],
- psell:["Protection vendeur",`<p class="sub">Outils prévus pour les vendeurs :</p>${L(["Vérification du compte vendeur","Preuves d’expédition et de livraison","Historique des paiements et remboursements","Commissions prélevées","Réponse aux réclamations","Signalement d’un acheteur"])}<div class="warn">Aucun vendeur n’est sanctionné automatiquement sur une simple accusation : toute suspension suit une vérification enregistrée.</div>`]}[k];
- sheet(`<h2>${T[0]}</h2>${T[1]}`)}
+function secureDomId(id){return String(id||"").replace(/[^A-Za-z0-9_-]/g,"_")}
+function secureOrderCard(o,role){
+ const id=String(o.id||""),dom=secureDomId(id),status=String(o.status||"AWAITING_PAYMENT");
+ const state=STL[status]||status,canConfirm=["PAYMENT_CONFIRMED","PREPARING","SHIPPED"].includes(status);
+ const amount=Number(o.totalCDF!==undefined?o.totalCDF:(o.amountCDF!==undefined?o.amountCDF:0));
+ const date=o.createdAt&&o.createdAt.toDate?o.createdAt.toDate().toLocaleString("fr-FR"):"";
+ const other=role==="buy"?"Vendeur : "+(o.sellerName||"Bilocost"):"Acheteur : "+(o.buyerName||"Membre Bilocost");
+ let action="";
+ if(status==="DELIVERED"){
+  action='<div class="warn" style="margin-top:10px">Réception confirmée. Cette validation ne déclenche pas, à elle seule, le versement des fonds.</div>';
+ }else if(canConfirm&&role==="buy"){
+  action='<button class="btn" style="margin-top:10px" data-act="showdeliverycode" data-v="'+esc(id)+'">Afficher mon code de remise</button><div id="delivery-code-'+dom+'" style="margin-top:8px"></div><small class="sub">Le code reste dans votre messagerie privée Bilocost. Communiquez-le seulement après avoir reçu et vérifié l’article.</small>';
+ }else if(canConfirm&&role==="sell"){
+  action='<label style="margin-top:10px">Code à 6 chiffres communiqué par l’acheteur</label><input class="f" id="delivery-input-'+dom+'" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Saisir le code reçu"><button class="btn" style="margin-top:8px" data-act="confirmdelivery" data-v="'+esc(id)+'">Confirmer la remise</button>';
+ }else if(status!=="CANCELLED"&&status!=="DISPUTED"&&status!=="RELEASED"){
+  action='<div class="sub" style="margin-top:10px">Le code de remise sera disponible après confirmation du paiement par le prestataire.</div>';
+ }
+ return '<article class="seller" style="display:block;margin:10px 0;padding:14px"><div class="row"><b>'+esc(o.itemTitle||o.title||"Commande Bilocost")+'</b><span class="tag">'+esc(state)+'</span></div><div class="sub" style="margin-top:6px">'+esc(other)+(date?" • "+esc(date):"")+'</div><div class="sum" style="margin-top:8px"><span>Montant de la commande</span><b>'+(amount>0?fmt(amount)+" CDF":"À confirmer")+'</b></div><div class="sub">Référence : '+esc(id)+'</div>'+action+'</article>';
+}
+async function loadSecureOrders(role){
+ if(!CLOUD||!S.user||!S.user.uid)throw new Error("Connectez-vous pour consulter vos commandes sécurisées.");
+ const F=FB.F,field=role==="buy"?"buyerId":"sellerId";
+ const q=F.query(F.collection(FB.db,"secureOrders"),F.where(field,"==",S.user.uid),F.limit(50));
+ const snap=await F.getDocs(q);
+ return snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
+  const av=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+  const bv=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+  return bv-av;
+ });
+}
+function secure(k){
+ if(k==="buy"||k==="sell"){
+  const title=k==="buy"?"Mes achats sécurisés":"Mes ventes sécurisées";
+  sheet("<h2>"+title+"</h2><div id=\"secureOrdersArea\" class=\"sub\" style=\"padding:18px 4px\">Chargement des commandes…</div>");
+  loadSecureOrders(k).then(orders=>{
+   const area=$("#secureOrdersArea");if(!area)return;
+   area.innerHTML=orders.length?orders.map(o=>secureOrderCard(o,k)).join():'<div class="empty" style="padding:24px 8px">'+I("inbox","",40)+'<b>Aucune commande sécurisée</b><br>Les commandes apparaîtront ici après la création côté serveur et la confirmation du paiement par le prestataire.</div>';
+  }).catch(e=>{
+   const area=$("#secureOrdersArea");if(area)area.innerHTML='<div class="warn">Impossible de charger les commandes : '+esc(e.message||e.code||"erreur")+'</div>';
+  });
+  return;
+ }
+ const L=a=>'<ul class="steps">'+a.map(x=>"<li>"+x+"</li>").join("")+"</ul>";
+ const T={
+  pbuy:["Protection acheteur",'<p class="sub">Parcours prévu : vérifier la commande, payer via le prestataire, suivre la livraison, confirmer la réception, puis demander la libération des fonds.</p>'+L(["Produit non conforme","Colis non reçu","Produit endommagé","Demande d’annulation ou de remboursement","Photos et preuves ajoutées au dossier"])+'<button class="btn out" disabled>'+t("report")+'</button><div class="warn">Disponible dès que vous avez une commande payée. Aucune libération ou remboursement automatique n’est promis par la seule confirmation de livraison.</div>'],
+  psell:["Protection vendeur",'<p class="sub">Outils prévus pour les vendeurs :</p>'+L(["Vérification du compte vendeur","Preuves d’expédition et de livraison","Historique des paiements et remboursements","Commissions prélevées","Réponse aux réclamations","Signalement d’un acheteur"])+'<div class="warn">Aucun vendeur n’est sanctionné automatiquement sur une simple accusation : toute suspension suit une vérification enregistrée.</div>']
+ }[k];
+ if(T)sheet("<h2>"+T[0]+"</h2>"+T[1]);
+}
+async function showBuyerDeliveryCode(orderId){
+ const box=document.getElementById("delivery-code-"+secureDomId(orderId));
+ try{
+  if(!CLOUD||!FB.N||!FB.fn)throw new Error("Le service de code de remise n’est pas encore activé.");
+  const call=FB.N.httpsCallable(FB.fn,"getBuyerDeliveryCode");
+  const result=await call({orderId});
+  const code=String(result.data&&result.data.code||"");
+  const expires=result.data&&result.data.expiresAt?new Date(result.data.expiresAt).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"";
+  if(!/^\d{6}$/.test(code))throw new Error("Le serveur n’a pas retourné un code valide.");
+  if(box)box.innerHTML='<div class="card" style="padding:14px;text-align:center;background:var(--mint)"><small class="sub">VOTRE CODE DE REMISE</small><div style="font-size:30px;font-weight:800;letter-spacing:8px;color:var(--pri);margin:6px 0">'+esc(code)+'</div><small class="sub">Valable jusqu’à '+esc(expires)+'. À communiquer au vendeur uniquement après vérification de l’article.</small></div>';
+  toast("Code enregistré dans votre messagerie privée Bilocost.");
+ }catch(e){toast(e.message||"Impossible de récupérer le code.");}
+}
+async function confirmSellerDelivery(orderId){
+ const input=document.getElementById("delivery-input-"+secureDomId(orderId));
+ const code=input?String(input.value||"").trim():"";
+ if(!/^\d{6}$/.test(code))return toast("Saisissez les 6 chiffres du code.");
+ try{
+  if(!CLOUD||!FB.N||!FB.fn)throw new Error("Le service de confirmation de livraison n’est pas encore activé.");
+  const call=FB.N.httpsCallable(FB.fn,"confirmDeliveryCode");
+  const result=await call({orderId,code});
+  if(!result.data||!result.data.ok)return toast((result.data&&result.data.message)||"Code incorrect.");
+  toast(result.data.message||"Livraison confirmée.");
+  secure("sell");
+ }catch(e){toast(e.message||"La confirmation de livraison a échoué.");}
+}
 /* ================= Firebase (mode cloud) : actif seulement si firebase-config.js est renseigné ================= */
 const FB={};
 const nid=v=>/^\d+$/.test(String(v))?+v:v;
 const ERR={"auth/email-already-in-use":"Cette adresse e-mail est déjà utilisée","auth/invalid-email":"Adresse e-mail invalide","auth/weak-password":"Mot de passe trop faible (6 caractères minimum)","auth/invalid-credential":"E-mail ou mot de passe incorrect","auth/wrong-password":"E-mail ou mot de passe incorrect","auth/user-not-found":"E-mail ou mot de passe incorrect","auth/too-many-requests":"Trop de tentatives, réessayez plus tard","auth/network-request-failed":"Connexion impossible, vérifiez votre réseau","auth/requires-recent-login":"Reconnectez-vous puis réessayez","auth/operation-not-allowed":"Activez ce fournisseur dans Firebase Authentication","auth/unauthorized-domain":"Ajoutez le domaine du site dans les domaines autorisés Firebase","auth/captcha-check-failed":"Vérification anti-robot échouée, réessayez","auth/invalid-phone-number":"Numéro de téléphone invalide","auth/quota-exceeded":"Quota SMS Firebase dépassé","auth/missing-phone-number":"Entrez votre numéro de téléphone","auth/invalid-verification-code":"Code SMS incorrect"};
 const errMsg=e=>ERR[e&&e.code]||"Une erreur est survenue ("+((e&&e.code)||"inconnue")+")";
 async function initFirebase(){const V="11.10.0",u=m=>`https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
- const [app,A,F,O,AC]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage")),import(u("app-check"))]);
+ const [app,A,F,O,AC,N]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage")),import(u("app-check")),import(u("functions"))]);
  const a=app.getApps().length?app.getApp():app.initializeApp(window.BILO_FIREBASE);
  // App Check must start before Auth, Firestore and Storage.
  let appCheck=null;
@@ -619,7 +686,7 @@ async function initFirebase(){const V="11.10.0",u=m=>`https://www.gstatic.com/fi
  try{await A.setPersistence(auth,A.indexedDBLocalPersistence)}
  catch(e){try{await A.setPersistence(auth,A.browserLocalPersistence)}catch(x){console.warn("Firebase Auth persistence fallback",x)}}
  auth.languageCode="fr";
- Object.assign(FB,{A,F,O,AC,appCheck,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
+ Object.assign(FB,{A,F,O,AC,N,appCheck,auth,db:F.getFirestore(a),st:O.getStorage(a),fn:N.getFunctions(a,"us-central1")})}
 
 const mapItem=d=>{const x=d.data();return{id:d.id,t:x.title,cdf:x.priceCDF,cat:x.category,e:x.condition,c:x.commune,r:x.rating||0,n:x.ratingCount||0,p:x.photos||[],bg:"#eef2f7",s:x.sellerName,sellerId:x.sellerId,w:x.sellerPhone||"",d:x.description||"",serial:x.serial||"",refCDF:x.refCDF||0,reserved:!!x.reserved,delivery:x.delivery||{mode:"pickup",fee:0,negotiable:false},attrs:x.attrs||{},swap:!!x.swap,swapWant:x.swapWant||"",bundle:x.bundle||0,at:(x.createdAt&&x.createdAt.seconds?x.createdAt.seconds*1000:Date.now()),renewedAt:x.renewedAt||0,sold:x.status==="sold",pending:x.status==="pending",boostUntil:(x.boostUntil&&x.boostUntil.seconds?x.boostUntil.seconds*1000:(typeof x.boostUntil==="number"?x.boostUntil:0)),boostPlan:x.boostPlan||""}};
 async function loadProfile(u){
@@ -965,6 +1032,8 @@ function act(a,v,el){switch(a){
  case "negdel":S.offerInChat=true;S.counterOf=null;offerSheet(v,"delivery");break;
  case "deloffer":S.offerInChat=false;S.counterOf=null;offerSheet(v,"delivery");break;
  case "ofcounter":{const [id,k]=v.split("|");S.offerInChat=true;S.counterOf=id;offerSheet((S.chatInfo||{}).itemId,k);break}
+ case "showdeliverycode":showBuyerDeliveryCode(v);break;
+ case "confirmdelivery":confirmSellerDelivery(v);break;
  case "payterms":termsSheet();break;
  case "payconfirm":startTerms();break;
  case "reserve":{const i=findItem(v);if(CLOUD)cloudUpdate(v,{reserved:!i.reserved});else{i.reserved=!i.reserved;save();render();renderPage()}toast(i.reserved?"Article réservé":"Réservation retirée");break}
