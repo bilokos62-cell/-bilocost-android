@@ -7,7 +7,6 @@
   const style=document.createElement("style");
   style.id="bilocost-ios-hig";
   style.textContent=`
-    :root{color-scheme:light dark}
     html{min-height:100%;scroll-padding-top:env(safe-area-inset-top,0px);scroll-padding-bottom:env(safe-area-inset-bottom,0px)}
     body{min-height:100dvh;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto}
     /* Apple's recommended comfortable target is 44 x 44 pt. */
