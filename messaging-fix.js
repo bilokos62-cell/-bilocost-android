@@ -91,3 +91,85 @@ async function sendMsg(){
  try{await postMsg(S.chatId,v);if(field)field.value="";if(!CLOUD)renderChat(S.lchats[S.chatId].msgs);}
  catch(e){console.error("Bilocost sendMsg:",e);toast(chatErrorText(e));}
 }
+
+
+/* Conversation view: full-height reading space and unread message indicator. */
+(function installBilocostMessagingUI(){
+  if(window.__biloMessagingUiV2)return;
+  window.__biloMessagingUiV2=true;
+  const css=document.createElement("style");
+  css.id="bilo-messaging-ui-v2";
+  css.textContent=`
+    #sheet.bilo-chat-fullscreen{position:fixed!important;inset:0!important;z-index:1200!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;background:rgba(5,15,10,.58)!important}
+    #sheet.bilo-chat-fullscreen #sheetBody{position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(14px + env(safe-area-inset-bottom,0px))!important;border-radius:0!important;overflow-y:auto!important;overscroll-behavior:contain;display:flex!important;flex-direction:column!important;gap:10px!important}
+    #sheet.bilo-chat-fullscreen #sheetBody>h2{font-size:21px!important;margin:4px 0 0!important}
+    #sheet.bilo-chat-fullscreen #ch{flex:1 1 auto!important;min-height:180px!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain;padding:12px 2px!important;border-radius:14px;scroll-behavior:smooth}
+    #sheet.bilo-chat-fullscreen #cm{min-height:50px!important;font-size:16px!important}
+    #sheet.bilo-chat-fullscreen [data-send]{min-height:50px!important;padding-inline:18px!important}
+    #sheet.bilo-chat-fullscreen [data-close]{flex:0 0 auto!important;margin-top:2px!important}
+    nav button[data-t="msg"]{position:relative!important;overflow:visible!important}
+    nav button[data-t="msg"] .bilo-unread-badge{position:absolute;top:2px;right:calc(50% - 25px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#e53935;color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--bar,#fff);pointer-events:none;z-index:5}
+    @media(max-width:380px){#sheet.bilo-chat-fullscreen #sheetBody{padding-left:12px!important;padding-right:12px!important}}
+  `;
+  document.head.appendChild(css);
+
+  function syncChatSheet(){
+    const sheet=document.getElementById("sheet");
+    if(!sheet)return;
+    const active=!!sheet.querySelector("#cm");
+    sheet.classList.toggle("bilo-chat-fullscreen",active);
+  }
+  function millis(value){
+    if(!value)return 0;
+    if(typeof value==="number")return value;
+    if(value.toMillis)return value.toMillis();
+    if(value.toDate)return value.toDate().getTime();
+    const n=Date.parse(value);
+    return Number.isFinite(n)?n:0;
+  }
+  function syncUnreadBadge(){
+    try{
+      const nav=document.querySelector('nav button[data-t="msg"]');
+      if(!nav)return;
+      let badge=nav.querySelector(".bilo-unread-badge");
+      if(!badge){badge=document.createElement("span");badge.className="bilo-unread-badge";badge.setAttribute("aria-label","Messages non lus");badge.setAttribute("aria-live","polite");nav.appendChild(badge);}
+      const me=(S.user&&S.user.uid)||myId();
+      const chats=typeof allChats==="function"?(allChats()||[]):[];
+      let count=0;
+      for(const chat of chats){
+        if(!chat||!chat.id)continue;
+        const msgs=Array.isArray(chat.msgs)?chat.msgs:null;
+        const readAt=Number((S.readAt&&S.readAt[chat.id])||0);
+        if(msgs){
+          count+=msgs.filter(m=>{
+            const sender=m.from||m.senderId;
+            const at=millis(m.at||m.createdAt||m.timestamp);
+            return sender&&sender!==me&&at>readAt;
+          }).length;
+        }else if(chat.lastFrom&&chat.lastFrom!==me&&millis(chat.updatedAt)>readAt){
+          count++;
+        }
+      }
+      badge.textContent=count>99?"99+":String(count);
+      badge.style.display=count?"inline-block":"none";
+      nav.setAttribute("aria-label",count?("Messages, "+count+" non lus"):"Messages");
+    }catch(error){console.warn("Bilocost unread badge:",error);}
+  }
+  function refreshMessagingUI(){
+    syncChatSheet();
+    syncUnreadBadge();
+  }
+  refreshMessagingUI();
+  const root=document.getElementById("sheet")||document.body;
+  if(window.MutationObserver){
+    new MutationObserver(refreshMessagingUI).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:["class","style"]});
+    const nav=document.querySelector("nav");
+    if(nav)new MutationObserver(syncUnreadBadge).observe(nav,{childList:true,subtree:true});
+  }
+  document.addEventListener("click",event=>{
+    if(event.target.closest('nav button[data-t="msg"]'))setTimeout(syncUnreadBadge,80);
+    if(event.target.closest("#sheet [data-close]"))setTimeout(refreshMessagingUI,80);
+  });
+  const priorRender=render;
+  render=function(){priorRender();refreshMessagingUI();};
+})();
