@@ -215,6 +215,29 @@ header>div:last-child{gap:5px!important}
 .cdf{font-size:15px;letter-spacing:-.02em}.usd{font-size:11px}.meta{font-size:10px;gap:6px;flex-wrap:wrap}.ph{background:var(--panel)}.badge{font-size:10px;padding:4px 9px}.fav{box-shadow:0 2px 8px rgba(15,23,42,.12)}.empty{line-height:1.6}
 @media (max-width:380px){header{padding-left:10px;padding-right:10px}.commune{padding:7px 8px}.wrap{padding-left:12px;padding-right:12px}.hero{padding:17px}.hero h1{font-size:21px}.grid{gap:9px}.card .in{padding:9px}.card h3{font-size:12px}}
 @media (prefers-reduced-motion:reduce){.card{transition:none}}
+
+/* Privacy, cookie consent and file-permission surfaces */
+.bilo-consent-backdrop{position:fixed;inset:0;z-index:10050;background:rgba(8,18,14,.58);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.bilo-consent-backdrop[hidden],#bilo-cookie-banner[hidden]{display:none!important}
+.bilo-consent-panel{width:min(100%,480px);max-height:min(84vh,720px);overflow:auto;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 22px 70px rgba(0,0,0,.25);animation:biloConsentIn .18s ease-out}
+.bilo-consent-panel h2{font-size:20px;line-height:1.25;margin:0 0 8px;letter-spacing:-.03em}
+.bilo-consent-panel p{color:var(--mute);font-size:13px;line-height:1.6;margin:0 0 14px}
+.bilo-consent-icon{width:44px;height:44px;border-radius:14px;background:var(--mint);color:var(--pri);display:grid;place-items:center;font-size:22px;margin-bottom:14px}
+.bilo-consent-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.bilo-consent-actions .primary{background:var(--pri);color:#fff;border:1px solid var(--pri)}
+.bilo-consent-actions button,.bilo-cookie-banner button{min-height:44px;border-radius:13px;padding:10px 13px;font-weight:800;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.bilo-consent-actions .wide{grid-column:1/-1}
+.bilo-cookie-banner{position:fixed;z-index:10040;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin:auto;width:min(100% - 24px,520px);padding:17px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 44px rgba(15,23,42,.2)}
+.bilo-cookie-banner h2{font-size:16px;margin:0 0 5px}.bilo-cookie-banner p{font-size:12px;line-height:1.5;color:var(--mute);margin:0 0 12px}
+.bilo-cookie-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bilo-cookie-actions .primary{grid-column:1/-1;background:var(--pri);color:white;border-color:var(--pri)}
+.bilo-cookie-link{border:0!important;background:transparent!important;color:var(--pri)!important;text-decoration:underline;min-height:36px!important;padding:5px!important}
+.bilo-choice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line);font-size:13px}
+.bilo-choice small{display:block;color:var(--mute);font-size:11px;line-height:1.45;margin-top:3px}
+.bilo-choice input{width:20px;height:20px;accent-color:var(--pri)}
+@keyframes biloConsentIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.bilo-consent-panel{animation:none}}
+@media(min-width:700px){.bilo-consent-backdrop{align-items:center}.bilo-cookie-banner{bottom:20px}}
+
 </style>
 </head>
 <body>
@@ -900,7 +923,40 @@ const PG={
   +`<p class="sub" style="text-align:center;margin-top:14px">Bilocost • version 1.0 (démo)<br>Taux indicatif : 1 $ = ${RATE} CDF</p>`]},
  lang(){return ["Choisir la langue",GR("",Object.entries(LANG_NAMES).map(([code,name])=>'<button type="button" class="lr" data-lang="'+code+'" aria-pressed="'+(S.lang===code)+'" style="width:100%;border:0;background:'+(S.lang===code?"var(--mint)":"transparent")+';color:inherit;text-align:left;cursor:pointer;padding:14px 10px;border-radius:12px"><span class="lt">'+name+'</span>'+(S.lang===code?I("check","ok",20):'<span class="tag">'+code.toUpperCase()+'</span>')+'</button>').join(""))+'<p class="sub">La langue choisie est mémorisée sur cet appareil.</p>']},
  notifset(){return ["Notifications",GR("",SW("notifMsg","Messages","Nouveaux messages des acheteurs et vendeurs")+SW("notifFav","Favoris","Prix en baisse sur vos favoris")+SW("notifArea","Nouveautés","Nouveaux articles dans ma commune")+SW("notifPromo","Actualités Bilocost"))+`<div class="warn">Les notifications seront envoyées à l’ouverture du serveur. Vos choix sont déjà enregistrés.</div>`]},
- privacy(){return ["Confidentialité",GR("",SW("pubProfile","Profil public","Les acheteurs peuvent voir mon profil")+SW("showCommune","Afficher ma commune")+SW("showPhone","Afficher mon numéro dans mes annonces","Désactivé par défaut : la discussion se fait dans l’application"))+"<section class=\"card\" style=\"padding:16px;margin-top:14px\"><h3>Protection de vos fichiers</h3><p><b>Votre autorisation est obligatoire.</b> Bilocost demandera confirmation avant d’ouvrir le sélecteur de fichiers.</p><ul><li>Aucun parcours automatique de la galerie, des téléchargements ou des documents.</li><li>Seuls les fichiers que vous choisissez expressément sont lus et envoyés.</li><li>Le motif est indiqué : annonce, location, profil, justificatif d’identité ou import CSV.</li><li>Aucune autre utilisation ni aucun partage sans autorisation distincte, sauf obligation légale.</li><li>Les justificatifs d’identité restent privés et ne sont jamais destinés à une annonce publique.</li><li>Vous pouvez demander leur suppression, sous réserve des obligations légales de conservation.</li></ul><p class=\"sub\">Choisir un fichier ne vaut pas consentement à sa publication publique.</p></section>" ]},
+ privacy(){return ["Confidentialité",GR("",SW("pubProfile","Profil public","Les acheteurs peuvent voir mon profil")+SW("showCommune","Afficher ma commune")+SW("showPhone","Afficher mon numéro dans mes annonces","Désactivé par défaut : la discussion se fait dans l’application"))+
+  `<section class="card" style="padding:16px;margin-top:14px">
+   <h3>Centre de confidentialité Bilocost</h3>
+   <p class="sub">Consultez les règles de protection de vos données et gérez vos choix à tout moment.</p>
+   <button class="btn ghost" type="button" id="bilo-cookie-open" style="width:100%;margin:8px 0">Gérer mes cookies et préférences</button>
+   <details class="faq"><summary>Politique de confidentialité</summary>
+    <p><b>Responsable du service.</b> Bilocost exploite cette plateforme de petites annonces. Les coordonnées officielles du responsable et du contact chargé de la confidentialité doivent être publiées avant l'ouverture commerciale.</p>
+    <p><b>Données susceptibles d'être traitées.</b> Selon les fonctions utilisées : informations de compte et de connexion, annonces et photos choisies, commune ou localisation renseignée, messages, favoris, commandes, préférences et données techniques nécessaires à la sécurité et au fonctionnement.</p>
+    <p><b>Utilisation.</b> Ces informations servent à créer et sécuriser votre compte, publier vos annonces, permettre les échanges, traiter les demandes et commandes, prévenir les abus et améliorer le service. Une photo sélectionnée pour une annonce n'est pas publiée sans l'action de publication correspondante.</p>
+    <p><b>Partage et prestataires.</b> Certaines données peuvent être traitées par les prestataires techniques nécessaires à l'hébergement, à l'authentification, au stockage et au fonctionnement de Bilocost. Elles ne sont pas vendues. Les informations publiques d'une annonce ou d'un profil sont visibles selon les réglages choisis.</p>
+    <p><b>Conservation.</b> Les données sont conservées pendant la durée nécessaire au fonctionnement du compte, à la sécurité et au traitement des demandes, puis supprimées ou archivées lorsque cela est possible et sous réserve des obligations légales applicables. Les durées précises doivent être documentées avant le lancement public.</p>
+    <p><b>Vos choix.</b> Vous pouvez modifier les informations de profil proposées dans l'application, gérer les cookies facultatifs et demander l'accès, la correction ou la suppression de vos données. Une demande peut être limitée lorsque la loi impose une conservation.</p>
+    <p><b>Contact.</b> Le canal officiel de contact relatif aux données personnelles doit être renseigné et vérifié par Bilocost avant le lancement public.</p>
+   </details>
+   <details class="faq"><summary>Conditions générales d'utilisation</summary>
+    <p>En utilisant Bilocost, vous vous engagez à fournir des informations exactes, publier des annonces licites et dont vous êtes autorisé à disposer, respecter les autres utilisateurs et ne pas utiliser la plateforme à des fins frauduleuses.</p>
+    <p>Les vendeurs restent responsables de l'exactitude des descriptions, des prix, de l'état et de la disponibilité des biens ou services proposés. Les acheteurs doivent vérifier les informations utiles avant toute transaction et utiliser uniquement les moyens de paiement officiellement proposés dans l'application.</p>
+    <p>Bilocost peut limiter ou retirer un contenu manifestement illicite, frauduleux ou contraire aux règles de la plateforme. Les modalités détaillées de vente, de location, de livraison, de paiement, de remboursement et de règlement des litiges doivent être finalisées dans les conditions contractuelles avant le lancement public.</p>
+   </details>
+   <details class="faq"><summary>Autorisations relatives aux photos et fichiers</summary>
+    <p>Bilocost demande votre accord au moment où vous choisissez une photo ou un fichier. Le sélecteur sécurisé du téléphone ou du navigateur s'ouvre ensuite : vous choisissez vous-même les éléments à transmettre.</p>
+    <ul><li>Bilocost ne parcourt pas automatiquement toute votre galerie, vos téléchargements ou vos documents.</li><li>Seuls les fichiers sélectionnés sont lus pour la fonction demandée : annonce, location, profil, justificatif privé ou import CSV.</li><li>Un justificatif d'identité n'est pas destiné à être affiché publiquement.</li><li>Choisir un fichier ne vaut pas consentement à sa publication publique.</li><li>Android, iOS ou votre navigateur peut afficher sa propre demande d'autorisation. Vous pouvez refuser et utiliser les fonctions qui ne nécessitent pas ce fichier.</li></ul>
+   </details>
+   <details class="faq"><summary>Cookies et stockage local</summary>
+    <p>Les éléments indispensables permettent le fonctionnement, la sécurité et la mémorisation de vos choix. Les catégories facultatives d'analyse et de publicité sont désactivées par défaut. Votre choix est mémorisé sur cet appareil et peut être modifié depuis cette page.</p>
+    <p>Les préférences affichées ici ne chargent pas à elles seules de traceur d'analyse ou de publicité. Toute intégration facultative future devra respecter le choix enregistré avant son activation.</p>
+   </details>
+   <div class="safe" style="margin-top:12px">Ne communiquez jamais votre mot de passe, code PIN Mobile Money ou code de validation à un autre utilisateur.</div>
+  </section>
+  <section class="card" style="padding:16px;margin-top:12px">
+   <h3>Protection de vos fichiers</h3>
+   <p>Bilocost demande votre accord avant d'ouvrir le sélecteur de fichiers. Vous gardez le contrôle sur chaque photo ou document choisi.</p>
+   <p class="sub">Pour les demandes d'accès, de correction ou de suppression de données, utilisez le contact officiel qui sera publié par Bilocost avant le lancement.</p>
+  </section>` ]},
  notifs(){return ["Notifications",`<div class="empty">${I("bell","",44)}<b>Aucune notification</b><br>Vous serez prévenu des messages, favoris et commandes.</div><button class="btn ghost" data-go="notifset">Réglages des notifications</button>`]},
  help(){return ["Centre d’aide",FAQ.map(f=>`<details class="faq"><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join("")+`<div class="warn">Contact du support : à renseigner avant le lancement.</div>`]},
  verify(){const u=S.user||{},id=u.identity||{},status=u.verificationStatus||"none",complete=!!(id.docType&&id.docNumber&&id.birthDate&&id.birthPlace&&id.docPath),green=complete,blue=status==="verified";const badge=(blue?'<span style="display:inline-flex;padding:7px 12px;border-radius:20px;background:#009a49;color:#fff;font-weight:700">Certification bleue</span>':green?'<span style="display:inline-flex;padding:7px 12px;border-radius:20px;background:#fff;color:#008b45;border:1px solid #008b45;font-weight:700">Dossier complet</span>':'<span class="tag">Non certifié</span>');return ["Vérification du compte",`<div class="prof" style="padding:8px 0">${I("shield","",40)}<h2>Identité et certification</h2>${badge}<p class="sub">Complétez ces informations dans votre espace privé. Vos documents ne seront pas visibles sur votre profil.</p></div><label>Type de document</label><select class="f" id="idtype"><option value="">Choisir un document</option><option value="carte_identite" ${id.docType==="carte_identite"?"selected":""}>Carte d’identité</option><option value="carte_electeur" ${id.docType==="carte_electeur"?"selected":""}>Carte d’électeur valide</option><option value="permis" ${id.docType==="permis"?"selected":""}>Permis de conduire</option></select><label>Numéro du document</label><input class="f" id="idnumber" value="${esc(id.docNumber||"")}" placeholder="Numéro officiel"><label>Date de naissance</label><input class="f" id="idbirth" type="date" value="${esc(id.birthDate||"")}"><label>Lieu de naissance</label><input class="f" id="idplace" value="${esc(id.birthPlace||"")}" placeholder="Ville / territoire"><label>Photo ou scan du document</label><input class="f" id="iddoc" type="file" accept="image/*,.pdf"><small class="sub">Formats image ou PDF. Ne téléversez qu’un document valide qui vous appartient.</small><button class="btn" data-act="saveidentity" style="margin-top:14px">Enregistrer et envoyer pour vérification</button>${status==="pending"?'<div class="warn">Votre dossier est en attente de contrôle. La certification bleue sera attribuée uniquement après validation humaine.</div>':status==="verified"?'<div class="warn">Votre identité a été validée.</div>':'<div class="warn">Le badge vert indique que le dossier est complet. Le badge bleu nécessite une validation réelle par Bilocost.</div>'}`]},
@@ -1249,8 +1305,7 @@ const filePurpose=input=>({pf:"lire les photos choisies pour illustrer votre ann
  const input=e.target.closest&&e.target.closest('input[type="file"]');if(!input)return;
  if(input.dataset.biloApprovedClick==="1"){delete input.dataset.biloApprovedClick;return}
  e.preventDefault();e.stopImmediatePropagation();delete input.dataset.biloConsentGranted;
- const ok=window.confirm("Autorisation d’accès à un fichier\\n\\nBilocost souhaite "+filePurpose(input)+".\\n\\nAucun autre fichier de votre téléphone ne sera parcouru. Le fichier ne sera lu qu’après votre choix dans le sélecteur. Continuer ?");
- if(!ok)return;input.dataset.biloConsentGranted="1";input.dataset.biloApprovedClick="1";input.click();
+ window.showBiloFilePermission(input);
  },true);
 document.addEventListener("change",e=>{if(e.target.matches&&e.target.matches('input[type="file"]')&&e.target.files&&e.target.files.length&&!e.target.dataset.biloConsentGranted){e.target.value="";toast("Autorisation requise avant l’accès au fichier");return}const f=e.target.dataset.f;if(f){S[f]=e.target.value;render()}
  if(e.target.id==="rs"||e.target.id==="re")updateRentQuote();
@@ -1325,5 +1380,62 @@ if(Q.get("a")){S.deep=Q.get("a");setTimeout(tryDeep,300)}if(Q.get("e")){S.deepE=
 <script>
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 </script>
+
+<div id="bilo-file-permission" class="bilo-consent-backdrop" hidden>
+ <section class="bilo-consent-panel" role="dialog" aria-modal="true" aria-labelledby="bilo-file-title">
+  <div class="bilo-consent-icon" aria-hidden="true">▧</div>
+  <h2 id="bilo-file-title">Autorisation d'accès à vos fichiers</h2>
+  <p id="bilo-file-description">Bilocost souhaite accéder uniquement au fichier que vous choisissez pour cette fonction. Aucun autre fichier ne sera parcouru automatiquement.</p>
+  <p>Le sélecteur sécurisé de votre appareil va s'ouvrir. Vous gardez le contrôle sur les éléments sélectionnés.</p>
+  <div class="bilo-consent-actions"><button type="button" id="bilo-file-later">Plus tard</button><button type="button" class="primary" id="bilo-file-allow">Continuer</button></div>
+ </section>
+</div>
+<aside id="bilo-cookie-banner" class="bilo-cookie-banner" hidden aria-label="Préférences de confidentialité">
+ <h2>Votre confidentialité compte</h2>
+ <p>Bilocost utilise des éléments indispensables à son fonctionnement. Les options facultatives restent désactivées par défaut. Vous pouvez personnaliser votre choix à tout moment.</p>
+ <div class="bilo-cookie-actions"><button type="button" class="primary" id="bilo-cookie-accept">Tout accepter</button><button type="button" id="bilo-cookie-reject">Refuser les options</button><button type="button" class="bilo-cookie-link" id="bilo-cookie-customize">Personnaliser mes choix</button></div>
+</aside>
+<div id="bilo-cookie-modal" class="bilo-consent-backdrop" hidden>
+ <section class="bilo-consent-panel" role="dialog" aria-modal="true" aria-labelledby="bilo-cookie-title">
+  <div class="bilo-consent-icon" aria-hidden="true">⚙</div><h2 id="bilo-cookie-title">Préférences des cookies</h2>
+  <p>Les éléments indispensables sont toujours actifs. Les catégories facultatives sont désactivées par défaut. Votre choix est enregistré sur cet appareil.</p>
+  <div class="bilo-choice"><span><b>Éléments indispensables</b><small>Connexion, sécurité et mémorisation de vos choix.</small></span><input type="checkbox" checked disabled aria-label="Éléments indispensables toujours actifs"></div>
+  <label class="bilo-choice"><span><b>Mesure d'audience</b><small>Autoriser une éventuelle mesure d'utilisation, uniquement si elle est activée par Bilocost.</small></span><input type="checkbox" id="bilo-cookie-analytics"></label>
+  <label class="bilo-choice"><span><b>Publicité personnalisée</b><small>Autoriser d'éventuels outils publicitaires, uniquement s'ils sont intégrés ultérieurement.</small></span><input type="checkbox" id="bilo-cookie-marketing"></label>
+  <div class="bilo-consent-actions"><button type="button" id="bilo-cookie-cancel">Annuler</button><button type="button" class="primary" id="bilo-cookie-save">Enregistrer mes choix</button><button type="button" class="wide" id="bilo-cookie-deny-all">Refuser les options facultatives</button></div>
+ </section>
+</div>
+
+
+<script>
+(function(){
+ "use strict";
+ const KEY="bilocost_cookie_consent_v1";
+ const $=id=>document.getElementById(id);
+ const banner=$("bilo-cookie-banner"),cookieModal=$("bilo-cookie-modal"),fileModal=$("bilo-file-permission");
+ const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}};
+ const hide=el=>{if(el)el.hidden=true},show=el=>{if(el)el.hidden=false};
+ const save=(analytics,marketing)=>{const value={version:1,necessary:true,analytics:!!analytics,marketing:!!marketing,updatedAt:new Date().toISOString()};try{localStorage.setItem(KEY,JSON.stringify(value))}catch(e){}hide(banner);hide(cookieModal);return value};
+ const openCookieSettings=()=>{const v=read()||{};$("bilo-cookie-analytics").checked=!!v.analytics;$("bilo-cookie-marketing").checked=!!v.marketing;show(cookieModal)};
+ if(!read())show(banner);
+ $("bilo-cookie-accept").addEventListener("click",()=>save(true,true));
+ $("bilo-cookie-reject").addEventListener("click",()=>save(false,false));
+ $("bilo-cookie-customize").addEventListener("click",openCookieSettings);
+ $("bilo-cookie-cancel").addEventListener("click",()=>hide(cookieModal));
+ $("bilo-cookie-save").addEventListener("click",()=>save($("bilo-cookie-analytics").checked,$("bilo-cookie-marketing").checked));
+ $("bilo-cookie-deny-all").addEventListener("click",()=>save(false,false));
+ document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("#bilo-cookie-open")){e.preventDefault();openCookieSettings()}});
+ window.showBiloFilePermission=function(input){
+  const purpose=({pf:"sélectionner les photos de votre annonce",rpf:"sélectionner les photos de votre annonce de location",svf:"sélectionner la photo de votre vitrine professionnelle",avf:"sélectionner votre photo de profil",iddoc:"sélectionner un justificatif privé pour la vérification",csvf:"sélectionner un fichier CSV à importer",apf:"sélectionner une photo pour compléter votre annonce"}[input.id]||"sélectionner le fichier demandé");
+  $("bilo-file-description").textContent="Bilocost a besoin de votre autorisation pour "+purpose+". Aucun autre fichier de votre appareil ne sera parcouru automatiquement.";
+  show(fileModal);
+  $("bilo-file-later").onclick=()=>hide(fileModal);
+  $("bilo-file-allow").onclick=()=>{hide(fileModal);input.dataset.biloConsentGranted="1";input.dataset.biloApprovedClick="1";input.click()};
+ };
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){hide(cookieModal);hide(fileModal)}});
+ window.biloOpenCookieSettings=openCookieSettings;
+})();
+</script>
+
 </body>
 </html>
