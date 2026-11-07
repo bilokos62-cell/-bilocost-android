@@ -127,12 +127,64 @@ async function sendMsg(){
     const n=Date.parse(value);
     return Number.isFinite(n)?n:0;
   }
+  const cloudMessageUnsubs=new Map();
+  let cloudChatsUnsub=null, cloudUnreadUid=null, cloudUnreadCount=null;
+  function stopCloudUnreadTracking(){
+    if(cloudChatsUnsub){cloudChatsUnsub();cloudChatsUnsub=null;}
+    for(const entry of cloudMessageUnsubs.values())entry.unsub();
+    cloudMessageUnsubs.clear();cloudUnreadUid=null;cloudUnreadCount=null;
+  }
+  function refreshCloudUnreadCount(){
+    let total=0;for(const entry of cloudMessageUnsubs.values())total+=entry.count||0;
+    cloudUnreadCount=total;refreshUnreadBadgeFromCloud();
+  }
+  function refreshUnreadBadgeFromCloud(){
+    const nav=document.querySelector('nav button[data-t="msg"]');
+    if(!nav||cloudUnreadCount===null)return;
+    let badge=nav.querySelector(".bilo-unread-badge");
+    if(!badge){badge=document.createElement("span");badge.className="bilo-unread-badge";badge.setAttribute("aria-label","Messages non lus");badge.setAttribute("aria-live","polite");nav.appendChild(badge);}
+    badge.textContent=cloudUnreadCount>99?"99+":String(cloudUnreadCount);
+    badge.style.display=cloudUnreadCount?"inline-block":"none";
+    nav.setAttribute("aria-label",cloudUnreadCount?("Messages, "+cloudUnreadCount+" non lus"):"Messages");
+  }
+  function ensureCloudUnreadTracking(){
+    const me=(S.user&&S.user.uid)||null;
+    if(!CLOUD||!me||!FB||!FB.F){if(cloudUnreadUid)stopCloudUnreadTracking();return;}
+    if(cloudUnreadUid===me&&cloudChatsUnsub)return;
+    stopCloudUnreadTracking();
+    const F=FB.F;
+    if(typeof F.where!=="function"){console.warn("Bilocost unread: Firestore where() indisponible");return;}
+    cloudUnreadUid=me;
+    const q=F.query(F.collection(FB.db,"chats"),F.where("participants","array-contains",me));
+    cloudChatsUnsub=F.onSnapshot(q,snapshot=>{
+      const present=new Set();
+      snapshot.docs.forEach(doc=>{
+        const id=doc.id;present.add(id);
+        if(cloudMessageUnsubs.has(id))return;
+        const unsub=F.onSnapshot(F.collection(FB.db,"chats",id,"messages"),msgSnapshot=>{
+          const readAt=Number((S.readAt&&S.readAt[id])||0);let count=0;
+          msgSnapshot.docs.forEach(messageDoc=>{
+            const message=messageDoc.data()||{},sender=message.from||message.senderId;
+            const stamp=millis(message.at||message.createdAt||message.timestamp);
+            if(sender&&sender!==me&&stamp>readAt)count++;
+          });
+          cloudMessageUnsubs.set(id,{unsub,count});refreshCloudUnreadCount();
+        },error=>console.warn("Bilocost unread messages listener:",error));
+        cloudMessageUnsubs.set(id,{unsub,count:0});
+      });
+      for(const [id,entry] of cloudMessageUnsubs)if(!present.has(id)){entry.unsub();cloudMessageUnsubs.delete(id);}
+      refreshCloudUnreadCount();
+    },error=>{console.warn("Bilocost unread chats listener:",error);stopCloudUnreadTracking();});
+  }
+
   function syncUnreadBadge(){
     try{
       const nav=document.querySelector('nav button[data-t="msg"]');
       if(!nav)return;
       let badge=nav.querySelector(".bilo-unread-badge");
       if(!badge){badge=document.createElement("span");badge.className="bilo-unread-badge";badge.setAttribute("aria-label","Messages non lus");badge.setAttribute("aria-live","polite");nav.appendChild(badge);}
+      ensureCloudUnreadTracking();
+      if(cloudUnreadCount!==null&&cloudUnreadUid===(S.user&&S.user.uid)){refreshUnreadBadgeFromCloud();return;}
       const me=(S.user&&S.user.uid)||myId();
       const chats=typeof allChats==="function"?(allChats()||[]):[];
       let count=0;
