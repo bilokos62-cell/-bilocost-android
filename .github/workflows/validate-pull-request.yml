@@ -15,5 +15,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Protect paused startup animation
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch origin "$BASE_REF" --depth=1
+          CHANGED="$(git diff --name-only FETCH_HEAD...HEAD)"
+          if printf '%s\\n' "$CHANGED" | grep -Fx -e "écran de chargement .mp4" -e "resources/13774.mp4"; then
+            echo "::error::Startup animation assets are paused and protected. Do not modify them without explicit approval."
+            exit 1
+          fi
+
       - name: Validate application and backend source
         run: npm run build
