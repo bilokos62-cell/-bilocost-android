@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
 <meta name="theme-color" content="#009a49">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bilocost">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
 <title>Bilocost – Achat à bas prix</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -222,8 +222,6 @@ window.BILO_FIREBASE = {
   appId: "1:969155385669:web:df21ad983a9f5900ce862c",
   measurementId: "G-4NEX58ZXNM"
 };
-/* Clé publique reCAPTCHA v3 pour Firebase App Check (jamais la clé secrète). */
-window.BILO_APPCHECK_SITE_KEY = "6Ld8ahEuAAAAAEBq4Jy5BFxxDHfwcCalTjv3s7gE";
 </script>
 
 <script>
@@ -626,20 +624,15 @@ const nid=v=>/^\d+$/.test(String(v))?+v:v;
 const ERR={"auth/email-already-in-use":"Cette adresse e-mail est déjà utilisée","auth/invalid-email":"Adresse e-mail invalide","auth/weak-password":"Mot de passe trop faible (6 caractères minimum)","auth/invalid-credential":"E-mail ou mot de passe incorrect","auth/wrong-password":"E-mail ou mot de passe incorrect","auth/user-not-found":"E-mail ou mot de passe incorrect","auth/too-many-requests":"Trop de tentatives, réessayez plus tard","auth/network-request-failed":"Connexion impossible, vérifiez votre réseau","auth/requires-recent-login":"Reconnectez-vous puis réessayez","auth/operation-not-allowed":"Activez ce fournisseur dans Firebase Authentication","auth/unauthorized-domain":"Ajoutez le domaine du site dans les domaines autorisés Firebase","auth/captcha-check-failed":"Vérification anti-robot échouée, réessayez","auth/invalid-phone-number":"Numéro de téléphone invalide","auth/quota-exceeded":"Quota SMS Firebase dépassé","auth/missing-phone-number":"Entrez votre numéro de téléphone","auth/invalid-verification-code":"Code SMS incorrect"};
 const errMsg=e=>ERR[e&&e.code]||"Une erreur est survenue ("+((e&&e.code)||"inconnue")+")";
 async function initFirebase(){const V="11.10.0",u=m=>`https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
- const [app,A,F,O,AC]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage")),import(u("app-check"))]);
+ const [app,A,F,O]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore")),import(u("storage"))]);
  const a=app.getApps().length?app.getApp():app.initializeApp(window.BILO_FIREBASE);
- // App Check must start before Auth, Firestore and Storage.
- let appCheck=null;
- if(window.BILO_APPCHECK_SITE_KEY){
-  try{appCheck=AC.initializeAppCheck(a,{provider:new AC.ReCaptchaV3Provider(window.BILO_APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true})}
-  catch(e){console.warn("Firebase App Check initialization",e)}
- }
  const auth=A.getAuth(a);
  // Persist sessions across Android app restarts and browser refreshes.
  try{await A.setPersistence(auth,A.indexedDBLocalPersistence)}
  catch(e){try{await A.setPersistence(auth,A.browserLocalPersistence)}catch(x){console.warn("Firebase Auth persistence fallback",x)}}
  auth.languageCode="fr";
- Object.assign(FB,{A,F,O,AC,appCheck,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
+ // App Check remains disabled until this exact Web app is registered in Firebase App Check.
+ Object.assign(FB,{A,F,O,auth,db:F.getFirestore(a),st:O.getStorage(a)})}
 
 const mapItem=d=>{const x=d.data();return{id:d.id,t:x.title,cdf:x.priceCDF,cat:x.category,e:x.condition,c:x.commune,province:x.province||"",territory:x.territory||"",locality:x.locality||"",locationLabel:x.locationLabel||"",neighborhood:x.neighborhood||"",r:x.rating||0,n:x.ratingCount||0,p:x.photos||[],bg:"#eef2f7",s:x.sellerName,sellerId:x.sellerId,w:x.sellerPhone||"",d:x.description||"",serial:x.serial||"",refCDF:x.refCDF||0,reserved:!!x.reserved,delivery:x.delivery||{mode:"pickup",fee:0,negotiable:false},attrs:x.attrs||{},swap:!!x.swap,swapWant:x.swapWant||"",bundle:x.bundle||0,at:(x.createdAt&&x.createdAt.seconds?x.createdAt.seconds*1000:Date.now()),renewedAt:x.renewedAt||0,sold:x.status==="sold",pending:x.status==="pending",boostUntil:(x.boostUntil&&x.boostUntil.seconds?x.boostUntil.seconds*1000:(typeof x.boostUntil==="number"?x.boostUntil:0)),boostPlan:x.boostPlan||""}};
 async function loadProfile(u){
@@ -1286,7 +1279,7 @@ if(Q.get("a")){S.deep=Q.get("a");setTimeout(tryDeep,300)}if(Q.get("e")){S.deepE=
 </script>
 
 <script>
-if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+if(location.protocol==="https:" && "serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(e=>console.warn("Bilocost service worker unavailable",e))})}
 </script>
 </body>
 </html>

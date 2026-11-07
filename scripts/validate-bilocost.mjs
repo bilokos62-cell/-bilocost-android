@@ -3,6 +3,9 @@ import vm from "node:vm";
 
 const file = "index.html";
 const html = readFileSync(file, "utf8");
+const pwaManifest = JSON.parse(readFileSync("manifest.webmanifest", "utf8"));
+const serviceWorker = readFileSync("sw.js", "utf8");
+const pwaIcon = readFileSync("icons/icon.svg", "utf8");
 const firestoreRules = readFileSync("firestore.rules", "utf8");
 const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
@@ -50,6 +53,15 @@ const checks = [
   ["Phone-number moderation", /function containsPhoneNumber\s*\(/],
   ["Rental module", /function rentHome\s*\(/],
 ];
+
+
+if (pwaManifest.start_url !== "/" || pwaManifest.scope !== "/") fail("PWA manifest start URL or scope is invalid");
+if (!pwaManifest.icons?.some(icon => icon.src === "/icons/icon.svg" && icon.type === "image/svg+xml")) fail("PWA SVG icon is missing from manifest");
+if (!pwaIcon.includes("<svg") || !pwaIcon.includes("#009a49")) fail("Bilocost PWA icon is invalid");
+if (!serviceWorker.includes("self.skipWaiting") || !serviceWorker.includes("self.clients.claim")) fail("PWA service worker lifecycle handlers are missing");
+if (!html.includes("navigator.serviceWorker.register") || !html.includes("/sw.js")) fail("Root-scoped service worker registration is missing");
+if (html.includes("BILO_APPCHECK_SITE_KEY") || html.includes("initializeAppCheck") || html.includes("firebase-app-check")) fail("Unregistered Firebase App Check client is still initialized");
+if (!firebaseWorkflow.includes("cp sw.js www/sw.js") || !firebaseWorkflow.includes("cp manifest.webmanifest www/manifest.webmanifest") || !firebaseWorkflow.includes("cp icons/icon.svg www/icons/icon.svg")) fail("Firebase Hosting workflow does not package required PWA assets");
 
 for (const [label, pattern] of checks) {
   if (!pattern.test(html)) fail(label + " is missing");
