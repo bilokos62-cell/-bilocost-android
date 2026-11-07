@@ -58,6 +58,32 @@
   `;
   (document.head||document.documentElement).appendChild(style);
 
+  /* Small-screen and iOS interaction polish; shared safely with web and Android. */
+  const platformStyle=document.createElement("style");
+  platformStyle.id="bilocost-mobile-polish";
+  platformStyle.textContent=`
+    html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior-y:contain}
+    body{overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent}
+    button,a,[role="button"],input,select,textarea{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    button,a,[role="button"]{-webkit-touch-callout:none}
+    input,select,textarea{font-size:16px}
+    input,textarea{user-select:text;-webkit-user-select:text}
+    :focus-visible{outline:3px solid color-mix(in srgb,var(--pri,#16834b) 58%,transparent);outline-offset:2px}
+    #sheet{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+    #sheet #sheetBody{max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain}
+    nav{padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+    img{height:auto}
+    @media(max-width:360px){
+      #view.wrap{padding-left:10px;padding-right:10px}
+      #view .btn{padding-left:12px;padding-right:12px}
+      #view .row{flex-wrap:wrap}
+    }
+    @media(prefers-reduced-motion:reduce){
+      html:focus-within{scroll-behavior:auto}
+    }
+  `;
+  (document.head||document.documentElement).appendChild(platformStyle);
+
   const syncAuthLayer=()=>{
     const auth=document.getElementById("auth");
     const open=!!(auth&&getComputedStyle(auth).display!=="none"&&auth.innerHTML.trim());
