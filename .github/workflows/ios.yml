@@ -78,6 +78,14 @@ jobs:
           print("Shared Bilocost modules injected for iOS.")
           PY
 
+      - name: Bundle and inject Bilocost loading video
+        run: |
+          test -s resources/bilocost-launch.mp4
+          mkdir -p www/resources
+          cp resources/bilocost-launch.mp4 www/resources/bilocost-launch.mp4
+          python3 -m py_compile scripts/inject-launch-video.py
+          python3 scripts/inject-launch-video.py www/index.html
+
       - name: Install dependencies
         run: npm install
 

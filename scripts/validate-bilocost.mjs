@@ -66,6 +66,12 @@ if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !stora
 try { new vm.Script(deliveryPatch, { filename: "delivery-otp.js" }); } catch (error) { fail("Delivery OTP patch syntax error: " + error.message); }
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
 try { new vm.Script(iosHigPatch, { filename: "ios-hig.js" }); } catch (error) { fail("iOS HIG patch syntax error: " + error.message); }
+try { new vm.Script(servicePatch, { filename: "service-design.js" }); } catch (error) { fail("Service design patch syntax error: " + error.message); }
+try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (error) { fail("Messaging patch syntax error: " + error.message); }
+try { new vm.Script(uiRefinementPatch, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement patch syntax error: " + error.message); }
+const assembledModules = [messagingPatch, servicePatch, deliveryPatch, geographyPatch, uiRefinementPatch].join("\\n");
+try { new vm.Script(assembledModules, { filename: "assembled-bilocost-modules.js" }); } catch (error) { fail("Combined injected modules syntax error: " + error.message); }
+console.log("All injected modules and combined bundle syntax: valid.");
 console.log("iOS HIG accessibility patch syntax: valid.");
 try { new vm.Script(functionsSource, { filename: "functions/index.js" }); } catch (error) { fail("Cloud Functions syntax error: " + error.message); }
 if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions source is not configured in firebase.json");
