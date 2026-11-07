@@ -77,10 +77,13 @@ jobs:
           # Copy the local brand assets used by the storefront.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
-          # Keep optional PWA assets available when they exist in the repository.
-          if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
-          if [ -f sw.js ]; then cp sw.js www/; fi
-          if [ -d icons ]; then cp -R icons/. www/icons/; fi
+          # PWA assets are mandatory because index.html references them.
+          cp manifest.webmanifest www/manifest.webmanifest
+          cp sw.js www/sw.js
+          cp icons/icon.svg www/icons/icon.svg
+          test -s www/manifest.webmanifest
+          test -s www/sw.js
+          test -s www/icons/icon.svg
           test -s www/IMG-20261024-WA0000.jpg
 
       - name: Install Firebase CLI

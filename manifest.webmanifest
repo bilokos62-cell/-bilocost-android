@@ -1,0 +1,20 @@
+{
+  "name": "Bilocost – Achat à bas prix",
+  "short_name": "Bilocost",
+  "description": "Achetez, vendez et louez à bas prix partout en RDC.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#009a49",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
