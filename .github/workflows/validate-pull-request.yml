@@ -28,3 +28,27 @@ jobs:
 
       - name: Validate application and backend source
         run: npm run build
+
+  android-manifest-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Generate Capacitor Android project
+        run: |
+          npm install
+          mkdir -p www
+          cp index.html www/index.html
+          npx cap add android
+          npx cap sync android
+      - name: Audit generated Android manifest
+        run: python3 scripts/audit-android-manifest.py android/app/src/main/AndroidManifest.xml
