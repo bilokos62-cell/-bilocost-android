@@ -10,6 +10,13 @@ const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const iosHigPatch = readFileSync("ios-hig.js", "utf8");
+const messagingPatch = readFileSync("messaging-fix.js", "utf8");
+const servicePatch = readFileSync("service-design.js", "utf8");
+const uiRefinementPatch = readFileSync("ui-refinement.js", "utf8");
+const listingLocationPatch = readFileSync("listing-location.js", "utf8");
+const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
+const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
+const firebaseWorkflow = readFileSync(".github/workflows/firebase-hosting.yml", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
