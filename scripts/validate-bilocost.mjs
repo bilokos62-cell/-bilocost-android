@@ -9,6 +9,7 @@ const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
+const iosHigPatch = readFileSync("ios-hig.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
@@ -57,6 +58,8 @@ if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !stora
 
 try { new vm.Script(deliveryPatch, { filename: "delivery-otp.js" }); } catch (error) { fail("Delivery OTP patch syntax error: " + error.message); }
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
+try { new vm.Script(iosHigPatch, { filename: "ios-hig.js" }); } catch (error) { fail("iOS HIG patch syntax error: " + error.message); }
+console.log("iOS HIG accessibility patch syntax: valid.");
 try { new vm.Script(functionsSource, { filename: "functions/index.js" }); } catch (error) { fail("Cloud Functions syntax error: " + error.message); }
 if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions source is not configured in firebase.json");
 if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.includes("match /deliveryCodes/{orderId}")) fail("Secure order and delivery-code rules are missing");
