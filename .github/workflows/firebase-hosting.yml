@@ -74,10 +74,23 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
-          # Copy the local brand assets used by the storefront.
+          # Remove any previously registered service worker and stale origin caches.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("www/index.html")
+          html = p.read_text(encoding="utf-8")
+          registration = 'if(location.protocol==="https:" && "serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(e=>console.warn("Bilocost service worker unavailable",e))})}'
+          recovery = '''if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{const regs=await navigator.serviceWorker.getRegistrations();const names=await caches.keys();if(regs.length||names.length){await Promise.all(regs.map(r=>r.unregister()));await Promise.all(names.map(n=>caches.delete(n)));if(!sessionStorage.getItem("bilo_recovery_20261107")){sessionStorage.setItem("bilo_recovery_20261107","1");location.reload()}}}catch(e){console.warn("Bilocost cache recovery",e)}})}'''
+          if registration not in html:
+              raise SystemExit("Expected service worker registration block not found; refusing an unsafe replacement")
+          html = html.replace(registration, recovery, 1)
+          if "navigator.serviceWorker.register" in html:
+              raise SystemExit("A service worker registration remains in the deployed HTML")
+          p.write_text(html, encoding="utf-8")
+          print("Legacy service workers and stale CacheStorage entries will be cleared on the next visit.")
+          PY
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
-          # PWA assets are mandatory because index.html references them.
           cp manifest.webmanifest www/manifest.webmanifest
           cp sw.js www/sw.js
           cp icons/icon.svg www/icons/icon.svg
