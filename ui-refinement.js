@@ -25,7 +25,7 @@
   style.id="bilocost-ui-refinement";
   style.textContent=`
     :root{--bilo-radius:18px;--bilo-shadow:0 8px 24px rgba(15,23,42,.055)}
-    body{background:var(--bg)}
+    body{background:var(--bg);-webkit-font-smoothing:antialiased}
     .app{width:100%;max-width:560px}
     header{min-height:62px;box-shadow:0 2px 12px rgba(15,23,42,.035)}
     #view.wrap{padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
