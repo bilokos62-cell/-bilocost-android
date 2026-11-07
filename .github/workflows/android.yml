@@ -71,11 +71,12 @@ jobs:
               raise SystemExit("Application script boundaries not found")
           messaging = Path("messaging-fix.js").read_text(encoding="utf-8")
           services = Path("service-design.js").read_text(encoding="utf-8")
+          delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + geography + "\n" + ui_refinement + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + ui_refinement + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
-          print("Messaging patch injected for Android.")
+          print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
 
       - name: Validate Bilocost source and integrations
