@@ -71,7 +71,7 @@ jobs:
           script_start = html.rfind("<script", 0, pos)
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0: raise SystemExit("Application script boundaries not found")
-          modules = ["messaging-fix.js", "service-design.js", "delivery-otp.js", "geography-selector.js", "ui-refinement.js"]
+          modules = ["messaging-fix.js", "service-design.js", "delivery-otp.js", "geography-selector.js", "ui-refinement.js", "ios-hig.js"]
           injected = "\n".join(Path(name).read_text(encoding="utf-8") for name in modules)
           html = html[:script_end] + "\n" + injected + "\n" + html[script_end:]
           p.write_text(html, encoding="utf-8")
