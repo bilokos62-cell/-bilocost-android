@@ -1,0 +1,85 @@
+name: Build Bilocost iOS Simulator
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Inject shared Bilocost modules
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("index.html").read_text(encoding="utf-8")
+          marker = "const CLOUD="
+          pos = html.find(marker)
+          if pos < 0:
+              raise SystemExit("Application script marker not found")
+          script_start = html.rfind("<script", 0, pos)
+          script_end = html.find("</script>", pos)
+          if script_start < 0 or script_end < 0:
+              raise SystemExit("Application script boundaries not found")
+          modules = [
+              "messaging-fix.js",
+              "service-design.js",
+              "delivery-otp.js",
+              "geography-selector.js",
+              "ui-refinement.js",
+          ]
+          additions = []
+          for name in modules:
+              path = Path(name)
+              if not path.is_file():
+                  raise SystemExit(f"Required shared module missing: {name}")
+              additions.append(path.read_text(encoding="utf-8"))
+          html = html[:script_end] + "\n" + "\n".join(additions) + "\n" + html[script_end:]
+          Path("index.html").write_text(html, encoding="utf-8")
+          print("Shared messaging, services, delivery OTP, geography, and UI modules injected for iOS.")
+          PY
+
+      - name: Validate Bilocost source
+        run: npm run build
+
+      - name: Prepare web bundle
+        run: |
+          mkdir -p www/icons www/resources
+          cp index.html www/index.html
+          cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
+          cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
+          test -s www/IMG-20261024-WA0000.jpg
+          if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
+          if [ -f sw.js ]; then cp sw.js www/; fi
+          if [ -d icons ]; then cp -R icons/. www/icons/; fi
+
+      - name: Add Capacitor iOS platform
+        run: |
+          npm install @capacitor/ios@^7.4.3
+          npx cap add ios
+          npx cap sync ios
+          test -d ios/App/App.xcworkspace
+
+      - name: Build iOS Simulator app
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
