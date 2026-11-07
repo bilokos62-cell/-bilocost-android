@@ -69,7 +69,7 @@ try { new vm.Script(iosHigPatch, { filename: "ios-hig.js" }); } catch (error) { 
 try { new vm.Script(servicePatch, { filename: "service-design.js" }); } catch (error) { fail("Service design patch syntax error: " + error.message); }
 try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (error) { fail("Messaging patch syntax error: " + error.message); }
 try { new vm.Script(uiRefinementPatch, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement patch syntax error: " + error.message); }
-const assembledModules = [messagingPatch, servicePatch, deliveryPatch, geographyPatch, uiRefinementPatch].join("\\n");
+const assembledModules = [messagingPatch, servicePatch, deliveryPatch, geographyPatch, uiRefinementPatch].join("\n");
 try { new vm.Script(assembledModules, { filename: "assembled-bilocost-modules.js" }); } catch (error) { fail("Combined injected modules syntax error: " + error.message); }
 console.log("All injected modules and combined bundle syntax: valid.");
 console.log("iOS HIG accessibility patch syntax: valid.");
