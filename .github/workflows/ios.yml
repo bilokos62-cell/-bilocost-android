@@ -71,11 +71,12 @@ jobs:
           npm install @capacitor/ios@^7.4.3
           npx cap add ios
           npx cap sync ios
+          test -d ios/App/App.xcworkspace
 
       - name: Build iOS Simulator app
         run: |
           xcodebuild \
-            -project ios/App/App.xcodeproj \
+            -workspace ios/App/App.xcworkspace \
             -scheme App \
             -sdk iphonesimulator \
             -configuration Debug \
