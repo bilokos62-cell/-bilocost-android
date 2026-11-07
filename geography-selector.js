@@ -164,7 +164,18 @@
     if(chip){e.preventDefault();e.stopPropagation();open();}
   },true);
   const css=document.createElement("style");
-  css.textContent="@media(max-width:390px){header .commune{max-width:42px!important;width:42px!important}header .commune #communeLbl{display:none!important}}";
+  css.textContent = [
+    "@media(max-width:390px){header .commune{max-width:42px!important;width:42px!important}header .commune #communeLbl{display:none!important}}",
+    "#biloLocationOverlay section{color:#17251e!important;background:#fff!important}",
+    "#biloLocationOverlay h2,#biloLocationOverlay label,#biloLocationOverlay [data-pick],#biloLocationOverlay [data-loc-close],#biloLocationOverlay #biloLocBack{color:#17251e!important}",
+    "#biloLocationOverlay .sub,#biloLocationOverlay #biloLocPath,#biloLocationOverlay #biloGeoNotice{color:#52645a!important;opacity:1!important}",
+    "#biloLocationOverlay #biloLocSearch,#biloLocationOverlay #biloLocManual{background:#fff!important;color:#17251e!important;border:1px solid #9aafa2!important;caret-color:#176b3a!important}",
+    "#biloLocationOverlay input::placeholder{color:#687a70!important;opacity:1!important}",
+    "#biloLocationOverlay [data-pick]{background:#f3f7f4!important;border:1px solid #c5d4ca!important}",
+    "#biloLocationOverlay [data-pick][style*=mint]{background:#d9f2e2!important;border-color:#27834b!important;color:#124d2b!important}",
+    "#biloLocationOverlay [data-loc-save]{color:#fff!important;background:#176b3a!important;border-color:#176b3a!important}",
+    "#biloLocationOverlay [data-loc-save]:disabled{color:#f3f6f4!important;background:#718078!important;opacity:1!important}"
+  ].join("\n")
   document.head.appendChild(css);
   setLabel();
   new MutationObserver(setLabel).observe(document.documentElement,{childList:true,subtree:true});
