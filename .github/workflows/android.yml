@@ -28,9 +28,6 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Cache Gradle distributions and dependencies
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Inject shared Bilocost patches
         run: |
           python3 - <<'PY'
@@ -80,7 +77,8 @@ jobs:
           delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + ui_refinement + "\n" + html[script_end:]
+          theme_rewards = Path("theme-rewards.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + ui_refinement + "\n" + theme_rewards + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -103,16 +101,10 @@ jobs:
           # Add the brand mark to the Android-only WebView bundle.
           cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
-          # Optional user-provided startup video: bundled in Android WebView only.
-          if [ -s "écran de chargement .mp4" ]; then
-            cp "écran de chargement .mp4" www/bilocost-launch.mp4
-            echo "Bilocost startup video found at repository root and bundled for Android."
-          elif [ -s resources/13774.mp4 ]; then
-            cp resources/13774.mp4 www/bilocost-launch.mp4
-            echo "Bilocost startup video found in resources and bundled for Android."
-          else
-            echo "Bilocost startup video not present in repository; animated fallback will be used."
-          fi
+          # Use the current Bilocost loading animation, not the older draft clip.
+          test -s resources/Bilocost_Loading_Screen.mp4
+          cp resources/Bilocost_Loading_Screen.mp4 www/bilocost-launch.mp4
+          test -s www/bilocost-launch.mp4
           # Inject the animated launch screen into Android output only (never into Firebase Hosting).
           python3 - <<'PY'
           from pathlib import Path
@@ -124,6 +116,7 @@ jobs:
           #bilocost-native-loader .bl-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#001b13}
           #bilocost-native-loader .bl-video[hidden]{display:none}
           #bilocost-native-loader.bl-video-active .bl-wrap,#bilocost-native-loader.bl-video-active:before,#bilocost-native-loader.bl-video-active:after{display:none}
+          #bilocost-native-loader.bl-video-pending .bl-wrap,#bilocost-native-loader.bl-video-pending:before,#bilocost-native-loader.bl-video-pending:after{display:none}
           #bilocost-native-loader:before,#bilocost-native-loader:after{content:"";position:absolute;width:72vw;height:72vw;max-width:520px;max-height:520px;border:1px solid rgba(74,255,145,.12);border-radius:50%;animation:bilocost-loader-orbit 7s linear infinite}
           #bilocost-native-loader:after{width:105vw;height:105vw;max-width:760px;max-height:760px;animation-direction:reverse;opacity:.55}
           #bilocost-native-loader .bl-wrap{position:relative;z-index:1;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 18px}
@@ -184,17 +177,36 @@ jobs:
             video.preload = "auto";
             video.loop = false;
             video.setAttribute("aria-hidden", "true");
-            video.addEventListener("error", () => { video.remove(); }, { once: true });
+            layer.classList.add("bl-video-pending");
+            video.addEventListener("loadeddata", () => {
+              layer.classList.remove("bl-video-pending");
+              layer.classList.add("bl-video-active");
+            }, { once: true });
             layer.insertBefore(video, layer.firstChild);
             document.body.appendChild(layer);
             let closed = false;
+            let videoFinished = false;
+            let appReady = false;
+            let startupTimedOut = false;
             const close = () => {
               if (closed) return;
               closed = true;
               layer.classList.add("bl-out");
               window.setTimeout(() => layer.remove(), 520);
             };
-            video.addEventListener("ended", close, { once: true });
+            const finishIfReady = () => {
+              if (videoFinished && appReady) close();
+            };
+            video.addEventListener("ended", () => {
+              videoFinished = true;
+              finishIfReady();
+            }, { once: true });
+            video.addEventListener("error", () => {
+              video.remove();
+              layer.classList.remove("bl-video-pending");
+              videoFinished = true;
+              finishIfReady();
+            }, { once: true });
             const readyForApp = () => {
               const view = document.getElementById("view");
               const interfaceReady = !!view && (view.childElementCount > 0 || view.textContent.trim().length > 0);
@@ -206,21 +218,45 @@ jobs:
               if (closed) return;
               if (readyForApp()) {
                 if (!readySince) readySince = Date.now();
-                if (Date.now() - readySince >= 700) { close(); return; }
+                if (Date.now() - readySince >= 700) {
+                  appReady = true;
+                  finishIfReady();
+                }
               } else {
                 readySince = 0;
               }
-              if (Date.now() - startedAt >= 9000) { close(); return; }
+              if (Date.now() - startedAt >= 15000 && !startupTimedOut) {
+                startupTimedOut = true;
+                if (!videoFinished) {
+                  video.pause();
+                  video.remove();
+                  layer.classList.remove("bl-video-pending");
+                  videoFinished = true;
+                }
+                const caption = layer.querySelector(".bl-caption");
+                if (caption) caption.textContent = "Le démarrage prend plus de temps que prévu. Vos données restent protégées.";
+                const retry = document.createElement("button");
+                retry.type = "button";
+                retry.className = "bl-retry";
+                retry.textContent = "Réessayer";
+                retry.addEventListener("click", () => window.location.reload(), { once: true });
+                layer.querySelector(".bl-wrap")?.appendChild(retry);
+                finishIfReady();
+              }
               window.setTimeout(waitUntilReady, 180);
             };
             const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             if (reduced) {
               video.remove();
+              videoFinished = true;
             } else {
               video.play().then(() => {
                 layer.classList.add("bl-video-active");
               }).catch(() => {
                 video.remove();
+                layer.classList.remove("bl-video-pending");
+                videoFinished = true;
+                finishIfReady();
               });
             }
             waitUntilReady();
@@ -251,19 +287,6 @@ jobs:
           }
           EOF
           npx cap add android
-          # Gradle's wrapper defaults to a 10-second download timeout on fresh runners.
-          # Raise it so slow GitHub runner connections do not abort the APK build.
-          python3 - <<'PY'
-          from pathlib import Path
-          wrapper = Path("android/gradle/wrapper/gradle-wrapper.properties")
-          if not wrapper.is_file():
-              raise SystemExit("Gradle wrapper properties file is missing")
-          lines = [line for line in wrapper.read_text(encoding="utf-8").splitlines()
-                   if not line.startswith("networkTimeout=")]
-          lines.append("networkTimeout=120000")
-          wrapper.write_text("\n".join(lines) + "\n", encoding="utf-8")
-          print("Gradle wrapper download timeout set to 120 seconds.")
-          PY
 
       - name: Install Bilocost launcher icon
         run: |
@@ -272,24 +295,31 @@ jobs:
           from pathlib import Path
           from PIL import Image
 
-          source = Path("resources/IMG_20261104_114004_803.jpg")
+          source = Path("resources/bilocost-app-icon.jpg")
           if not source.is_file():
-              raise SystemExit("Bilocost brand image is missing: resources/IMG_20261104_114004_803.jpg")
+              raise SystemExit("Bilocost app icon is missing: resources/bilocost-app-icon.jpg")
+          from PIL import Image, ImageDraw, ImageFilter
           image = Image.open(source).convert("RGB")
-          # Remove the photographed black corners and thin white frame.
+          # Clean the photographed rounded-square edge: replace the black corner
+          # background with a sampled Bilocost green, then antialias the contour.
           w, h = image.size
-          image = image.crop((round(w * 0.11), round(h * 0.10),
-                              round(w * 0.90), round(h * 0.89)))
-          side = min(image.size)
-          left = (image.width - side) // 2
-          top = (image.height - side) // 2
-          image = image.crop((left, top, left + side, top + side))
+          side = min(w, h)
+          image = image.crop(((w-side)//2, (h-side)//2, (w-side)//2+side, (h-side)//2+side))
+          image = image.resize((1024, 1024), Image.Resampling.LANCZOS)
+          bg = image.getpixel((512, 12))
+          scale = 4
+          mask_hi = Image.new("L", (1024*scale, 1024*scale), 0)
+          ImageDraw.Draw(mask_hi).rounded_rectangle((0, 0, 1024*scale-1, 1024*scale-1), radius=176*scale, fill=255)
+          mask = mask_hi.resize((1024, 1024), Image.Resampling.LANCZOS)
+          clean = Image.new("RGB", (1024, 1024), bg)
+          clean.paste(image, (0, 0), mask)
+          clean = clean.filter(ImageFilter.UnsharpMask(radius=1.1, percent=115, threshold=3))
           sizes = {"mdpi":48, "hdpi":72, "xhdpi":96, "xxhdpi":144, "xxxhdpi":192}
           base = Path("android/app/src/main/res")
           for density, px in sizes.items():
               folder = base / f"mipmap-{density}"
               folder.mkdir(parents=True, exist_ok=True)
-              icon = image.resize((px, px), Image.Resampling.LANCZOS)
+              icon = clean.resize((px, px), Image.Resampling.LANCZOS)
               icon.save(folder / "ic_launcher.png", optimize=True)
               icon.save(folder / "ic_launcher_round.png", optimize=True)
           # Remove adaptive XML that could fall back to the Android robot if its
@@ -311,6 +341,11 @@ jobs:
               raise SystemExit("AndroidManifest.xml has no <application> element")
           application.set(f"{{{android_ns}}}icon", "@mipmap/ic_launcher")
           application.set(f"{{{android_ns}}}roundIcon", "@mipmap/ic_launcher_round")
+          admob_meta = application.find("meta-data[@android:name='com.google.android.gms.ads.APPLICATION_ID']", {"android": android_ns})
+          if admob_meta is None:
+              admob_meta = ET.SubElement(application, "meta-data")
+          admob_meta.set(f"{{{android_ns}}}name", "com.google.android.gms.ads.APPLICATION_ID")
+          admob_meta.set(f"{{{android_ns}}}value", "ca-app-pub-3940256099942544~3347511713")
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
           ET.parse(manifest)
           PY
@@ -322,7 +357,45 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          # Use the smaller binary distribution from the direct Gradle CDN.
+          # The default services.gradle.org redirect currently returns timeouts/504.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("gradle/wrapper/gradle-wrapper.properties")
+          if not p.is_file():
+              raise SystemExit("Gradle wrapper properties file is missing")
+          lines = [line for line in p.read_text().splitlines()
+                   if not line.startswith("distributionUrl=")
+                   and not line.startswith("networkTimeout=")]
+          lines += [
+              "distributionUrl=https\\://mirrors.aliyun.com/gradle/distributions/v8.11.1/gradle-8.11.1-bin.zip",
+              "networkTimeout=120000",
+          ]
+          p.write_text("\n".join(lines) + "\n")
+          print("Gradle wrapper configured to use the Aliyun Gradle distribution mirror with 120s timeout.")
+          PY
+          # Prefer independent Maven Central mirrors to bypass transient 504 responses
+          # from the default Maven Central -> GitHub artifact redirect.
+          mkdir -p "$HOME/.gradle/init.d"
+          cat > "$HOME/.gradle/init.d/bilocost-maven-mirrors.gradle" <<'GRADLE'
+          allprojects {
+              repositories {
+                  maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+                  maven { url = uri("https://maven.aliyun.com/repository/central") }
+              }
+          }
+          GRADLE
+          for attempt in 1 2 3; do
+            if ./gradlew --no-daemon assembleDebug; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "Gradle build attempt $attempt failed; retrying in 20 seconds..."
+              sleep 20
+            fi
+          done
+          echo "Gradle build failed after 3 attempts."
+          exit 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

@@ -40,6 +40,7 @@ jobs:
               "delivery-otp.js",
               "geography-selector.js",
               "ui-refinement.js",
+              "theme-rewards.js",
           ]
           additions = []
           for name in modules:
@@ -62,14 +63,86 @@ jobs:
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
           test -s www/IMG-20261024-WA0000.jpg
+          # Native iOS bundle only: user-provided animated loading clip.
+          test -s resources/Bilocost_Loading_Screen.mp4
+          cp resources/Bilocost_Loading_Screen.mp4 www/bilocost-launch.mp4
           if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
           if [ -f sw.js ]; then cp sw.js www/; fi
           if [ -d icons ]; then cp -R icons/. www/icons/; fi
+          # Reuse the Bilocost native loader design, but activate it only inside iOS.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          workflow = Path(".github/workflows/android.yml").read_text(encoding="utf-8")
+          html_path = Path("www/index.html")
+          html = html_path.read_text(encoding="utf-8")
+          style_match = re.search(r'          style = r"""(.*?)"""', workflow, re.S)
+          script_match = re.search(r'          script = r"""(.*?)"""', workflow, re.S)
+          if not style_match or not script_match:
+              raise SystemExit("Shared Bilocost native loader source was not found")
+          style = style_match.group(1)
+          script = script_match.group(1).replace('cap.getPlatform() !== "android"', 'cap.getPlatform() !== "ios"')
+          if "bilocost-native-loader-style" not in html:
+              html = html.replace("</head>", style + "\n</head>", 1)
+          if "bilocost-native-loader-script" not in html:
+              html = html.replace("</body>", script + "\n</body>", 1)
+          if "bilocost-native-loader-script" not in html:
+              raise SystemExit("iOS native loader injection failed")
+          html_path.write_text(html, encoding="utf-8")
+          print("iOS-only Bilocost loading animation injected; website remains unchanged.")
+          PY
 
       - name: Add Capacitor iOS platform
         run: |
           npm install @capacitor/ios@^7.4.3
           npx cap add ios
+          python3 -m venv /tmp/bilocost-icon-venv
+          /tmp/bilocost-icon-venv/bin/pip install --quiet Pillow
+          /tmp/bilocost-icon-venv/bin/python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFilter
+          source = Path("resources/bilocost-app-icon.jpg")
+          if not source.is_file():
+              raise SystemExit("Bilocost app icon is missing: resources/bilocost-app-icon.jpg")
+          image = Image.open(source).convert("RGB")
+          w, h = image.size
+          side = min(w, h)
+          image = image.crop(((w-side)//2, (h-side)//2, (w-side)//2+side, (h-side)//2+side))
+          image = image.resize((1024, 1024), Image.Resampling.LANCZOS)
+          # Remove the photographed black corners and smooth the rounded contour.
+          bg = image.getpixel((512, 12))
+          scale = 4
+          mask_hi = Image.new("L", (1024*scale, 1024*scale), 0)
+          ImageDraw.Draw(mask_hi).rounded_rectangle((0, 0, 1024*scale-1, 1024*scale-1), radius=176*scale, fill=255)
+          mask = mask_hi.resize((1024, 1024), Image.Resampling.LANCZOS)
+          clean = Image.new("RGB", (1024, 1024), bg)
+          clean.paste(image, (0, 0), mask)
+          clean = clean.filter(ImageFilter.UnsharpMask(radius=1.1, percent=115, threshold=3))
+          clean_source = Path("/tmp/bilocost-app-icon-clean.png")
+          clean.save(clean_source, optimize=True)
+          folder = Path("ios/App/App/Assets.xcassets/AppIcon.appiconset")
+          folder.mkdir(parents=True, exist_ok=True)
+          specs = [
+            ("20x20","2x",40),("20x20","3x",60),
+            ("29x29","2x",58),("29x29","3x",87),
+            ("40x40","2x",80),("40x40","3x",120),
+            ("60x60","2x",120),("60x60","3x",180),
+            ("76x76","1x",76),("76x76","2x",152),
+            ("83.5x83.5","2x",167),
+          ]
+          entries = []
+          for size, scale_name, px in specs:
+            filename = f"bilocost-{px}.png"
+            import subprocess
+            subprocess.run(["sips","-s","format","png","-z",str(px),str(px),str(clean_source),"--out",str(folder/filename)],check=True,stdout=subprocess.DEVNULL)
+            entries.append({"size":size,"idiom":"universal","filename":filename,"scale":scale_name})
+          import subprocess
+          subprocess.run(["sips","-s","format","png","-z","1024","1024",str(clean_source),"--out",str(folder/"bilocost-1024.png")],check=True,stdout=subprocess.DEVNULL)
+          entries.append({"size":"1024x1024","idiom":"ios-marketing","filename":"bilocost-1024.png","scale":"1x"})
+          (folder/"Contents.json").write_text(json.dumps({"images":entries,"info":{"author":"xcode","version":1}},indent=2))
+          print("Clean Bilocost iOS app icon generated with antialiased contours.")
+          PY
           npx cap sync ios
           test -d ios/App/App.xcworkspace
 
