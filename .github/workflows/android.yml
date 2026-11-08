@@ -320,10 +320,10 @@ jobs:
           if not p.is_file():
               raise SystemExit("Gradle wrapper properties file is missing")
           lines = [line for line in p.read_text().splitlines()
-                   if not line.startswith("distributionUrl=")
+              "distributionUrl=https\://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip",
                    and not line.startswith("networkTimeout=")]
           lines += [
-              "distributionUrl=https\\://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip",
+          p.write_text("\n".join(lines) + "\n")
               "networkTimeout=120000",
           ]
           p.write_text("\\n".join(lines) + "\\n")
