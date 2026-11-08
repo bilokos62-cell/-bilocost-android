@@ -2,14 +2,26 @@
 (() => {
   "use strict";
   const KEY = "bilocost_theme_rewards_v1";
-  const COLORS = {
-    green: {name:"Vert Bilocost", pri:"#009a49", dark:"#006b30", mint:"#ecfdf5", mintText:"#047857", free:true},
-    blue: {name:"Bleu océan", pri:"#2563eb", dark:"#1d4ed8", mint:"#eff6ff", mintText:"#1d4ed8"},
-    purple: {name:"Violet", pri:"#7c3aed", dark:"#5b21b6", mint:"#f5f3ff", mintText:"#6d28d9"},
-    orange: {name:"Orange", pri:"#ea580c", dark:"#c2410c", mint:"#fff7ed", mintText:"#c2410c"},
-    rose: {name:"Rose", pri:"#e11d48", dark:"#be123c", mint:"#fff1f2", mintText:"#be123c"},
-    teal: {name:"Turquoise", pri:"#0d9488", dark:"#0f766e", mint:"#f0fdfa", mintText:"#0f766e"}
-  };
+  // 100 palettes: Bilocost green is free; the other 99 require two completed rewarded ads each.
+  const COLORS = (() => {
+    const palette = {green:{name:"Vert Bilocost",pri:"#009a49",dark:"#006b30",mint:"#ecfdf5",mintText:"#047857",free:true}};
+    const hues = [0,12,24,36,48,60,72,84,96,108,120,132,144,156,168,180,192,204,216,228,240,252,264,276,288,300,312,324,336,348];
+    let index = 1;
+    for (const hue of hues) {
+      for (const light of [38,46,54,62]) {
+        if (index >= 100) break;
+        const sat = 72 + ((index * 7) % 20);
+        const pri = 'hsl('+hue+' '+sat+'% '+light+'%)';
+        const dark = 'hsl('+hue+' '+sat+'% '+Math.max(24,light-12)+'%)';
+        const mint = 'hsl('+hue+' 75% 97%)';
+        const mintText = 'hsl('+hue+' 70% 32%)';
+        const id = 'color'+String(index).padStart(2,'0');
+        palette[id] = {name:'Couleur '+String(index).padStart(2,'0'),pri,dark,mint,mintText};
+        index++;
+      }
+    }
+    return palette;
+  })();
   const TEST_UNITS = {
     android: "ca-app-pub-3940256099942544/5224354917",
     ios: "ca-app-pub-3940256099942544/1712485313"
