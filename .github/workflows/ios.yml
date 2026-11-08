@@ -63,23 +63,74 @@ jobs:
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
           test -s www/IMG-20261024-WA0000.jpg
+          # Native iOS bundle only: user-provided animated loading clip.
+          test -s resources/Bilocost_Loading_Screen.mp4
+          cp resources/Bilocost_Loading_Screen.mp4 www/bilocost-launch.mp4
           if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
           if [ -f sw.js ]; then cp sw.js www/; fi
           if [ -d icons ]; then cp -R icons/. www/icons/; fi
+          # Reuse the Bilocost native loader design, but activate it only inside iOS.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          workflow = Path(".github/workflows/android.yml").read_text(encoding="utf-8")
+          html_path = Path("www/index.html")
+          html = html_path.read_text(encoding="utf-8")
+          style_match = re.search(r'          style = r"""(.*?)"""', workflow, re.S)
+          script_match = re.search(r'          script = r"""(.*?)"""', workflow, re.S)
+          if not style_match or not script_match:
+              raise SystemExit("Shared Bilocost native loader source was not found")
+          style = style_match.group(1)
+          script = script_match.group(1).replace('cap.getPlatform() !== "android"', 'cap.getPlatform() !== "ios"')
+          if "bilocost-native-loader-style" not in html:
+              html = html.replace("</head>", style + "\\n</head>", 1)
+          if "bilocost-native-loader-script" not in html:
+              html = html.replace("</body>", script + "\\n</body>", 1)
+          if "bilocost-native-loader-script" not in html:
+              raise SystemExit("iOS native loader injection failed")
+          html_path.write_text(html, encoding="utf-8")
+          print("iOS-only Bilocost loading animation injected; website remains unchanged.")
+          PY
 
       - name: Add Capacitor iOS platform
         run: |
           npm install @capacitor/ios@^7.4.3
           npx cap add ios
+          python3 -m pip install --quiet Pillow
           python3 - <<'PY'
-          import plistlib
+          import json, plistlib
           from pathlib import Path
+          from PIL import Image
+          source = Path("resources/bilocost-app-icon.jpg")
+          if not source.is_file():
+              raise SystemExit("Bilocost app icon is missing: resources/bilocost-app-icon.jpg")
+          image = Image.open(source).convert("RGB")
+          side = min(image.size)
+          left, top = (image.width-side)//2, (image.height-side)//2
+          image = image.crop((left, top, left+side, top+side))
+          folder = Path("ios/App/App/Assets.xcassets/AppIcon.appiconset")
+          folder.mkdir(parents=True, exist_ok=True)
+          entries = []
+          specs = [
+            ("20x20","2x",40),("20x20","3x",60),
+            ("29x29","2x",58),("29x29","3x",87),
+            ("40x40","2x",80),("40x40","3x",120),
+            ("60x60","2x",120),("60x60","3x",180),
+            ("76x76","1x",76),("76x76","2x",152),
+            ("83.5x83.5","2x",167),
+          ]
+          for size, scale, px in specs:
+            filename = f"bilocost-{px}.png"
+            image.resize((px,px),Image.Resampling.LANCZOS).save(folder/filename,optimize=True)
+            entries.append({"size":size,"idiom":"universal","filename":filename,"scale":scale})
+          image.resize((1024,1024),Image.Resampling.LANCZOS).save(folder/"bilocost-1024.png",optimize=True)
+          entries.append({"size":"1024x1024","idiom":"ios-marketing","filename":"bilocost-1024.png","scale":"1x"})
+          (folder/"Contents.json").write_text(json.dumps({"images":entries,"info":{"author":"xcode","version":1}},indent=2))
           path = Path("ios/App/App/Info.plist")
-          with path.open("rb") as f:
-              data = plistlib.load(f)
+          with path.open("rb") as f: data = plistlib.load(f)
           data["GADApplicationIdentifier"] = "ca-app-pub-3940256099942544~1458002511"
-          with path.open("wb") as f:
-              plistlib.dump(data, f)
+          with path.open("wb") as f: plistlib.dump(data,f)
+          print("Bilocost iOS AppIcon set generated from the supplied logo.")
           PY
           npx cap sync ios
           test -d ios/App/App.xcworkspace
