@@ -101,16 +101,10 @@ jobs:
           # Add the brand mark to the Android-only WebView bundle.
           cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
-          # Optional user-provided startup video: bundled in Android WebView only.
-          if [ -s "écran de chargement .mp4" ]; then
-            cp "écran de chargement .mp4" www/bilocost-launch.mp4
-            echo "Bilocost startup video found at repository root and bundled for Android."
-          elif [ -s resources/13774.mp4 ]; then
-            cp resources/13774.mp4 www/bilocost-launch.mp4
-            echo "Bilocost startup video found in resources and bundled for Android."
-          else
-            echo "Bilocost startup video not present in repository; animated fallback will be used."
-          fi
+          # Use the current Bilocost loading animation, not the older draft clip.
+          test -s resources/Bilocost_Loading_Screen.mp4
+          cp resources/Bilocost_Loading_Screen.mp4 www/bilocost-launch.mp4
+          test -s www/bilocost-launch.mp4
           # Inject the animated launch screen into Android output only (never into Firebase Hosting).
           python3 - <<'PY'
           from pathlib import Path
@@ -182,17 +176,29 @@ jobs:
             video.preload = "auto";
             video.loop = false;
             video.setAttribute("aria-hidden", "true");
-            video.addEventListener("error", () => { video.remove(); }, { once: true });
             layer.insertBefore(video, layer.firstChild);
             document.body.appendChild(layer);
             let closed = false;
+            let videoFinished = false;
+            let appReady = false;
             const close = () => {
               if (closed) return;
               closed = true;
               layer.classList.add("bl-out");
               window.setTimeout(() => layer.remove(), 520);
             };
-            video.addEventListener("ended", close, { once: true });
+            const finishIfReady = () => {
+              if (videoFinished && appReady) close();
+            };
+            video.addEventListener("ended", () => {
+              videoFinished = true;
+              finishIfReady();
+            }, { once: true });
+            video.addEventListener("error", () => {
+              video.remove();
+              videoFinished = true;
+              finishIfReady();
+            }, { once: true });
             const readyForApp = () => {
               const view = document.getElementById("view");
               const interfaceReady = !!view && (view.childElementCount > 0 || view.textContent.trim().length > 0);
@@ -204,21 +210,27 @@ jobs:
               if (closed) return;
               if (readyForApp()) {
                 if (!readySince) readySince = Date.now();
-                if (Date.now() - readySince >= 700) { close(); return; }
+                if (Date.now() - readySince >= 700) {
+                  appReady = true;
+                  finishIfReady();
+                }
               } else {
                 readySince = 0;
               }
-              if (Date.now() - startedAt >= 9000) { close(); return; }
+              if (Date.now() - startedAt >= 15000) { close(); return; }
               window.setTimeout(waitUntilReady, 180);
             };
             const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             if (reduced) {
               video.remove();
+              videoFinished = true;
             } else {
               video.play().then(() => {
                 layer.classList.add("bl-video-active");
               }).catch(() => {
                 video.remove();
+                videoFinished = true;
+                finishIfReady();
               });
             }
             waitUntilReady();
@@ -257,9 +269,9 @@ jobs:
           from pathlib import Path
           from PIL import Image
 
-          source = Path("resources/IMG_20261104_114004_803.jpg")
+          source = Path("resources/bilocost-app-icon.jpg")
           if not source.is_file():
-              raise SystemExit("Bilocost brand image is missing: resources/IMG_20261104_114004_803.jpg")
+              raise SystemExit("Bilocost app icon is missing: resources/bilocost-app-icon.jpg")
           image = Image.open(source).convert("RGB")
           # Remove the photographed black corners and thin white frame.
           w, h = image.size
