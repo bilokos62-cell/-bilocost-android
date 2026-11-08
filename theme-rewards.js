@@ -55,6 +55,20 @@
   }
   const isUnlocked = id => id === "green" || (state.unlocked.includes(id) && Number(state.expires[id]) > Date.now());
   const remainingDays = id => Math.max(1, Math.ceil((Number(state.expires[id]) - Date.now()) / 86400000));
+  let expiryTimer = null;
+  function scheduleExpiration() {
+    if (expiryTimer) clearTimeout(expiryTimer);
+    const upcoming = Object.values(state.expires).map(Number).filter(t => t > Date.now());
+    if (!upcoming.length) return;
+    expiryTimer = setTimeout(() => {
+      const changed = refreshExpirations();
+      if (changed) {
+        apply(state.selected);
+        if (typeof renderPage === "function") renderPage();
+      }
+      scheduleExpiration();
+    }, Math.min(2147483000, Math.max(0, Math.min(...upcoming) - Date.now() + 50)));
+  }
   refreshExpirations();
   if (!COLORS[state.selected] || !isUnlocked(state.selected)) state.selected = "green";
   const apply = id => {
@@ -71,6 +85,7 @@
     state.selected = id; save();
   };
   apply(state.selected);
+  scheduleExpiration();
   const adMob = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   const progress = id => Math.min(2, Number(state.progress[id] || 0));
   function openThemeCustomizer() {
@@ -101,6 +116,7 @@
           state.progress[id] = 2;
           if (!state.unlocked.includes(id)) state.unlocked.push(id);
           state.expires[id] = Date.now() + ACCESS_DURATION_MS;
+          scheduleExpiration();
           if (typeof toast === "function") toast(COLORS[id].name+" débloqué !");
         } else if (typeof toast === "function") toast("1/2 publicité terminée. Encore une pour débloquer "+COLORS[id].name+".");
         save();
