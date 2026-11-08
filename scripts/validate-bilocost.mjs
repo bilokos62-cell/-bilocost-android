@@ -9,6 +9,7 @@ const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
+const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
