@@ -4,7 +4,7 @@
   if (window.__biloThemeSettingsEntry) return;
   window.__biloThemeSettingsEntry = true;
   const labels = new Set(["thème", "thème de l'application", "thème de l’application", "apparence"]);
-  const norm = value => String(value || "").replace(/\\s+/g, " ").trim().toLocaleLowerCase("fr");
+  const norm = value => String(value || "").replace(/\s+/g, " ").trim().toLocaleLowerCase("fr");
   const open = () => {
     if (typeof window.biloOpenThemeCustomizer === "function") {
       window.biloOpenThemeCustomizer();
