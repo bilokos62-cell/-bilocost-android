@@ -273,14 +273,13 @@ jobs:
           if not source.is_file():
               raise SystemExit("Bilocost app icon is missing: resources/bilocost-app-icon.jpg")
           image = Image.open(source).convert("RGB")
-          # Remove the photographed black corners and thin white frame.
+          # Preserve the supplied app icon artwork; only center-crop if it is not square.
           w, h = image.size
-          image = image.crop((round(w * 0.11), round(h * 0.10),
-                              round(w * 0.90), round(h * 0.89)))
-          side = min(image.size)
-          left = (image.width - side) // 2
-          top = (image.height - side) // 2
-          image = image.crop((left, top, left + side, top + side))
+          if w != h:
+              side = min(w, h)
+              left = (w - side) // 2
+              top = (h - side) // 2
+              image = image.crop((left, top, left + side, top + side))
           sizes = {"mdpi":48, "hdpi":72, "xhdpi":96, "xxhdpi":144, "xxxhdpi":192}
           base = Path("android/app/src/main/res")
           for density, px in sizes.items():
