@@ -28,6 +28,9 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Cache Gradle distributions and dependencies
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Inject shared Bilocost patches
         run: |
           python3 - <<'PY'
@@ -248,6 +251,19 @@ jobs:
           }
           EOF
           npx cap add android
+          # Gradle's wrapper defaults to a 10-second download timeout on fresh runners.
+          # Raise it so slow GitHub runner connections do not abort the APK build.
+          python3 - <<'PY'
+          from pathlib import Path
+          wrapper = Path("android/gradle/wrapper/gradle-wrapper.properties")
+          if not wrapper.is_file():
+              raise SystemExit("Gradle wrapper properties file is missing")
+          lines = [line for line in wrapper.read_text(encoding="utf-8").splitlines()
+                   if not line.startswith("networkTimeout=")]
+          lines.append("networkTimeout=120000")
+          wrapper.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+          print("Gradle wrapper download timeout set to 120 seconds.")
+          PY
 
       - name: Install Bilocost launcher icon
         run: |
