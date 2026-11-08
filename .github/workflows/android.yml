@@ -323,11 +323,11 @@ jobs:
                    if not line.startswith("distributionUrl=")
                    and not line.startswith("networkTimeout=")]
           lines += [
-              "distributionUrl=https\\://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip",
+              "distributionUrl=https\\://mirrors.aliyun.com/gradle/distributions/v8.11.1/gradle-8.11.1-bin.zip",
               "networkTimeout=120000",
           ]
           p.write_text("\n".join(lines) + "\n")
-          print("Gradle wrapper configured for direct CDN download with 120s timeout.")
+          print("Gradle wrapper configured to use the Aliyun Gradle distribution mirror with 120s timeout.")
           PY
           # Prefer independent Maven Central mirrors to bypass transient 504 responses
           # from the default Maven Central -> GitHub artifact redirect.
