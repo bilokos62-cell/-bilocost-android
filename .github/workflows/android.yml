@@ -320,13 +320,13 @@ jobs:
           if not p.is_file():
               raise SystemExit("Gradle wrapper properties file is missing")
           lines = [line for line in p.read_text().splitlines()
-              "distributionUrl=https\://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip",
+                   if not line.startswith("distributionUrl=")
                    and not line.startswith("networkTimeout=")]
           lines += [
-          p.write_text("\n".join(lines) + "\n")
+              "distributionUrl=https\\://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip",
               "networkTimeout=120000",
           ]
-          p.write_text("\\n".join(lines) + "\\n")
+          p.write_text("\n".join(lines) + "\n")
           print("Gradle wrapper configured for direct CDN download with 120s timeout.")
           PY
           for attempt in 1 2 3; do
