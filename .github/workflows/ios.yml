@@ -96,12 +96,30 @@ jobs:
         run: |
           npm install @capacitor/ios@^7.4.3
           npx cap add ios
+          python3 -m pip install --quiet Pillow
           python3 - <<'PY'
           import json
           from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFilter
           source = Path("resources/bilocost-app-icon.jpg")
           if not source.is_file():
               raise SystemExit("Bilocost app icon is missing: resources/bilocost-app-icon.jpg")
+          image = Image.open(source).convert("RGB")
+          w, h = image.size
+          side = min(w, h)
+          image = image.crop(((w-side)//2, (h-side)//2, (w-side)//2+side, (h-side)//2+side))
+          image = image.resize((1024, 1024), Image.Resampling.LANCZOS)
+          # Remove the photographed black corners and smooth the rounded contour.
+          bg = image.getpixel((512, 12))
+          scale = 4
+          mask_hi = Image.new("L", (1024*scale, 1024*scale), 0)
+          ImageDraw.Draw(mask_hi).rounded_rectangle((0, 0, 1024*scale-1, 1024*scale-1), radius=176*scale, fill=255)
+          mask = mask_hi.resize((1024, 1024), Image.Resampling.LANCZOS)
+          clean = Image.new("RGB", (1024, 1024), bg)
+          clean.paste(image, (0, 0), mask)
+          clean = clean.filter(ImageFilter.UnsharpMask(radius=1.1, percent=115, threshold=3))
+          clean_source = Path("/tmp/bilocost-app-icon-clean.png")
+          clean.save(clean_source, optimize=True)
           folder = Path("ios/App/App/Assets.xcassets/AppIcon.appiconset")
           folder.mkdir(parents=True, exist_ok=True)
           specs = [
@@ -113,16 +131,16 @@ jobs:
             ("83.5x83.5","2x",167),
           ]
           entries = []
-          for size, scale, px in specs:
+          for size, scale_name, px in specs:
             filename = f"bilocost-{px}.png"
             import subprocess
-            subprocess.run(["sips","-s","format","png","-z",str(px),str(px),str(source),"--out",str(folder/filename)],check=True,stdout=subprocess.DEVNULL)
-            entries.append({"size":size,"idiom":"universal","filename":filename,"scale":scale})
+            subprocess.run(["sips","-s","format","png","-z",str(px),str(px),str(clean_source),"--out",str(folder/filename)],check=True,stdout=subprocess.DEVNULL)
+            entries.append({"size":size,"idiom":"universal","filename":filename,"scale":scale_name})
           import subprocess
-          subprocess.run(["sips","-s","format","png","-z","1024","1024",str(source),"--out",str(folder/"bilocost-1024.png")],check=True,stdout=subprocess.DEVNULL)
+          subprocess.run(["sips","-s","format","png","-z","1024","1024",str(clean_source),"--out",str(folder/"bilocost-1024.png")],check=True,stdout=subprocess.DEVNULL)
           entries.append({"size":"1024x1024","idiom":"ios-marketing","filename":"bilocost-1024.png","scale":"1x"})
           (folder/"Contents.json").write_text(json.dumps({"images":entries,"info":{"author":"xcode","version":1}},indent=2))
-          print("Bilocost iOS AppIcon set generated from the supplied logo using macOS sips.")
+          print("Clean Bilocost iOS app icon generated with antialiased contours.")
           PY
           npx cap sync ios
           test -d ios/App/App.xcworkspace
