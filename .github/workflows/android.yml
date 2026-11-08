@@ -232,7 +232,7 @@ jobs:
                 retry.className = "bl-retry";
                 retry.textContent = "Réessayer";
                 retry.addEventListener("click", () => window.location.reload(), { once: true });
-                layer.querySelector(".bl-content")?.appendChild(retry);
+                layer.querySelector(".bl-wrap")?.appendChild(retry);
                 finishIfReady();
               }
               window.setTimeout(waitUntilReady, 180);
