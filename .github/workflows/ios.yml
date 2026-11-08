@@ -40,6 +40,7 @@ jobs:
               "delivery-otp.js",
               "geography-selector.js",
               "ui-refinement.js",
+              "theme-rewards.js",
           ]
           additions = []
           for name in modules:
@@ -70,6 +71,16 @@ jobs:
         run: |
           npm install @capacitor/ios@^7.4.3
           npx cap add ios
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          path = Path("ios/App/App/Info.plist")
+          with path.open("rb") as f:
+              data = plistlib.load(f)
+          data["GADApplicationIdentifier"] = "ca-app-pub-3940256099942544~1458002511"
+          with path.open("wb") as f:
+              plistlib.dump(data, f)
+          PY
           npx cap sync ios
           test -d ios/App/App.xcworkspace
 
