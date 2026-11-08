@@ -312,14 +312,30 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          # Retry transient Gradle distribution download timeouts.
+          # Use the smaller binary distribution from the direct Gradle CDN.
+          # The default services.gradle.org redirect currently returns timeouts/504.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("gradle/wrapper/gradle-wrapper.properties")
+          if not p.is_file():
+              raise SystemExit("Gradle wrapper properties file is missing")
+          lines = [line for line in p.read_text().splitlines()
+                   if not line.startswith("distributionUrl=")
+                   and not line.startswith("networkTimeout=")]
+          lines += [
+              "distributionUrl=https\\://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip",
+              "networkTimeout=120000",
+          ]
+          p.write_text("\\n".join(lines) + "\\n")
+          print("Gradle wrapper configured for direct CDN download with 120s timeout.")
+          PY
           for attempt in 1 2 3; do
             if ./gradlew assembleDebug; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then
-              echo "Gradle build attempt $attempt failed; retrying in 15 seconds..."
-              sleep 15
+              echo "Gradle build attempt $attempt failed; retrying in 20 seconds..."
+              sleep 20
             fi
           done
           echo "Gradle build failed after 3 attempts."
