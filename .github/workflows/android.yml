@@ -181,6 +181,7 @@ jobs:
             let closed = false;
             let videoFinished = false;
             let appReady = false;
+            let startupTimedOut = false;
             const close = () => {
               if (closed) return;
               closed = true;
@@ -217,7 +218,23 @@ jobs:
               } else {
                 readySince = 0;
               }
-              if (Date.now() - startedAt >= 15000) { close(); return; }
+              if (Date.now() - startedAt >= 15000 && !startupTimedOut) {
+                startupTimedOut = true;
+                if (!videoFinished) {
+                  video.pause();
+                  video.remove();
+                  videoFinished = true;
+                }
+                const caption = layer.querySelector(".bl-caption");
+                if (caption) caption.textContent = "Le démarrage prend plus de temps que prévu. Vos données restent protégées.";
+                const retry = document.createElement("button");
+                retry.type = "button";
+                retry.className = "bl-retry";
+                retry.textContent = "Réessayer";
+                retry.addEventListener("click", () => window.location.reload(), { once: true });
+                layer.querySelector(".bl-content")?.appendChild(retry);
+                finishIfReady();
+              }
               window.setTimeout(waitUntilReady, 180);
             };
             const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
