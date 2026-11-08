@@ -77,7 +77,8 @@ jobs:
           delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + ui_refinement + "\n" + html[script_end:]
+          theme_rewards = Path("theme-rewards.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + ui_refinement + "\n" + theme_rewards + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -295,6 +296,11 @@ jobs:
               raise SystemExit("AndroidManifest.xml has no <application> element")
           application.set(f"{{{android_ns}}}icon", "@mipmap/ic_launcher")
           application.set(f"{{{android_ns}}}roundIcon", "@mipmap/ic_launcher_round")
+          admob_meta = application.find("meta-data[@android:name='com.google.android.gms.ads.APPLICATION_ID']", {"android": android_ns})
+          if admob_meta is None:
+              admob_meta = ET.SubElement(application, "meta-data")
+          admob_meta.set(f"{{{android_ns}}}name", "com.google.android.gms.ads.APPLICATION_ID")
+          admob_meta.set(f"{{{android_ns}}}value", "ca-app-pub-3940256099942544~3347511713")
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
           ET.parse(manifest)
           PY
