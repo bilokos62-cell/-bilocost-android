@@ -2,6 +2,7 @@
 (() => {
   "use strict";
   const KEY = "bilocost_theme_rewards_v1";
+  const ACCESS_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours à partir du 2e visionnage récompensé.
   // 100 palettes: Bilocost green is free; the other 99 require two completed rewarded ads each.
   const COLORS = (() => {
     const palette = {green:{name:"Vert Bilocost",pri:"#009a49",dark:"#006b30",mint:"#ecfdf5",mintText:"#047857",free:true}};
@@ -30,9 +31,35 @@
   let state = read();
   if (!Array.isArray(state.unlocked)) state.unlocked = ["green"];
   if (!state.progress || typeof state.progress !== "object") state.progress = {};
-  if (!COLORS[state.selected] || !state.unlocked.includes(state.selected)) state.selected = "green";
+  if (!state.expires || typeof state.expires !== "object") state.expires = {};
+  // Migration des anciens déblocages locaux : ils deviennent temporaires (30 jours).
+  const migrationNow = Date.now();
+  state.unlocked.filter(id => id !== "green" && COLORS[id]).forEach(id => {
+    if (!Number.isFinite(Number(state.expires[id]))) state.expires[id] = migrationNow + ACCESS_DURATION_MS;
+  });
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {} };
+  function refreshExpirations() {
+    const now = Date.now();
+    let changed = false;
+    Object.keys(state.expires).forEach(id => {
+      if (!Number.isFinite(Number(state.expires[id])) || Number(state.expires[id]) <= now) {
+        delete state.expires[id];
+        state.unlocked = state.unlocked.filter(x => x !== id);
+        state.progress[id] = 0;
+        if (state.selected === id) state.selected = "green";
+        changed = true;
+      }
+    });
+    if (changed) save();
+    return changed;
+  }
+  const isUnlocked = id => id === "green" || (state.unlocked.includes(id) && Number(state.expires[id]) > Date.now());
+  const remainingDays = id => Math.max(1, Math.ceil((Number(state.expires[id]) - Date.now()) / 86400000));
+  refreshExpirations();
+  if (!COLORS[state.selected] || !isUnlocked(state.selected)) state.selected = "green";
   const apply = id => {
+    refreshExpirations();
+    if (!isUnlocked(id)) id = "green";
     const c = COLORS[id] || COLORS.green;
     const root = document.documentElement;
     root.style.setProperty("--pri", c.pri);
@@ -48,14 +75,14 @@
   const progress = id => Math.min(2, Number(state.progress[id] || 0));
   function openThemeCustomizer() {
     const cards = Object.entries(COLORS).map(([id,c]) => {
-      const unlocked = state.unlocked.includes(id);
+      const unlocked = isUnlocked(id);
       const n = progress(id);
       return '<button type="button" class="bilo-theme-option '+(!unlocked?'is-locked':'is-unlocked')+'" data-bilo-theme-select="'+id+'" style="--swatch:'+c.pri+'" aria-label="'+c.name+(unlocked?' sélectionnable':' verrouillé, toucher pour regarder une publicité')+'">'+
         '<span class="bilo-theme-swatch"></span><span class="bilo-theme-name">'+c.name+'</span>'+
-        (unlocked ? (state.selected===id?'<span class="bilo-theme-state">Actif</span>':'<span class="bilo-theme-state">Débloqué</span>') :
+        (unlocked ? (state.selected===id?'<span class="bilo-theme-state">Actif · '+remainingDays(id)+' j</span>':'<span class="bilo-theme-state">Expire dans '+remainingDays(id)+' j</span>') :
         '<span class="bilo-theme-state">🔒 '+n+'/2 pubs</span>')+'</button>';
     }).join("");
-    sheet('<div class="bilo-theme-panel"><div class="bilo-theme-top"><div><small>PERSONNALISATION</small><h2>Choisir mes couleurs</h2><p>Regardez 2 publicités récompensées pour débloquer une couleur.</p></div><span class="bilo-theme-brand">BILOCOST</span></div><div class="bilo-theme-grid">'+cards+'</div><p class="bilo-theme-foot">Le vert Bilocost reste gratuit. Chaque couleur débloquée est mémorisée sur cet appareil.</p><button class="btn ghost" type="button" data-bilo-theme-close>Fermer</button></div>');
+    sheet('<div class="bilo-theme-panel"><div class="bilo-theme-top"><div><small>PERSONNALISATION</small><h2>Choisir mes couleurs</h2><p>Regardez 2 publicités récompensées pour débloquer une couleur.</p></div><span class="bilo-theme-brand">BILOCOST</span></div><div class="bilo-theme-grid">'+cards+'</div><p class="bilo-theme-foot">Le vert Bilocost reste gratuit. Chaque couleur premium est disponible pendant 30 jours après les 2 publicités récompensées, puis doit être débloquée à nouveau.</p><button class="btn ghost" type="button" data-bilo-theme-close>Fermer</button></div>');
   }
   async function watchForTheme(id) {
     const plugin = adMob();
@@ -73,6 +100,7 @@
         if (state.progress[id] >= 2) {
           state.progress[id] = 2;
           if (!state.unlocked.includes(id)) state.unlocked.push(id);
+          state.expires[id] = Date.now() + ACCESS_DURATION_MS;
           if (typeof toast === "function") toast(COLORS[id].name+" débloqué !");
         } else if (typeof toast === "function") toast("1/2 publicité terminée. Encore une pour débloquer "+COLORS[id].name+".");
         save();
@@ -97,7 +125,8 @@
     const select = e.target.closest && e.target.closest("[data-bilo-theme-select]");
     if (select) {
       const id = select.getAttribute("data-bilo-theme-select");
-      if (state.unlocked.includes(id)) { apply(id); if (typeof close_ === "function") close_(); if (typeof renderPage === "function") renderPage(); }
+      refreshExpirations();
+      if (isUnlocked(id)) { apply(id); if (typeof close_ === "function") close_(); if (typeof renderPage === "function") renderPage(); }
       else watchForTheme(id);
       return;
     }
