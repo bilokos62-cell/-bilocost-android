@@ -14,6 +14,8 @@
   };
   function findSettingTarget(node) {
     if (!node || !node.closest) return null;
+    const decorated = node.closest("[data-bilo-theme-entry]");
+    if (decorated) return decorated;
     let el = node.closest("button,a,[role='button'],label,[data-action],.row,.setting,.settings-item");
     if (!el) el = node;
     for (let i = 0; el && i < 5; i++, el = el.parentElement) {
