@@ -261,7 +261,7 @@ jobs:
           lines = [line for line in wrapper.read_text(encoding="utf-8").splitlines()
                    if not line.startswith("networkTimeout=")]
           lines.append("networkTimeout=120000")
-          wrapper.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+          wrapper.write_text("\n".join(lines) + "\n", encoding="utf-8")
           print("Gradle wrapper download timeout set to 120 seconds.")
           PY
 
