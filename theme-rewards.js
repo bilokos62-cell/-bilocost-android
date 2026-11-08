@@ -89,6 +89,7 @@
   const adMob = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   const progress = id => Math.min(2, Number(state.progress[id] || 0));
   function openThemeCustomizer() {
+    refreshExpirations();
     const cards = Object.entries(COLORS).map(([id,c]) => {
       const unlocked = isUnlocked(id);
       const n = progress(id);
