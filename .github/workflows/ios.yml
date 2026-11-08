@@ -83,9 +83,9 @@ jobs:
           style = style_match.group(1)
           script = script_match.group(1).replace('cap.getPlatform() !== "android"', 'cap.getPlatform() !== "ios"')
           if "bilocost-native-loader-style" not in html:
-              html = html.replace("</head>", style + "\\n</head>", 1)
+              html = html.replace("</head>", style + "\n</head>", 1)
           if "bilocost-native-loader-script" not in html:
-              html = html.replace("</body>", script + "\\n</body>", 1)
+              html = html.replace("</body>", script + "\n</body>", 1)
           if "bilocost-native-loader-script" not in html:
               raise SystemExit("iOS native loader injection failed")
           html_path.write_text(html, encoding="utf-8")
