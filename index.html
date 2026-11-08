@@ -1021,7 +1021,7 @@ function act(a,v,el){switch(a){
  case "walletrefresh":refreshWallet();break;
  case "pref":S.prefs[v]=!S.prefs[v];save();renderPage();break;
  case "soon":toast(v);break;
- case "theme":cycleTheme();renderPage();break;
+ case "theme":if(typeof openThemeCustomizer==="function")openThemeCustomizer();else{cycleTheme();renderPage()}break;
  case "switch":switchSheet();break;
  case "mode":S.user.mode=v;remember(S.user);save();if(CLOUD)FB.F.updateDoc(FB.F.doc(FB.db,"users",S.user.uid),{mode:v}).catch(()=>{});close_();render();renderPage();toast(v==="pro"?"Profil boutique activé":"Profil particulier activé");break;
  case "acc":{const x=S.accounts.find(z=>z.phone===v);if(x){S.user=x;save();close_();closePage();toast("Profil : "+x.name)}break}
@@ -1314,7 +1314,7 @@ document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return
  else if(t.id==="communeBtn")sheet(`<h2>Commune</h2><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">${COMMUNES.map(c=>`<button class="chip" data-c="${c}" aria-pressed="${S.commune===c}">${c}</button>`).join("")}</div>`);
  else if(d.c){S.commune=d.c;save();$("#sheet").classList.remove("on");render()}
  else if(d.logout!==undefined){if(CLOUD)FB.A.signOut(FB.auth);S.user=null;save();closePage();toast("Déconnecté")}
- else if(t.id==="theme"){const r=document.documentElement,n={undefined:"dark",dark:"light",light:"auto"}[r.dataset.theme];n==="auto"?delete r.dataset.theme:r.dataset.theme=n;render()}
+ else if(t.id==="theme"){if(typeof openThemeCustomizer==="function")openThemeCustomizer();else{const r=document.documentElement,n={undefined:"dark",dark:"light",light:"auto"}[r.dataset.theme];n==="auto"?delete r.dataset.theme:r.dataset.theme=n;render()}}
 });
 document.addEventListener("input",e=>{const id=e.target.id;
  if(id==="rq"){S.rq=e.target.value;const g=$("#rg");if(g)g.innerHTML=rentGridHtml()}
