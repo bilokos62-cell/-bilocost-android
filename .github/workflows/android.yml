@@ -329,8 +329,19 @@ jobs:
           p.write_text("\n".join(lines) + "\n")
           print("Gradle wrapper configured for direct CDN download with 120s timeout.")
           PY
+          # Prefer independent Maven Central mirrors to bypass transient 504 responses
+          # from the default Maven Central -> GitHub artifact redirect.
+          mkdir -p "$HOME/.gradle/init.d"
+          cat > "$HOME/.gradle/init.d/bilocost-maven-mirrors.gradle" <<'GRADLE'
+          allprojects {
+              repositories {
+                  maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+                  maven { url = uri("https://maven.aliyun.com/repository/central") }
+              }
+          }
+          GRADLE
           for attempt in 1 2 3; do
-            if ./gradlew assembleDebug; then
+            if ./gradlew --no-daemon assembleDebug; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then
