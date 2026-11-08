@@ -58,6 +58,62 @@
   `;
   (document.head||document.documentElement).appendChild(style);
 
+
+  /* Replace browser-native alert boxes with branded, accessible Bilocost dialogs. */
+  const showBilocostNotice = (message) => {
+    const existing = document.getElementById("bilocost-notice-overlay");
+    if (existing) existing.remove();
+    const overlay = document.createElement("div");
+    overlay.id = "bilocost-notice-overlay";
+    overlay.setAttribute("role", "presentation");
+    Object.assign(overlay.style, {
+      position:"fixed", inset:"0", zIndex:"100000", display:"grid",
+      placeItems:"center", padding:"20px", background:"rgba(10,24,15,.62)",
+      backdropFilter:"blur(5px)", WebkitBackdropFilter:"blur(5px)"
+    });
+    const panel = document.createElement("section");
+    panel.setAttribute("role","alertdialog");
+    panel.setAttribute("aria-modal","true");
+    panel.setAttribute("aria-labelledby","bilocost-notice-title");
+    Object.assign(panel.style,{
+      width:"min(100%,440px)", boxSizing:"border-box", padding:"24px",
+      borderRadius:"22px", border:"1px solid #dce7df", background:"#fff",
+      color:"#17231c", boxShadow:"0 22px 70px rgba(13,38,23,.22)",
+      fontFamily:"'Plus Jakarta Sans',Inter,system-ui,sans-serif"
+    });
+    const mark=document.createElement("div");
+    mark.textContent="B";
+    Object.assign(mark.style,{
+      width:"42px",height:"42px",display:"grid",placeItems:"center",
+      borderRadius:"13px",background:"#eaf6ee",color:"#16834a",
+      fontWeight:"900",fontSize:"22px",marginBottom:"14px"
+    });
+    const title=document.createElement("h2");
+    title.id="bilocost-notice-title";
+    title.textContent="Information Bilocost";
+    Object.assign(title.style,{margin:"0 0 9px",fontSize:"19px",fontWeight:"800",letterSpacing:"-.02em"});
+    const body=document.createElement("p");
+    body.textContent=String(message ?? "");
+    Object.assign(body.style,{margin:"0 0 22px",color:"#66736b",fontSize:"14px",lineHeight:"1.6",whiteSpace:"pre-wrap",overflowWrap:"anywhere"});
+    const close=document.createElement("button");
+    close.type="button"; close.textContent="Compris";
+    Object.assign(close.style,{
+      width:"100%",minHeight:"48px",border:"1px solid #16834a",
+      borderRadius:"13px",background:"#16834a",color:"#fff",
+      font:"700 14px 'Plus Jakarta Sans',Inter,system-ui,sans-serif"
+    });
+    const dismiss=()=>{overlay.remove();};
+    close.addEventListener("click",dismiss);
+    overlay.addEventListener("click",event=>{if(event.target===overlay)dismiss();});
+    panel.append(mark,title,body,close); overlay.append(panel);
+    (document.body||document.documentElement).append(overlay);
+    close.focus();
+  };
+  if(!window.__bilocostNativeNoticeReplaced){
+    window.__bilocostNativeNoticeReplaced=true;
+    window.alert=showBilocostNotice;
+  }
+
   const syncAuthLayer=()=>{
     const auth=document.getElementById("auth");
     const open=!!(auth&&getComputedStyle(auth).display!=="none"&&auth.innerHTML.trim());
