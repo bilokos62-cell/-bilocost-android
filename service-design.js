@@ -9,7 +9,7 @@
     adSlots = function(){
       return originalAdSlots().replace(
         '<div class="row"><h3>Partenaires Bilocost</h3>',
-        '<div class="row partner-nav"><h3>Partenaires Bilocost</h3>'
+        '<div class="row partner-nav"><img class="partner-brand-mark" src="resources/bilocost-icon.jpg" alt="B Bilocost"><h3>Partenaires Bilocost</h3>'
       );
     };
     window.__bilocostPartnerNavPatched = true;
@@ -83,6 +83,10 @@
   };
 
   style.textContent += `
+    .partner-brand-mark{display:block;flex:0 0 34px;width:34px;height:34px;object-fit:contain;object-position:center;border-radius:9px;background:#fff}
+    .partner-nav{align-items:center!important}
+
+
     .bilocost-horizontal-nav{
       display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
       align-items:stretch;gap:10px!important;width:100%!important;max-width:100%!important;

@@ -67,4 +67,26 @@
   if(window.MutationObserver){
     new MutationObserver(syncAuthLayer).observe(document.documentElement,{attributes:true,childList:true,subtree:true,attributeFilter:["style"]});
   }
+
+  /* One consistent Bilocost identity for every in-app request / dialog surface. */
+  const requestStyle = document.createElement("style");
+  requestStyle.id = "bilocost-request-design";
+  requestStyle.textContent = `
+    :root{--bilo-green:#16834a;--bilo-green-dark:#10683a;--bilo-green-soft:#eaf6ee;--bilo-ink:#17231c;--bilo-muted:#66736b;--bilo-border:#dce7df;--bilo-surface:#fff}
+    dialog[open],[role="dialog"],[role="alertdialog"],.modal,.modal-overlay,.modal-backdrop,.dialog,.dialog-overlay,.popup,.popup-overlay,.sheet,.bottom-sheet,.drawer,.prompt,.confirm,.request-modal,.permission-modal,[class*="modal-"],[class*="-modal"]{font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif;color:var(--bilo-ink)}
+    dialog[open],[role="dialog"],[role="alertdialog"],.modal,.dialog,.popup,.sheet,.bottom-sheet,.drawer,.prompt,.confirm,.request-modal,.permission-modal,[class*="modal-content"],[class*="dialog-content"]{background:var(--bilo-surface)!important;color:var(--bilo-ink)!important;border:1px solid var(--bilo-border)!important;border-radius:22px!important;box-shadow:0 22px 70px rgba(13,38,23,.22)!important;max-width:min(94vw,520px);overflow-wrap:anywhere}
+    dialog[open]::backdrop,.modal-overlay,.modal-backdrop,.dialog-overlay,.popup-overlay{background:rgba(10,24,15,.58)!important;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+    [role="dialog"] h1,[role="dialog"] h2,[role="dialog"] h3,[role="alertdialog"] h1,[role="alertdialog"] h2,[role="alertdialog"] h3,dialog h1,dialog h2,dialog h3,.modal h1,.modal h2,.modal h3,.dialog h1,.dialog h2,.dialog h3,.popup h1,.popup h2,.popup h3,.sheet h1,.sheet h2,.sheet h3{color:var(--bilo-ink)!important;font-weight:800;letter-spacing:-.025em}
+    [role="dialog"] p,[role="alertdialog"] p,dialog p,.modal p,.dialog p,.popup p,.sheet p,.prompt p,.confirm p{color:var(--bilo-muted);line-height:1.55}
+    [role="dialog"] input,[role="dialog"] select,[role="dialog"] textarea,[role="alertdialog"] input,[role="alertdialog"] select,[role="alertdialog"] textarea,dialog input,dialog select,dialog textarea,.modal input,.modal select,.modal textarea,.dialog input,.dialog select,.dialog textarea,.popup input,.popup select,.popup textarea,.sheet input,.sheet select,.sheet textarea,.prompt input,.prompt select,.prompt textarea,.confirm input,.confirm select,.confirm textarea{width:100%;max-width:100%;min-height:48px;box-sizing:border-box;padding:12px 14px;border:1px solid var(--bilo-border)!important;border-radius:13px!important;background:#fff!important;color:var(--bilo-ink)!important;font:500 14px/1.4 Inter,system-ui,sans-serif;outline:none}
+    [role="dialog"] input:focus,[role="dialog"] select:focus,[role="dialog"] textarea:focus,dialog input:focus,dialog select:focus,dialog textarea:focus,.modal input:focus,.modal select:focus,.modal textarea:focus,.dialog input:focus,.dialog select:focus,.dialog textarea:focus{border-color:var(--bilo-green)!important;box-shadow:0 0 0 3px rgba(22,131,74,.12)!important}
+    [role="dialog"] button,.modal button,.dialog button,.popup button,.sheet button,.prompt button,.confirm button,dialog button,.request-modal button,.permission-modal button{min-height:44px;border-radius:13px!important;font:700 13px/1.25 'Plus Jakarta Sans',Inter,system-ui,sans-serif;cursor:pointer;transition:transform .15s ease,filter .15s ease}
+    [role="dialog"] button:active,.modal button:active,.dialog button:active,.popup button:active,.sheet button:active,dialog button:active{transform:scale(.985)}
+    [role="dialog"] button.primary,[role="dialog"] button[type="submit"],.modal button.primary,.modal button[type="submit"],.dialog button.primary,.dialog button[type="submit"],.popup button.primary,.sheet button.primary,.request-modal button.primary,.permission-modal button.primary,dialog button.primary,dialog button[type="submit"]{background:var(--bilo-green)!important;color:#fff!important;border:1px solid var(--bilo-green)!important}
+    [role="dialog"] button.secondary,.modal button.secondary,.dialog button.secondary,.popup button.secondary,.sheet button.secondary,dialog button.secondary{background:var(--bilo-green-soft)!important;color:var(--bilo-green-dark)!important;border:1px solid #cfe6d6!important}
+    [role="dialog"] label,.modal label,.dialog label,.popup label,.sheet label,dialog label{color:var(--bilo-ink);font-weight:650;font-size:13px}
+    @media(max-width:520px){dialog[open],[role="dialog"],[role="alertdialog"],.modal,.dialog,.popup,.prompt,.confirm,.request-modal,.permission-modal,[class*="modal-content"],[class*="dialog-content"]{width:min(94vw,520px)!important;max-width:94vw!important;max-height:calc(100dvh - 28px);overflow-y:auto;border-radius:20px!important}.sheet,.bottom-sheet{width:100%!important;max-width:100%!important;max-height:88dvh;overflow-y:auto;border-radius:22px 22px 0 0!important}}
+  `;
+  (document.head||document.documentElement).appendChild(requestStyle);
+
 })();
