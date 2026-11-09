@@ -6,7 +6,7 @@
 
   const selector = '#view [data-act="theme"], #view #theme, #view [data-bilo-theme-entry]';
   const labels = new Set(["thème", "thème de l'application", "thème de l’application", "apparence"]);
-  const norm = value => String(value || "").replace(/\\s+/g, " ").trim().toLocaleLowerCase("fr");
+  const norm = value => String(value || "").replace(/\s+/g, " ").trim().toLocaleLowerCase("fr");
 
   const openPalette = () => {
     if (typeof window.biloOpenPersonalizationHub === "function") window.biloOpenPersonalizationHub();
