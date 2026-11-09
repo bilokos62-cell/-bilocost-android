@@ -7,6 +7,9 @@ const firestoreRules = readFileSync("firestore.rules", "utf8");
 const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
+const messagingPatch = readFileSync("messaging-fix.js", "utf8");
+const servicePatch = readFileSync("service-design.js", "utf8");
+const uiRefinementPatch = readFileSync("ui-refinement.js", "utf8");
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
@@ -14,7 +17,7 @@ const themeRewards = readFileSync("theme-rewards.js", "utf8");
 const themeSettingsEntry = readFileSync("theme-settings-entry.js", "utf8");
 const themeDesigns = readFileSync("personalization-designs.js", "utf8");
 try { new vm.Script(themeDesigns, { filename: "personalization-designs.js" }); } catch (error) { fail("Design personalization syntax error: " + error.message); }
-for (const [name, code] of [["theme-rewards.js", themeRewards], ["theme-settings-entry.js", themeSettingsEntry], ["delivery-otp.js", deliveryPatch], ["geography-selector.js", geographyPatch], ["listing-location.js", listingLocationPatch]]) {
+for (const [name, code] of [["messaging-fix.js", messagingPatch], ["service-design.js", servicePatch], ["ui-refinement.js", uiRefinementPatch], ["theme-rewards.js", themeRewards], ["theme-settings-entry.js", themeSettingsEntry], ["delivery-otp.js", deliveryPatch], ["geography-selector.js", geographyPatch], ["listing-location.js", listingLocationPatch]]) {
   try { new vm.Script(code, { filename: name }); } catch (error) { fail(name + " syntax error: " + error.message); }
 }
 const functionsSource = readFileSync("functions/index.js", "utf8");
