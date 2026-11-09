@@ -63,9 +63,12 @@
 
   const start = () => {
     decorate();
-    const view = document.getElementById("view");
-    if (view && window.MutationObserver) {
-      new MutationObserver(decorate).observe(view, {childList:true, subtree:true, characterData:true});
+    // Observe the document, not only the initial #view node: authentication can
+    // replace the settings container after login and detach the old observer target.
+    if (window.MutationObserver && document.documentElement) {
+      new MutationObserver(decorate).observe(document.documentElement, {
+        childList:true, subtree:true, characterData:true
+      });
     }
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, {once:true});
