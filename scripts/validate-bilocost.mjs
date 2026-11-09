@@ -90,6 +90,7 @@ const platformWorkflows = [
 for (const [path, workflow] of platformWorkflows) {
   if (!workflow.includes("personalization-designs.js")) fail(path + " does not inject premium design personalization");
   if (!workflow.includes("theme-rewards.js")) fail(path + " does not inject the rewarded color palettes");
+  if (!workflow.includes("listing-location.js")) fail(path + " does not enforce province and locality on listings");
 }
 
 console.log("Delivery OTP module and backend syntax: valid.");
