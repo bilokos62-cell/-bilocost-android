@@ -77,6 +77,21 @@ if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.inclu
 if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource.includes("exports.confirmDelivery") || !functionsSource.includes("exports.confirmOrderPayment")) fail("Delivery OTP backend functions are incomplete");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "sellerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Seller order-history index is missing");
+
+if (!/index\\s*=\\s*1/.test(themeRewards) || !/index\\s*>=\\s*100/.test(themeRewards)) fail("The 100-color palette generator is incomplete");
+if (!/ACCESS_DURATION_MS\\s*=\\s*30\\s*\\*/.test(themeRewards) || !/state\\.progress\\[id\\]\\s*>=\\s*2/.test(themeRewards)) fail("Premium color unlock must require two rewarded ads and last 30 days");
+if (!/const DAYS=30\\*86400000/.test(themeDesigns) || !/state\\.progress\\[id\\]>=2/.test(themeDesigns)) fail("Premium design unlock must require two rewarded ads and last 30 days");
+if (!themeDesigns.includes("window.biloOpenPersonalizationHub") || !themeSettingsEntry.includes("biloOpenPersonalizationHub")) fail("The colors-and-designs personalization hub is not connected");
+const platformWorkflows = [
+  [".github/workflows/android.yml", readFileSync(".github/workflows/android.yml", "utf8")],
+  [".github/workflows/ios.yml", readFileSync(".github/workflows/ios.yml", "utf8")],
+  [".github/workflows/firebase-hosting.yml", readFileSync(".github/workflows/firebase-hosting.yml", "utf8")],
+];
+for (const [path, workflow] of platformWorkflows) {
+  if (!workflow.includes("personalization-designs.js")) fail(path + " does not inject premium design personalization");
+  if (!workflow.includes("theme-rewards.js")) fail(path + " does not inject the rewarded color palettes");
+}
+
 console.log("Delivery OTP module and backend syntax: valid.");
 console.log("Bilocost source validation passed.");
 console.log("JavaScript syntax: valid");
