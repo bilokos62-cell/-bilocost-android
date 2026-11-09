@@ -115,7 +115,19 @@
   `;
 
   applyBilocostNavigation();
-  const navigationObserver = new MutationObserver(applyBilocostNavigation);
+  // Batch repeated DOM mutations into one navigation scan per animation frame.
+  let navigationScanPending = false;
+  const scheduleNavigationScan = () => {
+    if (navigationScanPending) return;
+    navigationScanPending = true;
+    const run = () => {
+      navigationScanPending = false;
+      applyBilocostNavigation();
+    };
+    if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(run);
+    else window.setTimeout(run, 32);
+  };
+  const navigationObserver = new MutationObserver(scheduleNavigationScan);
   navigationObserver.observe(document.documentElement,{childList:true,subtree:true});
 
   if (typeof serviceCards === "function") {
