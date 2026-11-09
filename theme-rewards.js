@@ -85,6 +85,31 @@
     state.selected = id; save();
   };
   apply(state.selected);
+
+  // Keep the selected palette after authentication and every app screen re-render.
+  // The main app can rewrite theme variables while rebuilding its authenticated UI.
+  const ensureSelectedTheme = () => {
+    const c = COLORS[state.selected] || COLORS.green;
+    const root = document.documentElement;
+    if (
+      root.style.getPropertyValue("--pri").trim() !== c.pri ||
+      root.style.getPropertyValue("--pri-d").trim() !== c.dark ||
+      root.style.getPropertyValue("--mint").trim() !== c.mint ||
+      root.style.getPropertyValue("--mint-t").trim() !== c.mintText
+    ) apply(state.selected);
+  };
+  if (window.MutationObserver && document.documentElement) {
+    new MutationObserver(ensureSelectedTheme).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["style"],
+      childList: true,
+      subtree: true
+    });
+  }
+  window.addEventListener("pageshow", ensureSelectedTheme);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) ensureSelectedTheme();
+  });
   scheduleExpiration();
   const adMob = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   const progress = id => Math.min(2, Number(state.progress[id] || 0));
