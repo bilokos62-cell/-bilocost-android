@@ -78,9 +78,9 @@ if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "sellerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Seller order-history index is missing");
 
-if (!/index\\s*=\\s*1/.test(themeRewards) || !/index\\s*>=\\s*100/.test(themeRewards)) fail("The 100-color palette generator is incomplete");
-if (!/ACCESS_DURATION_MS\\s*=\\s*30\\s*\\*/.test(themeRewards) || !/state\\.progress\\[id\\]\\s*>=\\s*2/.test(themeRewards)) fail("Premium color unlock must require two rewarded ads and last 30 days");
-if (!/const DAYS=30\\*86400000/.test(themeDesigns) || !/state\\.progress\\[id\\]>=2/.test(themeDesigns)) fail("Premium design unlock must require two rewarded ads and last 30 days");
+if (!/index\s*=\s*1/.test(themeRewards) || !/index\s*>=\s*100/.test(themeRewards)) fail("The 100-color palette generator is incomplete");
+if (!/ACCESS_DURATION_MS\s*=\s*30\s*\*/.test(themeRewards) || !/state\.progress\[id\]\s*>=\s*2/.test(themeRewards)) fail("Premium color unlock must require two rewarded ads and last 30 days");
+if (!/const DAYS=30\*86400000/.test(themeDesigns) || !/state\.progress\[id\]>=2/.test(themeDesigns)) fail("Premium design unlock must require two rewarded ads and last 30 days");
 if (!themeDesigns.includes("window.biloOpenPersonalizationHub") || !themeSettingsEntry.includes("biloOpenPersonalizationHub")) fail("The colors-and-designs personalization hub is not connected");
 const platformWorkflows = [
   [".github/workflows/android.yml", readFileSync(".github/workflows/android.yml", "utf8")],
