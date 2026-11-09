@@ -82,9 +82,9 @@ jobs:
           theme_designs = Path("personalization-designs.js").read_text(encoding="utf-8")
           theme_entry = Path("theme-settings-entry.js").read_text(encoding="utf-8")
           modules = [messaging, services, delivery, geography, listing_location, ui_refinement, theme_rewards, theme_designs, theme_entry]
-          injected = "\\n".join("<script>\\n" + module + "\\n</script>" for module in modules)
+          injected = "\n".join("<script>\n" + module + "\n</script>" for module in modules)
           close_end = script_end + len("</script>")
-          html = html[:close_end] + "\\n" + injected + "\\n" + html[close_end:]
+          html = html[:close_end] + "\n" + injected + "\n" + html[close_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
