@@ -309,11 +309,11 @@ jobs:
               end = text.find("}", pos)
               if end < 0:
                   raise SystemExit("Could not close root Gradle dependencies block")
-              text = text[:end] + "    classpath 'com.google.gms:google-services:4.4.4'\\n" + text[end:]
+              text = text[:end] + "    classpath 'com.google.gms:google-services:4.4.4'\n" + text[end:]
               root.write_text(text, encoding="utf-8")
           text = app.read_text(encoding="utf-8")
           if "com.google.gms.google-services" not in text:
-              text += "\\napply plugin: 'com.google.gms.google-services'\\n"
+              text += "\napply plugin: 'com.google.gms.google-services'\n"
               app.write_text(text, encoding="utf-8")
           PY
 
