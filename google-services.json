@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "969155385669",
+    "firebase_url": "https://bilocost-a8136-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "bilocost-a8136",
+    "storage_bucket": "bilocost-a8136.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969155385669:android:20dfab6a21ed1312ce862c",
+        "android_client_info": {
+          "package_name": "com.bilocost.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "969155385669-6ej8ujj12i78usrd95pl9psfpkrglfsl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwAofzFVCRBiZR4pbA_D8pYpM9GCDU3Pc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "969155385669-6ej8ujj12i78usrd95pl9psfpkrglfsl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
