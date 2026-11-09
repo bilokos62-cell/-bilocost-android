@@ -41,6 +41,7 @@ jobs:
               "geography-selector.js",
               "ui-refinement.js",
               "theme-rewards.js",
+              "personalization-designs.js",
               "theme-settings-entry.js",
           ]
           additions = []
