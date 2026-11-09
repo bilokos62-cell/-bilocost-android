@@ -50,7 +50,9 @@ jobs:
               if not path.is_file():
                   raise SystemExit(f"Required shared module missing: {name}")
               additions.append(path.read_text(encoding="utf-8"))
-          html = html[:script_end] + "\n" + "\n".join(additions) + "\n" + html[script_end:]
+          injected = "\\n".join("<script>\\n" + module + "\\n</script>" for module in additions)
+          close_end = script_end + len("</script>")
+          html = html[:close_end] + "\\n" + injected + "\\n" + html[close_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Shared messaging, services, delivery OTP, geography, and UI modules injected for iOS.")
           PY
