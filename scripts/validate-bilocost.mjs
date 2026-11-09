@@ -12,6 +12,8 @@ const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const themeRewards = readFileSync("theme-rewards.js", "utf8");
 const themeSettingsEntry = readFileSync("theme-settings-entry.js", "utf8");
+const themeDesigns = readFileSync("personalization-designs.js", "utf8");
+try { new vm.Script(themeDesigns, { filename: "personalization-designs.js" }); } catch (error) { fail("Design personalization syntax error: " + error.message); }
 const functionsSource = readFileSync("functions/index.js", "utf8");
 
 function fail(message) {
