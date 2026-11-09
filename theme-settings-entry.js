@@ -1,4 +1,4 @@
-/* Connect the Bilocost theme setting to the 100-colour palette. */
+/* Connect Bilocost settings to the complete personalization hub. */
 (() => {
   "use strict";
   if (window.__biloThemeSettingsEntry) return;
@@ -9,8 +9,9 @@
   const norm = value => String(value || "").replace(/\\s+/g, " ").trim().toLocaleLowerCase("fr");
 
   const openPalette = () => {
-    if (typeof window.biloOpenThemeCustomizer !== "function") return false;
-    window.biloOpenThemeCustomizer();
+    if (typeof window.biloOpenPersonalizationHub === "function") window.biloOpenPersonalizationHub();
+    else if (typeof window.biloOpenThemeCustomizer === "function") window.biloOpenThemeCustomizer();
+    else return false;
     return true;
   };
 
@@ -39,8 +40,8 @@
       if (target.querySelector(".bilo-theme-entry-badge")) continue;
       const badge = document.createElement("span");
       badge.className = "bilo-theme-entry-badge";
-      badge.textContent = "100 couleurs";
-      badge.setAttribute("aria-label", "Ouvrir les 100 palettes de couleurs");
+      badge.textContent = "Couleurs & designs";
+      badge.setAttribute("aria-label", "Ouvrir les couleurs et designs Bilocost");
       target.appendChild(badge);
     }
   };
