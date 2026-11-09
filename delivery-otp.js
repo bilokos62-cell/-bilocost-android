@@ -35,15 +35,24 @@ async function biloLoadOrders(side) {
   try {
     const F = FB.F, field = side === "buy" ? "buyerId" : "sellerId";
     const q = F.query(F.collection(FB.db, "orders"), F.where(field, "==", S.user.uid), F.orderBy("createdAt", "desc"), F.limit(50));
-    const snap = await F.getDocs(q), orders = snap.docs.map(d => Object.assign({ id: d.id }, d.data())), cards = [];
-    for (const order of orders) {
-      let code = null;
-      if (side === "buy" && order.status === "READY_FOR_DELIVERY") {
-        try { const secret = await F.getDoc(F.doc(FB.db, "deliveryCodes", order.id)); if (secret.exists()) code = secret.data().code; }
-        catch (e) { console.warn("Delivery code is not readable", e); }
-      }
-      cards.push(biloOrderCard(order, side, code));
+    const snap = await F.getDocs(q), orders = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    const readyOrders = side === "buy" ? orders.filter(order => order.status === "READY_FOR_DELIVERY") : [];
+    const codeEntries = [];
+    for (let i = 0; i < readyOrders.length; i += 10) {
+      const batch = readyOrders.slice(i, i + 10);
+      const entries = await Promise.all(batch.map(async order => {
+        try {
+          const secret = await F.getDoc(F.doc(FB.db, "deliveryCodes", order.id));
+          return [order.id, secret.exists() ? secret.data().code : null];
+        } catch (e) {
+          console.warn("Delivery code is not readable", e);
+          return [order.id, null];
+        }
+      }));
+      codeEntries.push(...entries);
     }
+    const deliveryCodes = new Map(codeEntries);
+    const cards = orders.map(order => biloOrderCard(order, side, deliveryCodes.get(order.id) || null));
     sheet('<h2>' + (side === "buy" ? "Mes achats sécurisés" : "Mes ventes sécurisées") + '</h2><p class="sub">Le code de remise est créé uniquement après confirmation du paiement par un administrateur ou le prestataire de paiement.</p>' + (cards.join("") || '<div class="empty"><b>Aucune commande pour le moment</b><br>Les commandes créées depuis la messagerie apparaîtront ici.</div>') + '<button class="btn out" style="margin-top:8px" data-otp-refresh="' + side + '">Actualiser</button>');
   } catch (e) {
     console.error("Bilocost order list", e);
@@ -89,16 +98,22 @@ document.addEventListener("click", e => {
 /* Bilocost in-app inbox: order codes, account notices and promotions. */
 let BILO_INBOX_FILTER = "all";
 let BILO_INBOX_BADGE_BUSY = false;
+let BILO_INBOX_BADGE_LAST_AT = 0;
+let BILO_INBOX_BADGE_UID = "";
 function biloInstallInboxIcon() {
   // The inbox is accessed from the Messages area, not as another permanent header icon.
 }
-async function biloRefreshInboxBadge() {
+async function biloRefreshInboxBadge(force) {
   if (BILO_INBOX_BADGE_BUSY || !CLOUD || !S.user || !FB.F || !FB.db) return;
+  const uid = S.user.uid, now = Date.now();
+  if (!force && uid === BILO_INBOX_BADGE_UID && now - BILO_INBOX_BADGE_LAST_AT < 15000) return;
   BILO_INBOX_BADGE_BUSY = true;
   try {
-    const F = FB.F, q = F.query(F.collection(FB.db, "inboxNotifications"), F.where("ownerId", "==", S.user.uid), F.orderBy("createdAt", "desc"), F.limit(80));
+    const F = FB.F, q = F.query(F.collection(FB.db, "inboxNotifications"), F.where("ownerId", "==", uid), F.orderBy("createdAt", "desc"), F.limit(80));
     const snap = await F.getDocs(q), count = snap.docs.filter(d => d.data().read !== true).length, badge = document.getElementById("biloInboxBadge");
     if (badge) { badge.textContent = count > 99 ? "99+" : String(count); badge.style.display = count ? "block" : "none"; }
+    BILO_INBOX_BADGE_UID = uid;
+    BILO_INBOX_BADGE_LAST_AT = Date.now();
   } catch (e) { console.warn("Bilocost inbox badge", e); }
   finally { BILO_INBOX_BADGE_BUSY = false; }
 }
@@ -132,7 +147,7 @@ async function biloOpenInbox(filter) {
   }
 }
 async function biloMarkInboxRead(notificationId) {
-  try { await biloDeliveryCall("markInboxNotificationRead", {notificationId}); biloOpenInbox(); biloRefreshInboxBadge(); }
+  try { await biloDeliveryCall("markInboxNotificationRead", {notificationId}); biloOpenInbox(); biloRefreshInboxBadge(true); }
   catch (e) { toast(e.message || "Impossible de mettre à jour le message."); }
 }
 let BILO_SHOW_INBOX_ENTRY = false;
