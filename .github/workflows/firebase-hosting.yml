@@ -53,6 +53,7 @@ jobs:
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
           theme_rewards = Path("theme-rewards.js").read_text(encoding="utf-8")
+          theme_designs = Path("personalization-designs.js").read_text(encoding="utf-8")
           theme_entry = Path("theme-settings-entry.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
