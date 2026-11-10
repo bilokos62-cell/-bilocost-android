@@ -74,6 +74,9 @@ if (!listingLocationPatch.includes("form.province=loc.province") || !listingLoca
 for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
   if (!workflow.includes("listing-location.js")) fail(platform + " build does not inject the mandatory listing location module");
 }
+if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||loc.neighborhood||")) fail("Listing publication must preserve a valid fallback locality");
+if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
+if (!hostingWorkflow.includes("firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136")) fail("Firebase deployment must include the reviewed security rules and indexes");
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
