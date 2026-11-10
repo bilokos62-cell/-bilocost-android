@@ -16,6 +16,9 @@ const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const themeRewards = readFileSync("theme-rewards.js", "utf8");
 const themeSettingsEntry = readFileSync("theme-settings-entry.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
+const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
+const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
+const hostingWorkflow = readFileSync(".github/workflows/firebase-hosting.yml", "utf8");
 
 function fail(message) {
   console.error("Bilocost validation failed: " + message);
@@ -68,6 +71,9 @@ try { new vm.Script(serviceDesign, { filename: "service-design.js" }); } catch (
 try { new vm.Script(uiRefinement, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement syntax error: " + error.message); }
 try { new vm.Script(listingLocationPatch, { filename: "listing-location.js" }); } catch (error) { fail("Listing location patch syntax error: " + error.message); }
 if (!listingLocationPatch.includes("form.province=loc.province") || !listingLocationPatch.includes("form.locality=loc.commune") || !listingLocationPatch.includes("Choisissez votre province et votre localité avant de publier")) fail("Listing publication no longer enforces province and locality");
+for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
+  if (!workflow.includes("listing-location.js")) fail(platform + " build does not inject the mandatory listing location module");
+}
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
