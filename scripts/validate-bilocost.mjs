@@ -67,6 +67,9 @@ try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (
 try { new vm.Script(serviceDesign, { filename: "service-design.js" }); } catch (error) { fail("Service design syntax error: " + error.message); }
 try { new vm.Script(uiRefinement, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement syntax error: " + error.message); }
 try { new vm.Script(listingLocationPatch, { filename: "listing-location.js" }); } catch (error) { fail("Listing location patch syntax error: " + error.message); }
+if (!listingLocationPatch.includes("form.province=loc.province") || !listingLocationPatch.includes("form.locality=loc.commune") || !listingLocationPatch.includes("Choisissez votre province et votre localité avant de publier")) fail("Listing publication no longer enforces province and locality");
+if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
+
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
 try { new vm.Script(themeRewards, { filename: "theme-rewards.js" }); } catch (error) { fail("Theme rewards syntax error: " + error.message); }
 try { new vm.Script(themeSettingsEntry, { filename: "theme-settings-entry.js" }); } catch (error) { fail("Theme settings entry syntax error: " + error.message); }
