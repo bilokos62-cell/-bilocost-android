@@ -8,6 +8,9 @@ const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
+const messagingPatch = readFileSync("messaging-fix.js", "utf8");
+const serviceDesign = readFileSync("service-design.js", "utf8");
+const uiRefinement = readFileSync("ui-refinement.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const themeRewards = readFileSync("theme-rewards.js", "utf8");
@@ -59,6 +62,10 @@ if (!firestoreRules.includes("match /chats/{chatId}") || !firestoreRules.include
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow read: if isOwner(uid) || isAdmin()")) fail("Private identity Storage rules are missing");
 
 try { new vm.Script(deliveryPatch, { filename: "delivery-otp.js" }); } catch (error) { fail("Delivery OTP patch syntax error: " + error.message); }
+try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (error) { fail("Messaging patch syntax error: " + error.message); }
+try { new vm.Script(serviceDesign, { filename: "service-design.js" }); } catch (error) { fail("Service design syntax error: " + error.message); }
+try { new vm.Script(uiRefinement, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement syntax error: " + error.message); }
+try { new vm.Script(listingLocationPatch, { filename: "listing-location.js" }); } catch (error) { fail("Listing location patch syntax error: " + error.message); }
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
 try { new vm.Script(themeRewards, { filename: "theme-rewards.js" }); } catch (error) { fail("Theme rewards syntax error: " + error.message); }
 try { new vm.Script(themeSettingsEntry, { filename: "theme-settings-entry.js" }); } catch (error) { fail("Theme settings entry syntax error: " + error.message); }
