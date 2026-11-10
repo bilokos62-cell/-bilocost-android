@@ -8,8 +8,10 @@ Le dépôt utilise désormais :
 - `storage.rules` pour les documents d'identité et les photos de location/événements ;
 - `firebase.json` pour déclarer ces fichiers au CLI Firebase.
 
-Le workflow du site exécute :
+Le workflow manuel du site exécute :
 `firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136`
+
+Il publie donc ensemble le site, les règles Firestore, les index et les règles Storage. Le workflow n'est pas lancé automatiquement à chaque commit : il faut le déclencher depuis GitHub Actions après vérification du projet Firebase et du secret `FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136`.
 
 Le workflow Android compile l'application ; il ne déploie pas les règles Firebase.
 
