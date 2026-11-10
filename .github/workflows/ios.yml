@@ -39,6 +39,7 @@ jobs:
               "service-design.js",
               "delivery-otp.js",
               "geography-selector.js",
+              "listing-location.js",
               "ui-refinement.js",
               "theme-rewards.js",
               "theme-settings-entry.js",
