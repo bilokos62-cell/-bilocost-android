@@ -25,7 +25,7 @@
         if(item.province){
           if(item.province!==loc.province)return false;
           if(loc.territory&&item.territory!==loc.territory)return false;
-          if(loc.commune&&item.locality!==loc.commune)return false;
+          if(loc.commune&&(item.locality||item.commune||item.c)!==loc.commune)return false;
           return true;
         }
         // Older listings have no province metadata. Only retain them in their known Kinshasa commune.
@@ -41,7 +41,7 @@
     form.c=value;
     form.province=loc.province||"";
     form.territory=loc.territory||"";
-    form.locality=loc.commune||"";
+    form.locality=loc.commune||loc.territory||loc.neighborhood||"";
     form.locationLabel=loc.location||[loc.province,loc.territory,loc.commune].filter(Boolean).join(" · ");
     form.neighborhood=loc.neighborhood||"";
     return originalPublishCloud(form);
