@@ -122,10 +122,10 @@
       if(!item)return;
       const id=item.dataset.pick;
       if(state.step==="province"){
-        state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;
+        state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual="";
         if(reference)showTerritories();else{state.step="local";refresh();}
       }else if(state.step==="territory"){
-        state.territory=territories.find(x=>getId(x)===id)||null;state.local=null;showLocals();
+        state.territory=territories.find(x=>getId(x)===id)||null;state.local=null;state.manual="";showLocals();
       }else{
         state.local=locals.find(x=>getId(x)===id)||null;refresh();
       }
