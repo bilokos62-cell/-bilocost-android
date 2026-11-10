@@ -65,7 +65,18 @@
   };
   syncAuthLayer();
   if(window.MutationObserver){
-    new MutationObserver(syncAuthLayer).observe(document.documentElement,{attributes:true,childList:true,subtree:true,attributeFilter:["style"]});
+    let authSyncQueued=false;
+    const scheduleAuthSync=()=>{
+      if(authSyncQueued)return;
+      authSyncQueued=true;
+      const run=()=>{
+        authSyncQueued=false;
+        syncAuthLayer();
+      };
+      if(typeof window.requestAnimationFrame==="function")window.requestAnimationFrame(run);
+      else window.setTimeout(run,32);
+    };
+    new MutationObserver(scheduleAuthSync).observe(document.documentElement,{attributes:true,childList:true,subtree:true,attributeFilter:["style"]});
   }
 
   /* One consistent Bilocost identity for every in-app request / dialog surface. */
