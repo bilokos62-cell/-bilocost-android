@@ -92,4 +92,4 @@ jobs:
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
           # Deploy only Hosting. Firestore rules, indexes, and Functions require separate review.
-          firebase deploy --only hosting --project bilocost-a8136
+          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136
