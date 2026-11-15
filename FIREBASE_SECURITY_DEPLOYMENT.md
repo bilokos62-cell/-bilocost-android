@@ -53,6 +53,17 @@ et non une simple valeur envoyée par le navigateur.
 - Le blocage des numéros dans les messages est actuellement effectué dans l'interface ; une fonction serveur de modération reste nécessaire pour rendre ce contrôle résistant aux clients modifiés.
 - Les photos de location et d'événements ont des URLs de téléchargement enregistrées dans les documents publics ; elles sont donc traitées comme des médias publics. Les justificatifs d'identité ne doivent jamais être partagés par URL publique.
 
+## Protection ajoutée — annonces en attente
+
+Les vendeurs ne peuvent pas faire passer eux-mêmes une annonce `pending` à `active`. Seul un compte administrateur de confiance (custom claim `admin: true`) peut effectuer cette modération. Cette protection est vérifiée par le script de validation du dépôt. Elle doit encore être déployée sur Firebase pour devenir effective en production.
+
+## Clés et services tiers
+
+- Les paramètres Firebase client et la clé de site reCAPTCHA sont des identifiants publics côté application ; ils ne remplacent jamais les règles d'accès.
+- Ne jamais ajouter de clé privée, mot de passe, jeton d'accès ou clé de compte de service dans le dépôt. Les secrets de déploiement restent dans GitHub Actions Secrets.
+- Le preset Cloudinary `bilocost_upload` est un preset non signé utilisé par le navigateur. Dans la console Cloudinary, limiter ce preset aux images nécessaires, aux formats autorisés et à une taille maximale ; ne pas y placer de secret. Un upload signé côté serveur est préférable lorsque l'environnement serveur est disponible.
+- L'analyse du dépôt ne prouve pas l'absence de secrets dans tout l'historique Git ni l'état effectif des réglages Firebase/Cloudinary.
+
 ## Vérifications
 
 Le script `npm run build` contrôle la syntaxe JavaScript de l'application,
