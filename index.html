@@ -734,22 +734,73 @@ async function loadProfile(u){
 }
 
 function applyItems(){const all=S.allItems||[];items=all.filter(i=>!i.pending);S.pendingItems=all.filter(i=>i.pending&&S.user&&i.sellerId===S.user.uid)}
-async function bootCloud(){const nd=document.querySelector("nav .dot");if(nd)nd.style.display="none";
- try{await initFirebase();S.cloudError=""}catch(e){S.cloudError="Firebase ne répond pas : "+(e&&e.message||"vérifiez la configuration et le réseau");render();toast("Connexion à Firebase impossible");return}
+let cloudUnsubs=[],cloudBooting=false,cloudReady=false;
+function showCloudStatus(mode,message=""){
+ const v=document.getElementById("view");if(!v)return;
+ const offline=mode==="offline",loading=mode==="loading";
+ const safe=String(message||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ v.innerHTML='<section class="warn" role="status" aria-live="polite" style="margin:28px 12px;padding:24px;text-align:center;border-radius:18px;background:var(--card);border:1px solid var(--line)">'+
+ (loading?'<div aria-hidden="true" style="width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--pri);border-radius:50%;margin:0 auto 16px;animation:biloSpin .8s linear infinite"></div>':'<div aria-hidden="true" style="font-size:30px;margin-bottom:12px">'+(offline?'⌁':'!')+'</div>')+
+ '<b style="display:block;font-size:18px">'+(loading?'Chargement de Bilocost':offline?'Aucune connexion Internet':'Chargement impossible')+'</b>'+
+ '<p style="margin:10px 0 18px;color:var(--mute)">'+(loading?'Connexion sécurisée et récupération des annonces…':offline?'Vérifiez votre réseau Internet. Bilocost reprendra automatiquement dès que la connexion sera rétablie.':safe)+'</p>'+
+ (loading?'':'<button class="btn" type="button" onclick="retryCloudBoot()">Réessayer</button>')+'</section>';
+}
+if(!document.getElementById("bilo-cloud-loader-style")){const st=document.createElement("style");st.id="bilo-cloud-loader-style";st.textContent="@keyframes biloSpin{to{transform:rotate(360deg)}}";document.head.appendChild(st)}
+function retryCloudBoot(){if(cloudBooting)return;cloudUnsubs.splice(0).forEach(fn=>{try{fn()}catch(e){}});cloudReady=false;cloudBooting=false;showCloudStatus(navigator.onLine===false?"offline":"loading");bootCloud()}
+window.addEventListener("offline",()=>{showCloudStatus("offline")});
+window.addEventListener("online",()=>{if(!cloudReady||!cloudBooting)retryCloudBoot()});
+async function bootCloud(){
+ if(cloudBooting)return;
+ if(navigator.onLine===false){showCloudStatus("offline");return}
+ cloudBooting=true;cloudReady=false;
+ const nd=document.querySelector("nav .dot");if(nd)nd.style.display="none";
+ showCloudStatus("loading");
+ try{await initFirebase();S.cloudError=""}
+ catch(e){
+  cloudBooting=false;
+  const net=navigator.onLine===false||/network|offline|failed to fetch|load failed|unavailable/i.test(String(e&&((e.code||"")+" "+(e.message||e))));
+  showCloudStatus(net?"offline":"error",net?"":"Firebase ne répond pas : "+(e&&e.message||"vérifiez la configuration"));
+  return
+ }
  const {A,F,auth,db}=FB;
- // Redirect-result processing must not hold up normal startup or email login.
  A.getRedirectResult(auth).catch(re=>{console.error("Google redirect result",re);toast(errMsg(re)+" ("+(re.code||"erreur")+")")});
- F.onSnapshot(F.query(F.collection(db,"items"),F.orderBy("createdAt","desc"),F.limit(200)),s=>{S.cloudError="";S.allItems=s.docs.map(mapItem);applyItems();render();tryDeep();if(S.stack.length)renderPage()},e=>{S.cloudError="Impossible de lire les annonces : "+(e.code||e.message||"accès refusé");render();toast("Lecture des annonces impossible")});
+ let firstDone=false,firstTimer;
+ const firstItems=new Promise((resolve,reject)=>{
+  const unsub=F.onSnapshot(F.query(F.collection(db,"items"),F.orderBy("createdAt","desc"),F.limit(200)),s=>{
+   S.cloudError="";S.allItems=s.docs.map(mapItem);applyItems();
+   if(!firstDone){firstDone=true;clearTimeout(firstTimer);cloudReady=true;resolve()}
+   if(cloudReady){render();tryDeep();if(S.stack.length)renderPage()}
+  },e=>{
+   S.cloudError="Impossible de lire les annonces : "+(e.code||e.message||"accès refusé");
+   if(!firstDone){firstDone=true;clearTimeout(firstTimer);reject(e)}
+   else{render();toast("Lecture des annonces impossible")}
+  });
+  cloudUnsubs.push(unsub);
+  firstTimer=setTimeout(()=>{if(!firstDone){firstDone=true;reject(new Error("Le serveur met trop de temps à répondre."))}},20000);
+ });
+ try{await firstItems}
+ catch(e){
+  cloudBooting=false;
+  const net=navigator.onLine===false||/unavailable|deadline-exceeded|network|offline|failed to fetch|timed out/i.test(String((e&&e.code||"")+" "+(e&&e.message||e)));
+  showCloudStatus(net?"offline":"error",net?"":"Impossible de récupérer les annonces : "+(e&&e.message||e.code||"erreur serveur"));
+  return
+ }
  F.onSnapshot(F.query(F.collection(db,"services"),F.where("status","==","ACTIVE"),F.limit(100)),s=>{S.services=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="services")render()},()=>{});
  F.onSnapshot(F.query(F.collection(db,"ads"),F.where("status","==","ACTIVE"),F.limit(50)),s=>{S.ads=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="home"||S.tab==="ads")render()},()=>{});
  F.onSnapshot(F.query(F.collection(db,"events"),F.orderBy("startAt","asc"),F.limit(100)),s=>{S.events=s.docs.map(d=>{const x=d.data();return{id:d.id,title:x.title,desc:x.description||"",type:x.type,startAt:x.startAt,endAt:x.endAt,commune:x.commune,spot:x.spot||"",sellerId:x.sellerId,sellerName:x.sellerName,w:x.sellerPhone||"",p:x.photos||[]}});render();if(S.stack.length)renderPage();tryDeep()},()=>{});
  F.onSnapshot(F.query(F.collection(db,"rentalListings"),F.where("status","==","BOOKABLE"),F.limit(100)),s=>{S.rentals=s.docs.map(d=>{const x=d.data();return{id:d.id,t:x.title,cat:x.category,d:x.description||"",cond:x.condition||"",priceDay:x.priceDay,priceWeek:x.priceWeek||0,priceMonth:x.priceMonth||0,minDays:x.minDays||1,maxDays:x.maxDays||0,deposit:x.deposit,declaredValue:x.declaredValue||0,commune:x.commune,p:x.photos||[],owner:x.ownerName||"",ownerId:x.ownerId,ownerKyc:x.ownerKycStatus||"NOT_STARTED",blocked:x.blocked||[],handover:x.handover||""}});render()},e=>{S.cloudError="Locations indisponibles : "+(e.code||e.message||"accès refusé");render()});
- A.onAuthStateChanged(auth,async u=>{if(S.unChats){S.unChats();S.unChats=null}if(S.unRentMine){S.unRentMine();S.unRentMine=null}
-  if(u){try{S.user=await loadProfile(u)}catch(e){toast("Profil indisponible");S.user=null}S.auth=null;showAuth();applyItems();
+ A.onAuthStateChanged(auth,async u=>{
+  if(S.unChats){S.unChats();S.unChats=null}if(S.unRentMine){S.unRentMine();S.unRentMine=null}
+  if(u){
+   try{S.user=await loadProfile(u)}catch(e){toast("Profil indisponible");S.user=null}
+   S.auth=null;showAuth();applyItems();
    S.unRentMine=F.onSnapshot(F.query(F.collection(db,"rentalListings"),F.where("ownerId","==",u.uid)),q=>{S.rdrafts=q.docs.map(d=>{const x=d.data();return{id:d.id,t:x.title,cat:x.category,d:x.description,cond:x.condition,priceDay:x.priceDay,priceWeek:x.priceWeek,priceMonth:x.priceMonth,minDays:x.minDays,maxDays:x.maxDays,deposit:x.deposit,declaredValue:x.declaredValue,commune:x.commune,handover:x.handover,serial:x.serial,authorized:x.authorized,rulesAccepted:x.rulesAccepted,p:x.photos||[],status:x.status}});if(S.stack.length&&S.stack[S.stack.length-1].n==="rentmine")renderPage()},e=>{S.cloudError="Impossible de charger vos brouillons de location : "+(e.code||"accès refusé");render()});
-   S.unChats=F.onSnapshot(F.query(F.collection(db,"chats"),F.where("participants","array-contains",u.uid)),s=>{S.chats=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b.updatedAt&&b.updatedAt.seconds)||0)-((a.updatedAt&&a.updatedAt.seconds)||0));render()},()=>{})}
-  else{S.user=null;S.chats=[];S.rdrafts=[];applyItems();close_();if(S.stack.length)closePage()}
-  render();if(S.stack.length)renderPage()})}
+   S.unChats=F.onSnapshot(F.query(F.collection(db,"chats"),F.where("participants","array-contains",u.uid)),s=>{S.chats=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b.updatedAt&&b.updatedAt.seconds)||0)-((a.updatedAt&&a.updatedAt.seconds)||0));render()},()=>{})
+  }else{S.user=null;S.chats=[];S.rdrafts=[];applyItems();close_();if(S.stack.length)closePage()}
+  render();if(S.stack.length)renderPage()
+ });
+ cloudBooting=false;
+}
 let phoneConfirmation=null,phoneRecaptcha=null;
 async function socialAuth(provider){
  if(!CLOUD||!FB.A||!FB.auth)return toast("Firebase Authentication n'est pas initialisé. Rechargez la page.");
@@ -1341,7 +1392,7 @@ document.addEventListener("change",e=>{if(e.target.matches&&e.target.matches('in
  if(e.target.id==="apf"&&e.target.files[0]){const id=S.photoFor,f=e.target.files[0];readPhoto(f,600,async url=>{const i=findItem(id);if(!i)return;if(CLOUD){try{const n=(i.p||[]).length;if(n>=4)return toast("4 photos maximum");const r=FB.O.ref(FB.st,`items/${S.user.uid}/${id}/${n}.jpg`);await FB.O.uploadString(r,url,"data_url");const u=await FB.O.getDownloadURL(r);cloudUpdate(id,{photos:[...(i.p||[]),u]});toast("Photo ajoutée")}catch(err){toast("Envoi impossible")}}else{i.p=[...(i.p||[]),url];save();render();renderPage();toast("Photo ajoutée")}});e.target.value=""}
  if(e.target.id==="q"){const v=e.target.value.trim();if(v.length>1){S.recent=[v,...S.recent.filter(x=>x!==v)].slice(0,6);save()}}
  if(e.target.id==="avf"&&e.target.files[0]){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,200/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);S.user.avatar=c.toDataURL("image/jpeg",.75);if(CLOUD)FB.F.updateDoc(FB.F.doc(FB.db,"users",S.user.uid),{avatar:S.user.avatar}).catch(()=>{});save();$("#epav").innerHTML=avh(S.user,"big");render()};im.src=r.result};r.readAsDataURL(e.target.files[0])}});
-render();showAuth();if(CLOUD)bootCloud();
+if(CLOUD){showCloudStatus(navigator.onLine===false?"offline":"loading");bootCloud()}else{render();showAuth()}
 if(Q.get("a")){S.deep=Q.get("a");setTimeout(tryDeep,300)}if(Q.get("e")){S.deepE=Q.get("e");setTimeout(tryDeep,300)}if(Q.get("v"))go("seller",Q.get("v"));
 
 /* Bilocost — connect national location selector to listings and catalogue filters. */
