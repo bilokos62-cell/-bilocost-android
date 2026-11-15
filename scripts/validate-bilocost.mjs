@@ -19,6 +19,7 @@ const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
 const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
 const hostingWorkflow = readFileSync(".github/workflows/firebase-hosting.yml", "utf8");
+const functionsWorkflow = readFileSync(".github/workflows/firebase-functions.yml", "utf8");
 
 function fail(message) {
   console.error("Bilocost validation failed: " + message);
@@ -77,6 +78,7 @@ for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWor
 if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||loc.neighborhood||")) fail("Listing publication must preserve a valid fallback locality");
 if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
 if (!hostingWorkflow.includes("firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136")) fail("Firebase deployment must include the reviewed security rules and indexes");
+if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions --project bilocost-a8136")) fail("Cloud Functions deployment workflow is incomplete");
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
