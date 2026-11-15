@@ -746,7 +746,7 @@ function showCloudStatus(mode,message=""){
  (loading?'':'<button class="btn" type="button" onclick="retryCloudBoot()">Réessayer</button>')+'</section>';
 }
 if(!document.getElementById("bilo-cloud-loader-style")){const st=document.createElement("style");st.id="bilo-cloud-loader-style";st.textContent="@keyframes biloSpin{to{transform:rotate(360deg)}}";document.head.appendChild(st)}
-function retryCloudBoot(){if(cloudBooting)return;cloudUnsubs.splice(0).forEach(fn=>{try{fn()}catch(e){}});cloudReady=false;cloudBooting=false;showCloudStatus(navigator.onLine===false?"offline":"loading");bootCloud()}
+function retryCloudBoot(){if(cloudBooting)return;if(S.unChats){S.unChats();S.unChats=null}if(S.unRentMine){S.unRentMine();S.unRentMine=null}cloudUnsubs.splice(0).forEach(fn=>{try{fn()}catch(e){}});cloudReady=false;cloudBooting=false;showCloudStatus(navigator.onLine===false?"offline":"loading");bootCloud()}
 window.addEventListener("offline",()=>{cloudGeneration++;cloudBooting=false;cloudReady=false;cloudUnsubs.splice(0).forEach(fn=>{try{fn()}catch(e){}});showCloudStatus("offline")});
 window.addEventListener("online",()=>{if(!cloudReady||!cloudBooting)retryCloudBoot()});
 async function bootCloud(){
@@ -758,6 +758,7 @@ async function bootCloud(){
  showCloudStatus("loading");
  try{await initFirebase();S.cloudError=""}
  catch(e){
+  if(generation!==cloudGeneration)return;
   cloudBooting=false;
   const net=navigator.onLine===false||/network|offline|failed to fetch|load failed|unavailable/i.test(String(e&&((e.code||"")+" "+(e.message||e))));
   showCloudStatus(net?"offline":"error",net?"":"Firebase ne répond pas : "+(e&&e.message||"vérifiez la configuration"));
@@ -788,6 +789,7 @@ async function bootCloud(){
   showCloudStatus(net?"offline":"error",net?"":"Impossible de récupérer les annonces : "+(e&&e.message||e.code||"erreur serveur"));
   return
  }
+ if(generation!==cloudGeneration)return;
  cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"services"),F.where("status","==","ACTIVE"),F.limit(100)),s=>{S.services=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="services")render()},()=>{}));
  cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"ads"),F.where("status","==","ACTIVE"),F.limit(50)),s=>{S.ads=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="home"||S.tab==="ads")render()},()=>{}));
  cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"events"),F.orderBy("startAt","asc"),F.limit(100)),s=>{S.events=s.docs.map(d=>{const x=d.data();return{id:d.id,title:x.title,desc:x.description||"",type:x.type,startAt:x.startAt,endAt:x.endAt,commune:x.commune,spot:x.spot||"",sellerId:x.sellerId,sellerName:x.sellerName,w:x.sellerPhone||"",p:x.photos||[]}});render();if(S.stack.length)renderPage();tryDeep()},()=>{}));
