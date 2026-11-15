@@ -85,6 +85,7 @@ try { new vm.Script(themeSettingsEntry, { filename: "theme-settings-entry.js" })
 if (!themeSettingsEntry.includes("biloOpenThemeCustomizer") || !themeRewards.includes("window.biloOpenThemeCustomizer")) fail("Theme palette settings entry is not connected");
 try { new vm.Script(functionsSource, { filename: "functions/index.js" }); } catch (error) { fail("Cloud Functions syntax error: " + error.message); }
 if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions source is not configured in firebase.json");
+if (firebaseConfig.functions?.runtime !== "nodejs22") fail("Cloud Functions must use the supported Node.js 22 runtime");
 if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.includes("match /deliveryCodes/{orderId}")) fail("Secure order and delivery-code rules are missing");
 if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource.includes("exports.confirmDelivery") || !functionsSource.includes("exports.confirmOrderPayment")) fail("Delivery OTP backend functions are incomplete");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
