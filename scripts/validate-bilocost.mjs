@@ -54,6 +54,8 @@ const checks = [
 ];
 
 if (!html.includes('loading="lazy" decoding="async" fetchpriority="low"')) fail("Listing and category images must lazy-load asynchronously");
+if (!html.includes("1600/Math.max(im.width,im.height)") || !html.includes("toDataURL(\"image/jpeg\",.88)")) fail("Listing photo processing must preserve high resolution and JPEG quality");
+if (!html.includes("object-fit:contain;background:var(--panel)")) fail("Product photos must display without cropping");
 
 for (const [label, pattern] of checks) {
   if (!pattern.test(html)) fail(label + " is missing");
