@@ -53,6 +53,8 @@ const checks = [
   ["Rental module", /function rentHome\s*\(/],
 ];
 
+if (!html.includes('loading="lazy" decoding="async" fetchpriority="low"')) fail("Listing and category images must lazy-load asynchronously");
+
 for (const [label, pattern] of checks) {
   if (!pattern.test(html)) fail(label + " is missing");
 }
