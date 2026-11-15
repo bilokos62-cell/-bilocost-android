@@ -63,6 +63,7 @@ if (firebaseConfig.firestore?.indexes !== "firestore.indexes.json") fail("Firest
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "walletTransactions" && index.fields.some(field => field.fieldPath === "ownerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Wallet transaction composite index is missing");
 if (!firestoreRules.includes("match /{document=**}") || !firestoreRules.includes("allow read, write: if false")) fail("Firestore default-deny rule is missing");
 if (!firestoreRules.includes("match /chats/{chatId}") || !firestoreRules.includes("match /identity_verifications/{uid}")) fail("Critical Firestore access rules are missing");
+if (!firestoreRules.includes('resource.data.status == "pending" && request.resource.data.status == "active"')) fail("Seller moderation bypass protection is missing");
 if (!firestoreRules.includes("request.resource.data.province is string") || !firestoreRules.includes("request.resource.data.locality is string")) fail("Listing province and locality requirements are missing from Firestore rules");
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow read: if isOwner(uid) || isAdmin()")) fail("Private identity Storage rules are missing");
 
