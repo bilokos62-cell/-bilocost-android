@@ -734,7 +734,7 @@ async function loadProfile(u){
 }
 
 function applyItems(){const all=S.allItems||[];items=all.filter(i=>!i.pending);S.pendingItems=all.filter(i=>i.pending&&S.user&&i.sellerId===S.user.uid)}
-let cloudUnsubs=[],cloudBooting=false,cloudReady=false;
+let cloudUnsubs=[],cloudBooting=false,cloudReady=false,cloudGeneration=0;
 function showCloudStatus(mode,message=""){
  const v=document.getElementById("view");if(!v)return;
  const offline=mode==="offline",loading=mode==="loading";
@@ -747,10 +747,11 @@ function showCloudStatus(mode,message=""){
 }
 if(!document.getElementById("bilo-cloud-loader-style")){const st=document.createElement("style");st.id="bilo-cloud-loader-style";st.textContent="@keyframes biloSpin{to{transform:rotate(360deg)}}";document.head.appendChild(st)}
 function retryCloudBoot(){if(cloudBooting)return;cloudUnsubs.splice(0).forEach(fn=>{try{fn()}catch(e){}});cloudReady=false;cloudBooting=false;showCloudStatus(navigator.onLine===false?"offline":"loading");bootCloud()}
-window.addEventListener("offline",()=>{showCloudStatus("offline")});
+window.addEventListener("offline",()=>{cloudGeneration++;cloudBooting=false;cloudReady=false;cloudUnsubs.splice(0).forEach(fn=>{try{fn()}catch(e){}});showCloudStatus("offline")});
 window.addEventListener("online",()=>{if(!cloudReady||!cloudBooting)retryCloudBoot()});
 async function bootCloud(){
  if(cloudBooting)return;
+ const generation=++cloudGeneration;
  if(navigator.onLine===false){showCloudStatus("offline");return}
  cloudBooting=true;cloudReady=false;
  const nd=document.querySelector("nav .dot");if(nd)nd.style.display="none";
@@ -762,6 +763,7 @@ async function bootCloud(){
   showCloudStatus(net?"offline":"error",net?"":"Firebase ne répond pas : "+(e&&e.message||"vérifiez la configuration"));
   return
  }
+ if(generation!==cloudGeneration)return;
  const {A,F,auth,db}=FB;
  A.getRedirectResult(auth).catch(re=>{console.error("Google redirect result",re);toast(errMsg(re)+" ("+(re.code||"erreur")+")")});
  let firstDone=false,firstTimer;
@@ -780,16 +782,17 @@ async function bootCloud(){
  });
  try{await firstItems}
  catch(e){
+  if(generation!==cloudGeneration)return;
   cloudBooting=false;
   const net=navigator.onLine===false||/unavailable|deadline-exceeded|network|offline|failed to fetch|timed out/i.test(String((e&&e.code||"")+" "+(e&&e.message||e)));
   showCloudStatus(net?"offline":"error",net?"":"Impossible de récupérer les annonces : "+(e&&e.message||e.code||"erreur serveur"));
   return
  }
- F.onSnapshot(F.query(F.collection(db,"services"),F.where("status","==","ACTIVE"),F.limit(100)),s=>{S.services=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="services")render()},()=>{});
- F.onSnapshot(F.query(F.collection(db,"ads"),F.where("status","==","ACTIVE"),F.limit(50)),s=>{S.ads=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="home"||S.tab==="ads")render()},()=>{});
- F.onSnapshot(F.query(F.collection(db,"events"),F.orderBy("startAt","asc"),F.limit(100)),s=>{S.events=s.docs.map(d=>{const x=d.data();return{id:d.id,title:x.title,desc:x.description||"",type:x.type,startAt:x.startAt,endAt:x.endAt,commune:x.commune,spot:x.spot||"",sellerId:x.sellerId,sellerName:x.sellerName,w:x.sellerPhone||"",p:x.photos||[]}});render();if(S.stack.length)renderPage();tryDeep()},()=>{});
- F.onSnapshot(F.query(F.collection(db,"rentalListings"),F.where("status","==","BOOKABLE"),F.limit(100)),s=>{S.rentals=s.docs.map(d=>{const x=d.data();return{id:d.id,t:x.title,cat:x.category,d:x.description||"",cond:x.condition||"",priceDay:x.priceDay,priceWeek:x.priceWeek||0,priceMonth:x.priceMonth||0,minDays:x.minDays||1,maxDays:x.maxDays||0,deposit:x.deposit,declaredValue:x.declaredValue||0,commune:x.commune,p:x.photos||[],owner:x.ownerName||"",ownerId:x.ownerId,ownerKyc:x.ownerKycStatus||"NOT_STARTED",blocked:x.blocked||[],handover:x.handover||""}});render()},e=>{S.cloudError="Locations indisponibles : "+(e.code||e.message||"accès refusé");render()});
- A.onAuthStateChanged(auth,async u=>{
+ cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"services"),F.where("status","==","ACTIVE"),F.limit(100)),s=>{S.services=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="services")render()},()=>{}));
+ cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"ads"),F.where("status","==","ACTIVE"),F.limit(50)),s=>{S.ads=s.docs.map(d=>({id:d.id,...d.data()}));if(S.tab==="home"||S.tab==="ads")render()},()=>{}));
+ cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"events"),F.orderBy("startAt","asc"),F.limit(100)),s=>{S.events=s.docs.map(d=>{const x=d.data();return{id:d.id,title:x.title,desc:x.description||"",type:x.type,startAt:x.startAt,endAt:x.endAt,commune:x.commune,spot:x.spot||"",sellerId:x.sellerId,sellerName:x.sellerName,w:x.sellerPhone||"",p:x.photos||[]}});render();if(S.stack.length)renderPage();tryDeep()},()=>{}));
+ cloudUnsubs.push(F.onSnapshot(F.query(F.collection(db,"rentalListings"),F.where("status","==","BOOKABLE"),F.limit(100)),s=>{S.rentals=s.docs.map(d=>{const x=d.data();return{id:d.id,t:x.title,cat:x.category,d:x.description||"",cond:x.condition||"",priceDay:x.priceDay,priceWeek:x.priceWeek||0,priceMonth:x.priceMonth||0,minDays:x.minDays||1,maxDays:x.maxDays||0,deposit:x.deposit,declaredValue:x.declaredValue||0,commune:x.commune,p:x.photos||[],owner:x.ownerName||"",ownerId:x.ownerId,ownerKyc:x.ownerKycStatus||"NOT_STARTED",blocked:x.blocked||[],handover:x.handover||""}});render()},e=>{S.cloudError="Locations indisponibles : "+(e.code||e.message||"accès refusé");render()}));
+ cloudUnsubs.push(A.onAuthStateChanged(auth,async u=>{
   if(S.unChats){S.unChats();S.unChats=null}if(S.unRentMine){S.unRentMine();S.unRentMine=null}
   if(u){
    try{S.user=await loadProfile(u)}catch(e){toast("Profil indisponible");S.user=null}
@@ -798,7 +801,7 @@ async function bootCloud(){
    S.unChats=F.onSnapshot(F.query(F.collection(db,"chats"),F.where("participants","array-contains",u.uid)),s=>{S.chats=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b.updatedAt&&b.updatedAt.seconds)||0)-((a.updatedAt&&a.updatedAt.seconds)||0));render()},()=>{})
   }else{S.user=null;S.chats=[];S.rdrafts=[];applyItems();close_();if(S.stack.length)closePage()}
   render();if(S.stack.length)renderPage()
- });
+ }));
  cloudBooting=false;
 }
 let phoneConfirmation=null,phoneRecaptcha=null;
