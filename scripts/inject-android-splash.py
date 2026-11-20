@@ -34,7 +34,7 @@ script = r"""<script id="bilocost-native-loader-script">
  layer.id="bilocost-native-loader";
  layer.setAttribute("role","status");
  layer.setAttribute("aria-label","Chargement de Bilocost");
- layer.innerHTML='<div class="bl-wrap"><img class="bl-mark" src="bilocost-loader-logo.jpg" alt="Bilocost"><div class="bl-name">Bilocost</div><div class="bl-tag">L\\'ACHAT À BAS PRIX !</div><div class="bl-slogan">Notre marché. Notre plateforme. Notre avenir.</div><div class="bl-track" aria-hidden="true"><div class="bl-fill"></div></div><div class="bl-caption">Préparation de votre espace Bilocost…</div></div>';
+ layer.innerHTML='<div class="bl-wrap"><img class="bl-mark" src="bilocost-loader-logo.jpg" alt="Bilocost"><div class="bl-name">Bilocost</div><div class="bl-tag">L\'ACHAT À BAS PRIX !</div><div class="bl-slogan">Notre marché. Notre plateforme. Notre avenir.</div><div class="bl-track" aria-hidden="true"><div class="bl-fill"></div></div><div class="bl-caption">Préparation de votre espace Bilocost…</div></div>';
  document.body.appendChild(layer);
  const startedAt=Date.now();let closed=false,readySince=0;
  const close=()=>{if(closed)return;closed=true;layer.classList.add("bl-out");window.setTimeout(()=>layer.remove(),460)};
