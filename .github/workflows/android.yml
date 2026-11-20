@@ -103,178 +103,9 @@ jobs:
           # Add the brand mark to the Android-only WebView bundle.
           cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
-          # Use the current Bilocost loading animation, not the older draft clip.
-          test -s resources/Bilocost_Loading_Screen.mp4
-          cp resources/Bilocost_Loading_Screen.mp4 www/bilocost-launch.mp4
-          test -s www/bilocost-launch.mp4
-          # Inject the animated launch screen into Android output only (never into Firebase Hosting).
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("www/index.html")
-          html = p.read_text(encoding="utf-8")
-          style = r"""
-          <style id="bilocost-native-loader-style">
-          #bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 34%,#075d36 0%,#023a25 44%,#001b13 100%);color:#fff;opacity:1;transition:opacity .48s ease}
-          #bilocost-native-loader .bl-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#001b13}
-          #bilocost-native-loader .bl-video[hidden]{display:none}
-          #bilocost-native-loader.bl-video-active .bl-wrap,#bilocost-native-loader.bl-video-active:before,#bilocost-native-loader.bl-video-active:after{display:none}
-          #bilocost-native-loader.bl-video-pending .bl-wrap,#bilocost-native-loader.bl-video-pending:before,#bilocost-native-loader.bl-video-pending:after{display:none}
-          #bilocost-native-loader:before,#bilocost-native-loader:after{content:"";position:absolute;width:72vw;height:72vw;max-width:520px;max-height:520px;border:1px solid rgba(74,255,145,.12);border-radius:50%;animation:bilocost-loader-orbit 7s linear infinite}
-          #bilocost-native-loader:after{width:105vw;height:105vw;max-width:760px;max-height:760px;animation-direction:reverse;opacity:.55}
-          #bilocost-native-loader .bl-wrap{position:relative;z-index:1;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 18px}
-          #bilocost-native-loader .bl-map{width:min(64vw,270px);height:auto;overflow:visible;filter:drop-shadow(0 0 13px rgba(0,255,112,.35));animation:bilocost-loader-float 3s ease-in-out infinite}
-          #bilocost-native-loader .bl-map-line{fill:rgba(0,255,117,.07);stroke:#39ff83;stroke-width:2.5;stroke-linejoin:round;stroke-dasharray:900;stroke-dashoffset:900;animation:bilocost-loader-draw 2.25s ease-out forwards}
-          #bilocost-native-loader .bl-brand{display:flex;flex-direction:column;align-items:center;margin-top:-4px}
-          #bilocost-native-loader .bl-logo{width:76px;height:76px;object-fit:contain;border-radius:19px;filter:drop-shadow(0 0 15px rgba(65,255,123,.5));animation:bilocost-loader-pop .65s 1.7s both}
-          #bilocost-native-loader .bl-name{font:italic 800 29px/1.1 system-ui,sans-serif;letter-spacing:-.7px;margin-top:7px;text-shadow:0 2px 12px #00a64f}
-          #bilocost-native-loader .bl-tag{font:700 10px/1.5 system-ui,sans-serif;letter-spacing:2.3px;color:#a8f6c6;margin-top:6px}
-          #bilocost-native-loader .bl-star{position:absolute;top:9%;left:22%;color:#ffe45e;font-size:23px;text-shadow:0 0 12px #ffe45e;animation:bilocost-loader-twinkle 1.2s ease-in-out infinite alternate}
-          #bilocost-native-loader .bl-flag{position:absolute;inset:0;pointer-events:none}
-          #bilocost-native-loader .bl-steps{display:flex;justify-content:center;gap:9px;margin-top:31px;width:100%}
-          #bilocost-native-loader .bl-step{width:29px;height:29px;border:1px solid rgba(102,255,168,.3);border-radius:50%;display:grid;place-items:center;background:rgba(0,40,25,.55);color:#7cbd98;font:700 14px system-ui,sans-serif;animation:bilocost-loader-step 1.05s ease-in-out infinite}
-          #bilocost-native-loader .bl-step:nth-child(2){animation-delay:.15s}#bilocost-native-loader .bl-step:nth-child(3){animation-delay:.3s}#bilocost-native-loader .bl-step:nth-child(4){animation-delay:.45s}#bilocost-native-loader .bl-step:nth-child(5){animation-delay:.6s}#bilocost-native-loader .bl-step:nth-child(6){animation-delay:.75s}
-          #bilocost-native-loader .bl-track{height:4px;width:min(74vw,300px);border-radius:10px;background:rgba(150,255,190,.2);overflow:hidden;margin-top:14px;box-shadow:0 0 10px rgba(0,255,115,.16)}
-          #bilocost-native-loader .bl-fill{height:100%;width:32%;border-radius:10px;background:linear-gradient(90deg,#25b85f,#baff65);box-shadow:0 0 10px #4cff91;animation:bilocost-loader-progress 1.15s ease-in-out infinite alternate}
-          #bilocost-native-loader .bl-caption{font:500 11px/1.4 system-ui,sans-serif;letter-spacing:.5px;color:#b8e9ca;margin-top:12px}
-          #bilocost-native-loader.bl-out{opacity:0;pointer-events:none}
-          @keyframes bilocost-loader-draw{to{stroke-dashoffset:0}}@keyframes bilocost-loader-progress{from{transform:translateX(-25%)}to{transform:translateX(220%)}}@keyframes bilocost-loader-float{50%{transform:translateY(-5px)}}@keyframes bilocost-loader-pop{0%{opacity:0;transform:scale(.65)}100%{opacity:1;transform:scale(1)}}@keyframes bilocost-loader-step{0%,100%{color:#74ad8b;border-color:rgba(102,255,168,.25);box-shadow:none;transform:scale(.92)}45%{color:#fff;border-color:#51ff9a;background:rgba(0,190,85,.4);box-shadow:0 0 13px rgba(43,255,131,.7);transform:scale(1.12)}}@keyframes bilocost-loader-twinkle{to{opacity:.4;transform:scale(.8)}}@keyframes bilocost-loader-orbit{to{transform:rotate(360deg)}}
-          @media(prefers-reduced-motion:reduce){#bilocost-native-loader *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
-          </style>
-          """
-          script = r"""
-          <script id="bilocost-native-loader-script">
-          (() => {
-            const cap = window.Capacitor;
-            if (!cap || typeof cap.getPlatform !== "function" || cap.getPlatform() !== "android") return;
-            if (document.getElementById("bilocost-native-loader")) return;
-            const layer = document.createElement("div");
-            layer.id = "bilocost-native-loader";
-            layer.setAttribute("role", "status");
-            layer.setAttribute("aria-label", "Chargement de Bilocost");
-            layer.innerHTML = `
-              <div class="bl-wrap">
-                <svg class="bl-map" viewBox="0 0 240 250" role="img" aria-label="Carte de la République démocratique du Congo">
-                  <defs><clipPath id="bilocost-drc-clip"><path d="M83 9 111 15 128 27 153 24 172 42 193 49 205 72 226 84 216 106 224 128 205 143 198 166 180 176 169 202 151 213 145 239 123 230 108 242 89 221 68 211 59 190 39 177 34 155 19 139 31 117 24 96 43 80 42 58 62 45 69 25Z"/></clipPath></defs>
-                  <path class="bl-map-line" d="M83 9 111 15 128 27 153 24 172 42 193 49 205 72 226 84 216 106 224 128 205 143 198 166 180 176 169 202 151 213 145 239 123 230 108 242 89 221 68 211 59 190 39 177 34 155 19 139 31 117 24 96 43 80 42 58 62 45 69 25Z"/>
-                  <g clip-path="url(#bilocost-drc-clip)"><path d="M5 194 240 42" stroke="#ffd84a" stroke-width="17"/><path d="M5 194 240 42" stroke="#e83232" stroke-width="9"/></g>
-                </svg>
-                <span class="bl-star">★</span>
-                <div class="bl-brand">
-                  <img class="bl-logo" src="bilocost-loader-logo.jpg" alt="Bilocost">
-                  <div class="bl-name">Bilocost</div>
-                  <div class="bl-tag">ACHAT À BAS PRIX</div>
-                </div>
-                <div class="bl-steps" aria-hidden="true">
-                  <span class="bl-step">▣</span><span class="bl-step">ϟ</span><span class="bl-step">▤</span><span class="bl-step">▧</span><span class="bl-step">⌂</span><span class="bl-step">✓</span>
-                </div>
-                <div class="bl-track"><div class="bl-fill"></div></div>
-                <div class="bl-caption">Préparation de votre espace Bilocost…</div>
-              </div>`;
-            const video = document.createElement("video");
-            video.className = "bl-video";
-            video.src = "bilocost-launch.mp4";
-            video.autoplay = true;
-            video.muted = true;
-            video.playsInline = true;
-            video.preload = "auto";
-            video.loop = false;
-            video.setAttribute("aria-hidden", "true");
-            layer.classList.add("bl-video-pending");
-            video.addEventListener("loadeddata", () => {
-              layer.classList.remove("bl-video-pending");
-              layer.classList.add("bl-video-active");
-            }, { once: true });
-            layer.insertBefore(video, layer.firstChild);
-            document.body.appendChild(layer);
-            let closed = false;
-            let videoFinished = false;
-            let appReady = false;
-            let startupTimedOut = false;
-            const close = () => {
-              if (closed) return;
-              closed = true;
-              layer.classList.add("bl-out");
-              window.setTimeout(() => layer.remove(), 520);
-            };
-            const finishIfReady = () => {
-              if (videoFinished && appReady) close();
-            };
-            video.addEventListener("ended", () => {
-              videoFinished = true;
-              finishIfReady();
-            }, { once: true });
-            video.addEventListener("error", () => {
-              video.remove();
-              layer.classList.remove("bl-video-pending");
-              videoFinished = true;
-              finishIfReady();
-            }, { once: true });
-            const readyForApp = () => {
-              const view = document.getElementById("view");
-              const interfaceReady = !!view && (view.childElementCount > 0 || view.textContent.trim().length > 0);
-              return document.readyState !== "loading" && interfaceReady;
-            };
-            const startedAt = Date.now();
-            let readySince = 0;
-            const waitUntilReady = () => {
-              if (closed) return;
-              if (readyForApp()) {
-                if (!readySince) readySince = Date.now();
-                if (Date.now() - readySince >= 700) {
-                  appReady = true;
-                  finishIfReady();
-                }
-              } else {
-                readySince = 0;
-              }
-              if (Date.now() - startedAt >= 15000 && !startupTimedOut) {
-                startupTimedOut = true;
-                if (!videoFinished) {
-                  video.pause();
-                  video.remove();
-                  layer.classList.remove("bl-video-pending");
-                  videoFinished = true;
-                }
-                const caption = layer.querySelector(".bl-caption");
-                if (caption) caption.textContent = "Le démarrage prend plus de temps que prévu. Vos données restent protégées.";
-                const retry = document.createElement("button");
-                retry.type = "button";
-                retry.className = "bl-retry";
-                retry.textContent = "Réessayer";
-                retry.addEventListener("click", () => window.location.reload(), { once: true });
-                layer.querySelector(".bl-wrap")?.appendChild(retry);
-                finishIfReady();
-              }
-              window.setTimeout(waitUntilReady, 180);
-            };
-            const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            if (reduced) {
-              video.remove();
-              videoFinished = true;
-            } else {
-              video.play().then(() => {
-                layer.classList.add("bl-video-active");
-              }).catch(() => {
-                video.remove();
-                layer.classList.remove("bl-video-pending");
-                videoFinished = true;
-                finishIfReady();
-              });
-            }
-            waitUntilReady();
-            window.addEventListener("pagehide", close, { once: true });
-          })();
-          </script>
-          """
-          if "bilocost-native-loader-style" not in html:
-              if "</head>" not in html: raise SystemExit("Android loader: </head> missing")
-              html = html.replace("</head>", style + "\n</head>", 1)
-          if "bilocost-native-loader-script" not in html:
-              if "</body>" not in html: raise SystemExit("Android loader: </body> missing")
-              html = html.replace("</body>", script + "\n</body>", 1)
-          p.write_text(html, encoding="utf-8")
-          print("Android-only Bilocost animated launch screen injected.")
-          PY
+          # Replace the legacy video player with the native animated splash (no video controls or playback).
+          python3 scripts/inject-android-splash.py
+
 
       - name: Install dependencies
         run: npm install
@@ -289,6 +120,46 @@ jobs:
           }
           EOF
           npx cap add android
+          # Keep the native Android launch window white before the WebView appears.
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          res = Path("android/app/src/main/res")
+          values = res / "values"
+          values.mkdir(parents=True, exist_ok=True)
+          colors = values / "colors.xml"
+          colors.write_text("""<?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="bilocost_launch_white">#FFFFFF</color>
+              <color name="bilocost_launch_black">#171717</color>
+              <color name="bilocost_launch_green">#087542</color>
+          </resources>
+          """, encoding="utf-8")
+          styles = values / "styles.xml"
+          if not styles.is_file():
+              raise SystemExit("Generated Android styles.xml is missing")
+          android = "http://schemas.android.com/apk/res/android"
+          ET.register_namespace("android", android)
+          tree = ET.parse(styles)
+          root = tree.getroot()
+          launch = next((node for node in root.findall("style") if node.get("name") == "AppTheme.NoActionBarLaunch"), None)
+          if launch is None:
+              raise SystemExit("Native launch theme AppTheme.NoActionBarLaunch was not found")
+          settings = {
+              "windowBackground": "@android:color/white",
+              "statusBarColor": "@android:color/white",
+              "navigationBarColor": "@android:color/white",
+              "windowLightStatusBar": "true",
+              "windowLightNavigationBar": "true",
+          }
+          for name, value in settings.items():
+              item = next((x for x in launch.findall("item") if x.get("name") == name), None)
+              if item is None:
+                  item = ET.SubElement(launch, "item", {"name": name})
+              item.text = value
+          tree.write(styles, encoding="utf-8", xml_declaration=True)
+          ET.parse(styles)
+          PY
           # Add the Firebase Android configuration generated in Firebase Console.
           test -s google-services.json
           mkdir -p android/app
