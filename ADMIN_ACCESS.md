@@ -9,7 +9,7 @@ https://bilocost-drc-2026.web.app/admin/
 2. Depuis un poste de confiance connecté au projet Firebase avec les droits IAM nécessaires, attribuer le rôle à l'adresse voulue :
    ```bash
    cd functions
-   npm ci
+   npm install --omit=dev
    gcloud auth application-default login
    node scripts/set-admin-claim.js admin@example.com
    ```
