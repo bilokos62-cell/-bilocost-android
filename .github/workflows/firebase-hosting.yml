@@ -72,8 +72,9 @@ jobs:
 
       - name: Prepare website
         run: |
-          mkdir -p www/icons www/resources
+          mkdir -p www/icons www/resources www/admin
           cp index.html www/index.html
+          cp admin/index.html www/admin/index.html
           # Copy the local brand assets used by the storefront.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
