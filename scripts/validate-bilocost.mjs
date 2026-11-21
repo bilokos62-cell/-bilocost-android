@@ -71,6 +71,13 @@ if (!firestoreRules.includes('resource.data.status == "pending" && request.resou
 if (!firestoreRules.includes("request.resource.data.province is string") || !firestoreRules.includes("request.resource.data.locality is string")) fail("Listing province and locality requirements are missing from Firestore rules");
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow read: if isOwner(uid) || isAdmin()")) fail("Private identity Storage rules are missing");
 
+if (!firestoreRules.includes("function isAdmin()") || !firestoreRules.includes("request.auth.token.admin == true")) fail("Firestore admin access must require the trusted Firebase admin custom claim");
+if (!functionsSource.includes("const requireAdmin = request =>") || !functionsSource.includes("request.auth.token.admin !== true")) fail("Sensitive callable functions must enforce the admin custom claim server-side");
+if (!firestoreRules.includes("allow read, write: if false") || !storageRules.includes("allow read, write: if false")) fail("Firebase services must retain default-deny fallback rules");
+if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow update: if false")) fail("Private identity files must remain in a dedicated protected path with updates denied");
+if (firestoreRules.includes('allow read: if true;') && firestoreRules.includes('match /identity_verifications/{uid}')) fail("Identity verification documents must never be publicly readable");
+
+
 try { new vm.Script(deliveryPatch, { filename: "delivery-otp.js" }); } catch (error) { fail("Delivery OTP patch syntax error: " + error.message); }
 try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (error) { fail("Messaging patch syntax error: " + error.message); }
 try { new vm.Script(serviceDesign, { filename: "service-design.js" }); } catch (error) { fail("Service design syntax error: " + error.message); }
