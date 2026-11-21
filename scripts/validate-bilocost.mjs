@@ -16,6 +16,8 @@ const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const themeRewards = readFileSync("theme-rewards.js", "utf8");
 const themeSettingsEntry = readFileSync("theme-settings-entry.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
+const adminPortal = readFileSync("admin/index.html", "utf8");
+const adminProvision = readFileSync("functions/scripts/set-admin-claim.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
 const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
 const hostingWorkflow = readFileSync(".github/workflows/firebase-hosting.yml", "utf8");
@@ -73,6 +75,9 @@ if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !stora
 
 if (!firestoreRules.includes("function isAdmin()") || !firestoreRules.includes("request.auth.token.admin == true")) fail("Firestore admin access must require the trusted Firebase admin custom claim");
 if (!functionsSource.includes("const requireAdmin = request =>") || !functionsSource.includes("request.auth.token.admin !== true")) fail("Sensitive callable functions must enforce the admin custom claim server-side");
+if (!adminPortal.includes("getIdTokenResult(true)") || !adminPortal.includes("token.claims.admin===true")) fail("Admin portal must verify the refreshed Firebase admin claim");
+if (!adminProvision.includes("setCustomUserClaims") || !adminProvision.includes("applicationDefault()")) fail("Admin role provisioning must use trusted Firebase Admin credentials");
+try { new vm.Script(adminProvision, { filename: "functions/scripts/set-admin-claim.js" }); } catch (error) { fail("Admin provisioning script syntax error: " + error.message); }
 if (!firestoreRules.includes("allow read, write: if false") || !storageRules.includes("allow read, write: if false")) fail("Firebase services must retain default-deny fallback rules");
 if (!storageRules.includes("match /private_identity/{uid}/{fileName}") || !storageRules.includes("allow update: if false")) fail("Private identity files must remain in a dedicated protected path with updates denied");
 if (firestoreRules.includes('allow read: if true;') && firestoreRules.includes('match /identity_verifications/{uid}')) fail("Identity verification documents must never be publicly readable");
@@ -104,6 +109,7 @@ if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.inclu
 if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource.includes("exports.confirmDelivery") || !functionsSource.includes("exports.confirmOrderPayment")) fail("Delivery OTP backend functions are incomplete");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "sellerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Seller order-history index is missing");
+console.log("Admin portal claim check and provisioning script: valid.");
 console.log("Delivery OTP module and backend syntax: valid.");
 console.log("Bilocost source validation passed.");
 console.log("JavaScript syntax: valid");
