@@ -62,6 +62,8 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
+          cp responsive-layout.css www/responsive-layout.css
+          test -s www/responsive-layout.css
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
           test -s www/IMG-20261024-WA0000.jpg
