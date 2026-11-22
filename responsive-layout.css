@@ -1,0 +1,270 @@
+/* Bilocost responsive layout: preserve the existing green/white brand and app behavior. */
+@media (min-width: 700px) {
+  .app {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-bottom: 36px;
+  }
+  header {
+    padding: 14px clamp(22px, 3vw, 48px);
+  }
+  .wrap {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px clamp(22px, 3vw, 48px) 40px;
+  }
+  .hero {
+    min-height: 210px;
+    padding: 28px;
+  }
+  .hero h1 {
+    max-width: 560px;
+    font-size: clamp(26px, 3vw, 38px);
+    line-height: 1.15;
+  }
+  .hero p {
+    max-width: 560px;
+    font-size: 15px;
+  }
+  .search input {
+    height: 56px;
+    font-size: 15px;
+  }
+  .search button {
+    width: 56px;
+    height: 56px;
+  }
+  .rail {
+    gap: 18px;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  .cat {
+    width: 84px;
+    font-size: 13px;
+  }
+  .cat span {
+    width: 68px;
+    height: 68px;
+  }
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .cg {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .card .in {
+    padding: 13px 14px 15px;
+  }
+  .card h3 {
+    font-size: 15px;
+    min-height: 42px;
+  }
+  .cdf {
+    font-size: 17px;
+  }
+  nav {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  nav div {
+    max-width: 760px;
+    height: 72px;
+  }
+  .sheet > div {
+    width: min(100%, 720px);
+    max-width: 720px;
+  }
+  .pw {
+    max-width: 900px;
+  }
+  .bilo-cookie-banner {
+    width: min(100% - 40px, 640px);
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1099px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .cg {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  body {
+    overflow-x: hidden;
+  }
+  .app {
+    width: calc(100% - 232px);
+    max-width: none;
+    margin-left: 232px;
+    margin-right: 0;
+    min-height: 100vh;
+  }
+  header {
+    padding: 16px clamp(28px, 3vw, 56px);
+  }
+  .wrap {
+    max-width: 1500px;
+    padding: 28px clamp(28px, 3vw, 56px) 56px;
+  }
+  .hero {
+    min-height: 240px;
+    padding: 34px;
+    border-radius: 28px;
+  }
+  .hero h1 {
+    font-size: 40px;
+  }
+  .hero p {
+    font-size: 16px;
+  }
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .cg {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .card {
+    border-radius: 20px;
+  }
+  .card .in {
+    padding: 14px 15px 16px;
+  }
+  .card h3 {
+    font-size: 15px;
+    min-height: 42px;
+  }
+  .cdf {
+    font-size: 17px;
+  }
+  nav {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: 232px;
+    padding: 22px 14px;
+    background: var(--card);
+    border-right: 1px solid var(--line);
+    pointer-events: auto;
+  }
+  nav div {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    margin: 0;
+    padding: 10px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  nav button {
+    min-height: 54px;
+    height: 54px;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 0 16px;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+  nav button svg {
+    width: 22px;
+    height: 22px;
+  }
+  nav button[aria-current=page]:not(.plus) {
+    color: var(--pri);
+    background: var(--mint);
+  }
+  nav .plus {
+    width: 100%;
+    height: 54px;
+    margin: 10px 0;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+  nav .plus svg {
+    width: 24px;
+    height: 24px;
+  }
+  nav .dot {
+    top: 8px;
+    right: auto;
+    left: 34px;
+  }
+  #page .pw {
+    max-width: 1180px;
+  }
+  #page .pbar {
+    padding-left: clamp(28px, 3vw, 56px);
+    padding-right: clamp(28px, 3vw, 56px);
+  }
+  .sheet {
+    align-items: center;
+  }
+  .sheet > div {
+    width: min(760px, calc(100% - 48px));
+    max-width: 760px;
+    max-height: 88vh;
+    border-radius: 24px;
+    padding: 28px;
+  }
+  #auth .au {
+    max-width: 560px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .wrap {
+    max-width: 1700px;
+  }
+}
+
+/* Avoid hover-only behavior on touch devices; preserve accessible focus states. */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
+  }
+}
+
+
+/* Reels: short product videos */
+.reels-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:8px 0 18px}
+.reels-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--pri)}
+.reels-head h2{margin:5px 0;font-size:25px}
+.reels-mark{display:grid;place-items:center;width:54px;height:54px;border-radius:18px;background:var(--mint);color:var(--pri);font-size:24px;font-weight:900}
+.reel-upload{padding:16px;margin:14px 0 20px}
+.reel-upload h3{margin:0 0 6px}
+.reel-picker{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:132px;margin:14px 0;padding:18px;border:1.5px dashed var(--pri);border-radius:18px;background:var(--mint);color:var(--pri);text-align:center;cursor:pointer}
+.reel-picker small{color:var(--mute);font-weight:500}
+.reel-preview{display:grid;gap:8px;margin:10px 0}
+.reel-preview video{width:min(100%,260px);max-height:380px;aspect-ratio:9/16;object-fit:cover;border-radius:16px;background:#050a12}
+.reel-upload .btn:disabled{opacity:.5;cursor:not-allowed}
+.reel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.reel-card{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.reel-card video{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;background:#050a12}
+.reel-card>div{padding:10px}
+.reel-card p{margin:5px 0}
+@media(min-width:700px){.reel-upload{max-width:680px;padding:22px}.reel-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media(min-width:1100px){.reel-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
