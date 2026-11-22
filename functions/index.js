@@ -2,7 +2,7 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue, Timestamp, FieldPath } = require("firebase-admin/firestore");
 const crypto = require("node:crypto");
 
 initializeApp();
@@ -165,15 +165,24 @@ exports.broadcastBilocostPromotion = onCall(async request => {
       typeof body !== "string" || !body.trim() || body.length > 400) {
     throw new HttpsError("invalid-argument", "Le titre (100 caractères) et le message (400 caractères) sont obligatoires.");
   }
-  const users = await db.collection("users").select().get();
-  let batch = db.batch(), count = 0, pending = 0;
-  for (const user of users.docs) {
-    const ref = db.collection("inboxNotifications").doc();
-    batch.create(ref, { ownerId: user.id, type: "promotion", title: title.trim(), body: body.trim(), read: false, createdAt: FieldValue.serverTimestamp() });
-    count++; pending++;
-    if (pending === 450) { await batch.commit(); batch = db.batch(); pending = 0; }
+  const usersRef = db.collection("users");
+  let cursor = null, count = 0;
+  while (true) {
+    let query = usersRef.orderBy(FieldPath.documentId()).limit(400);
+    if (cursor) query = query.startAfter(cursor);
+    const page = await query.select().get();
+    if (page.empty) break;
+    let batch = db.batch(), pending = 0;
+    for (const user of page.docs) {
+      const ref = db.collection("inboxNotifications").doc();
+      batch.create(ref, { ownerId: user.id, type: "promotion", title: title.trim(), body: body.trim(), read: false, createdAt: FieldValue.serverTimestamp() });
+      count++; pending++;
+      if (pending === 400) { await batch.commit(); batch = db.batch(); pending = 0; }
+    }
+    if (pending) await batch.commit();
+    cursor = page.docs[page.docs.length - 1];
+    if (page.size < 400) break;
   }
-  if (pending) await batch.commit();
   return { sent: count };
 });
 
