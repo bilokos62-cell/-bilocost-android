@@ -10,6 +10,6 @@ link = '<link rel="stylesheet" href="responsive-layout.css">'
 if link not in html:
     if "</head>" not in html:
         raise SystemExit("HTML head closing tag not found")
-    html = html.replace("</head>", link + "\\n</head>", 1)
+    html = html.replace("</head>", link + "\n</head>", 1)
 html_path.write_text(html, encoding="utf-8")
 print("Responsive tablet/desktop stylesheet linked.")
