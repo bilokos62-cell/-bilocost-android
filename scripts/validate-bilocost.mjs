@@ -103,6 +103,8 @@ if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions sour
 if (firebaseConfig.functions?.runtime !== "nodejs22") fail("Cloud Functions must use the supported Node.js 22 runtime");
 if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.includes("match /deliveryCodes/{orderId}")) fail("Secure order and delivery-code rules are missing");
 if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource.includes("exports.confirmDelivery") || !functionsSource.includes("exports.confirmOrderPayment")) fail("Delivery OTP backend functions are incomplete");
+if (!messagingPatch.includes('F.orderBy("at","desc"),F.limit(100)')) fail("Chat live listener must be bounded to the latest 100 messages");
+if (!functionsSource.includes("FieldPath.documentId()") || !functionsSource.includes("startAfter(cursor)") || !functionsSource.includes("usersRef.orderBy")) fail("Admin broadcasts must paginate users instead of loading the full collection");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "sellerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Seller order-history index is missing");
 console.log("Delivery OTP module and backend syntax: valid.");
