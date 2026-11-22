@@ -32,6 +32,10 @@ if (appMarker < 0) fail("main application script marker not found");
 
 if (!html.includes('href="responsive-layout.css"')) fail("Responsive stylesheet is not linked from index.html");
 if (!responsiveCss.includes("@media (min-width: 700px)") || !responsiveCss.includes("@media (min-width: 1100px)") || !responsiveCss.includes("grid-template-columns: repeat(5")) fail("Tablet and desktop responsive breakpoints are incomplete");
+if (!html.includes('<button data-t="reels"') || html.includes('<button data-t="search"><svg')) fail("Bottom navigation must show Reels instead of Explorer");
+if (html.includes('data-t="wallet" aria-label="Portefeuille"')) fail("Wallet shortcut must be removed from the header");
+if (!html.includes("async function initReels()") || !html.includes('collection(FB.db,"reels")') || !html.includes("duration<5||duration>10")) fail("Short product Reels flow is incomplete");
+if (!responsiveCss.includes(".reel-card") || !responsiveCss.includes(".reel-picker")) fail("Reels responsive styles are missing");
 
 const scriptStart = html.lastIndexOf("<script", appMarker);
 const tagEnd = html.indexOf(">", scriptStart);
