@@ -29,6 +29,10 @@ function fail(message) {
 
 if (!responsiveCss.includes("@media (min-width: 700px)")) fail("Responsive stylesheet is missing");
 if (!responsiveCss.includes("@media (min-width: 700px)") || !responsiveCss.includes("@media (min-width: 1100px)") || !responsiveCss.includes("grid-template-columns: repeat(5")) fail("Tablet and desktop responsive breakpoints are incomplete");
+if (!uiRefinement.includes("@media(min-width:700px)") || !uiRefinement.includes(".app{width:100%;max-width:none;margin:0 auto")) fail("Injected UI refinement still constrains the tablet app shell");
+if (!uiRefinement.includes("@media(min-width:1100px)") || !uiRefinement.includes(".app{width:calc(100% - 232px);max-width:none;margin-left:232px")) fail("Injected UI refinement overrides the desktop sidebar layout");
+if (!uiRefinement.includes("nav>div{max-width:100%;height:72px}") || !uiRefinement.includes("nav>div{max-width:none;height:auto}")) fail("Injected navigation width conflicts with tablet/desktop layout");
+
 
 const appMarker = html.indexOf("const CLOUD=");
 if (appMarker < 0) fail("main application script marker not found");
