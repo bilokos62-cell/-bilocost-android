@@ -54,6 +54,15 @@
     #auth .au.c{gap:16px}
     #auth .btn{border-radius:15px;min-height:50px}
     @media(max-width:380px){#view.wrap{padding-left:12px;padding-right:12px}#view .grid{gap:9px}#view .card{border-radius:17px}#view .card .in{padding:9px 10px 11px}}
+    /* Responsive overrides must be injected after the base .app shell rules. */
+    @media(min-width:700px){
+      .app{width:100%;max-width:none;margin:0 auto;padding-bottom:36px}
+      nav>div{max-width:100%;height:72px}
+    }
+    @media(min-width:1100px){
+      .app{width:calc(100% - 232px);max-width:none;margin-left:232px;margin-right:0;min-height:100vh}
+      nav>div{max-width:none;height:auto}
+    }
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   `;
   (document.head||document.documentElement).appendChild(style);
