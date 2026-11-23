@@ -268,3 +268,73 @@
 .reel-card p{margin:5px 0}
 @media(min-width:700px){.reel-upload{max-width:680px;padding:22px}.reel-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
 @media(min-width:1100px){.reel-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+
+/* Mobile product catalogue and detail navigation: prevent the fixed tab bar
+   from covering the last rows and keep the detail view vertically scrollable. */
+@media (max-width: 699px) {
+  html, body {
+    min-height: 100%;
+    overscroll-behavior-y: auto;
+  }
+  body {
+    overflow-x: hidden;
+  }
+  .app {
+    min-height: 100dvh;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  }
+  #page {
+    min-height: 0;
+    height: auto;
+    overflow: visible;
+  }
+  #page .pw {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+  #page .pbar {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+  nav {
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  nav > div {
+    box-sizing: border-box;
+  }
+  .grid, .cg {
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .card img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    object-fit: cover;
+  }
+  .card h3, .card p {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Product detail media and information blocks remain responsive. */
+#page .pw img, #page .pw video {
+  max-width: 100%;
+}
+#page .pw * {
+  box-sizing: border-box;
+}
+@media (prefers-reduced-motion: no-preference) {
+  #page {
+    scroll-behavior: smooth;
+  }
+}
