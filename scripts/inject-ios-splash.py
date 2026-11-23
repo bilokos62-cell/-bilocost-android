@@ -6,17 +6,17 @@ if not html_path.is_file() or not logo_path.is_file() or logo_path.stat().st_siz
     raise SystemExit("iOS splash prerequisites are missing")
 html = html_path.read_text(encoding="utf-8")
 style = r"""<style id="bilocost-native-loader-style">
-#bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:#ffffff;color:#087542;opacity:1;transition:opacity .42s ease}
+#bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:#063b2b;color:#ffffff;opacity:1;transition:opacity .42s ease}
 #bilocost-native-loader:before,#bilocost-native-loader:after{content:"";position:absolute;display:none}
 #bilocost-native-loader:after{display:none}
 #bilocost-native-loader .bl-wrap{position:relative;z-index:1;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 18px}
 #bilocost-native-loader .bl-mark{width:clamp(180px,48vw,240px);height:clamp(180px,48vw,240px);object-fit:contain;border-radius:28px;filter:none;animation:none}
-#bilocost-native-loader .bl-name{font:800 clamp(32px,9vw,42px)/1.1 system-ui,sans-serif;letter-spacing:0;margin-top:18px;color:#087542;text-shadow:none;animation:none}
-#bilocost-native-loader .bl-tag{font:700 10px/1.6 system-ui,sans-serif;letter-spacing:2px;color:#087542;margin-top:9px;animation:bl-rise .55s .32s both}
-#bilocost-native-loader .bl-slogan{font:600 12px/1.5 system-ui,sans-serif;color:#334155;margin-top:18px;letter-spacing:.25px;animation:bl-rise .55s .42s both}
-#bilocost-native-loader .bl-track{height:4px;width:min(68vw,270px);border-radius:10px;background:rgba(8,117,66,.16);overflow:hidden;margin-top:29px}
-#bilocost-native-loader .bl-fill{height:100%;width:38%;border-radius:10px;background:#087542;box-shadow:0 0 12px rgba(8,117,66,.25);animation:bl-progress 1.25s ease-in-out infinite alternate}
-#bilocost-native-loader .bl-caption{font:500 11px/1.4 system-ui,sans-serif;color:#64748b;margin-top:11px}
+#bilocost-native-loader .bl-name{font:800 clamp(32px,9vw,42px)/1.1 system-ui,sans-serif;letter-spacing:0;margin-top:18px;color:#ffffff;text-shadow:none;animation:none}
+#bilocost-native-loader .bl-tag{font:700 10px/1.6 system-ui,sans-serif;letter-spacing:2px;color:#8be3ad;margin-top:9px;animation:bl-rise .55s .32s both}
+#bilocost-native-loader .bl-slogan{font:600 12px/1.5 system-ui,sans-serif;color:#e5f5eb;margin-top:18px;letter-spacing:.25px;animation:bl-rise .55s .42s both}
+#bilocost-native-loader .bl-track{height:4px;width:min(68vw,270px);border-radius:10px;background:rgba(255,255,255,.24);overflow:hidden;margin-top:29px}
+#bilocost-native-loader .bl-fill{height:100%;width:38%;border-radius:10px;background:#39d477;box-shadow:0 0 12px rgba(57,212,119,.3);animation:bl-progress 1.25s ease-in-out infinite alternate}
+#bilocost-native-loader .bl-caption{font:500 11px/1.4 system-ui,sans-serif;color:#c4dfcf;margin-top:11px}
 #bilocost-native-loader.bl-out{opacity:0;pointer-events:none}
 @keyframes bl-arrive{0%{opacity:0;transform:scale(.72) rotate(-7deg)}70%{opacity:1;transform:scale(1.05) rotate(1deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 @keyframes bl-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -34,30 +34,45 @@ script = r"""<script id="bilocost-native-loader-script">
  layer.id="bilocost-native-loader";
  layer.setAttribute("role","status");
  layer.setAttribute("aria-label","Chargement de Bilocost");
- layer.innerHTML='<div class="bl-wrap"><img class="bl-mark" src="bilocost-loader-logo.jpg" alt="Bilocost"><div class="bl-name">Bilocost</div><div class="bl-tag">L\'ACHAT À BAS PRIX !</div><div class="bl-slogan">Notre marché. Notre plateforme. Notre avenir.</div><div class="bl-track" aria-hidden="true"><div class="bl-fill"></div></div><div class="bl-caption">Préparation de votre espace Bilocost…</div></div>';
+ layer.innerHTML='<div class="bl-wrap"><img class="bl-mark" src="bilocost-loader-logo.jpg" alt="Bilocost"><div class="bl-name">Bilocost</div><div class="bl-tag">L’ACHAT À BAS PRIX !</div><div class="bl-slogan">Notre marché. Notre plateforme. Notre avenir.</div><div class="bl-track" role="progressbar" aria-label="Chargement en cours" aria-valuetext="Progression indéterminée"><div class="bl-fill"></div></div><div class="bl-caption" aria-live="polite">Préparation de votre espace Bilocost…</div></div>';
  document.body.appendChild(layer);
- const startedAt=Date.now();let closed=false,readySince=0;
+ const startedAt=Date.now();let closed=false,readySince=0,wasOffline=navigator.onLine===false;
+ const caption=layer.querySelector(".bl-caption");
+ const setMessage=(message)=>{if(caption)caption.textContent=message};
+ const ensureRetry=()=>{
+  if(layer.querySelector("button"))return;
+  const retry=document.createElement("button");retry.type="button";retry.textContent="Réessayer";
+  retry.style.cssText="margin-top:18px;padding:10px 20px;border:1px solid #b9f5d0;border-radius:24px;background:#063b2b;color:#ffffff;font-weight:700";
+  retry.addEventListener("click",()=>{if(navigator.onLine===false){setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");return}window.location.reload()});
+  layer.querySelector(".bl-wrap").appendChild(retry);
+ };
  const close=()=>{if(closed)return;closed=true;layer.classList.add("bl-out");window.setTimeout(()=>layer.remove(),460)};
+ const updateNetwork=()=>{
+  if(navigator.onLine===false){wasOffline=true;setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");ensureRetry()}
+  else if(wasOffline&&!closed){wasOffline=false;setMessage("Connexion rétablie. Appuyez sur Réessayer pour reprendre le chargement.");ensureRetry()}
+ };
+ window.addEventListener("offline",updateNetwork);
+ window.addEventListener("online",updateNetwork);
  const check=()=>{
   if(closed)return;
   const view=document.getElementById("view");
   const ready=document.readyState!=="loading"&&!!view&&(view.childElementCount>0||view.textContent.trim().length>0);
-  if(ready){if(!readySince)readySince=Date.now();if(Date.now()-readySince>=500&&Date.now()-startedAt>=1400){close();return}}else readySince=0;
+  if(ready&&navigator.onLine!==false){if(!readySince)readySince=Date.now();if(Date.now()-readySince>=500&&Date.now()-startedAt>=1400){close();return}}else readySince=0;
   if(Date.now()-startedAt>=10000){
-   const caption=layer.querySelector(".bl-caption");if(caption)caption.textContent="Le chargement continue…";
-   if(ready){close();return}
-   if(!layer.querySelector("button")){const retry=document.createElement("button");retry.type="button";retry.textContent="Réessayer";retry.style.cssText="margin-top:18px;padding:10px 20px;border:1px solid #b9f5d0;border-radius:24px;background:#ffffff;color:#087542;font-weight:700";retry.addEventListener("click",()=>window.location.reload(),{once:true});layer.querySelector(".bl-wrap").appendChild(retry)}
+   if(navigator.onLine===false)setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");
+   else setMessage("Le chargement prend plus de temps que prévu. Vérifiez votre connexion puis réessayez.");
+   ensureRetry();
   }
   window.setTimeout(check,160);
  };
- check();window.addEventListener("pagehide",close,{once:true});
+ updateNetwork();check();window.addEventListener("pagehide",close,{once:true});
 })();
 </script>"""
 if "bilocost-native-loader-style" not in html:
-    if "</head>" not in html: raise SystemExit("Android splash: </head> missing")
+    if "</head>" not in html: raise SystemExit("iOS splash: </head> missing")
     html=html.replace("</head>",style+"\n</head>",1)
 if "bilocost-native-loader-script" not in html:
-    if "</body>" not in html: raise SystemExit("Android splash: </body> missing")
+    if "</body>" not in html: raise SystemExit("iOS splash: </body> missing")
     html=html.replace("</body>",script+"\n</body>",1)
 html_path.write_text(html,encoding="utf-8")
-print("Native Bilocost splash installed for iOS.")
+print("Original dark-green Bilocost splash restored for iOS with honest indeterminate progress and offline recovery.")

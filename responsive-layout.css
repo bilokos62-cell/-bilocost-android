@@ -1,5 +1,5 @@
 /* Bilocost responsive layout: preserve the existing green/white brand and app behavior. */
-@media (min-width: 700px) {
+@media (min-width: 600px) {
   .app {
     width: 100%;
     max-width: 100%;
@@ -266,13 +266,13 @@
 .reel-card video{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;background:#050a12}
 .reel-card>div{padding:10px}
 .reel-card p{margin:5px 0}
-@media(min-width:700px){.reel-upload{max-width:680px;padding:22px}.reel-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media(min-width:600px){.reel-upload{max-width:680px;padding:22px}.reel-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
 @media(min-width:1100px){.reel-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
 
 /* Mobile product catalogue and detail navigation: prevent the fixed tab bar
    from covering the last rows and keep the detail view vertically scrollable. */
-@media (max-width: 699px) {
+@media (max-width: 599px) {
   html, body {
     min-height: 100%;
     overscroll-behavior-y: auto;
@@ -337,4 +337,60 @@
   #page {
     scroll-behavior: smooth;
   }
+}
+
+
+/* Bilocost default appearance: LIGHT GREEN/WHITE (website + mobile apps). */
+:root {
+  color-scheme: light !important;
+  --bg: #ffffff !important;
+  --card: #ffffff !important;
+  --panel: #f6faf7 !important;
+  --bar: rgba(255,255,255,.97) !important;
+  --line: #e1ebe4 !important;
+  --ink: #17231c !important;
+  --mute: #66736b !important;
+  --pri: #009a49 !important;
+  --pri-d: #006b30 !important;
+  --mint: #ecfdf5 !important;
+  --mint-t: #047857 !important;
+  --theme-accent: #009a49 !important;
+}
+html, body, body .app, body #view, #view.wrap, #page, #auth {
+  background-color: #ffffff !important;
+  color: #17231c !important;
+  color-scheme: light !important;
+}
+header, nav, nav > div, .sheet, .sheet > div, .card, .seller, .lr, .safe,
+.warn, .ph, .reel-card, .reel-upload, .bilo-cookie-banner {
+  background-color: #ffffff !important;
+  color: #17231c !important;
+  border-color: #e1ebe4 !important;
+}
+#view h1, #view h2, #view h3, #view h4, #view p, #view label,
+#view .sub, #view .muted, nav button, header, header * {
+  color: inherit;
+}
+#view .btn:not(.ghost), #view button.primary, nav button[aria-current="page"] {
+  background-color: #009a49;
+  border-color: #009a49;
+  color: #ffffff;
+}
+#view .chip, #view .btn.ghost, #view .tag, #view .badge,
+#view [class*="soft"], nav button[aria-current="page"] {
+  border-color: #cfe6d6;
+}
+#view input, #view select, #view textarea, input.f, select.f, textarea.f {
+  background: #ffffff !important;
+  color: #17231c !important;
+  border-color: #dce7df !important;
+}
+#view .ph { background: #f3f8f4 !important; }
+#view .card, #view .seller, #view .safe, #view .warn {
+  box-shadow: 0 5px 18px rgba(16,72,39,.06);
+}
+@media (prefers-color-scheme: dark) {
+  html, body, body .app, body #view, #page, #auth, header, nav,
+  .sheet, .sheet > div, .card, .seller, .lr, .safe, .warn,
+  .reel-card, .reel-upload { background-color: #ffffff !important; color: #17231c !important; }
 }

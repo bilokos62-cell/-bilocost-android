@@ -27,6 +27,24 @@
     :root{--bilo-radius:18px;--bilo-shadow:0 8px 24px rgba(15,23,42,.055)}
     body{background:var(--bg);-webkit-font-smoothing:antialiased}
     .app{width:100%;max-width:560px}
+    /* Tablets must use the available canvas, not the phone-sized 560px shell. */
+    @media (min-width:600px) {
+      .app{width:100%;max-width:none;margin:0 auto}
+      header{width:100%;box-sizing:border-box}
+      #view.wrap{width:100%;max-width:1440px;box-sizing:border-box;margin:0 auto}
+      #view .grid,#view .cg{grid-template-columns:repeat(3,minmax(0,1fr))}
+      nav{left:0;right:0;width:100%;box-sizing:border-box}
+      nav>div{width:100%;max-width:900px;margin:0 auto}
+      #page .pw{width:100%;max-width:1200px;margin-left:auto;margin-right:auto}
+    }
+    @media (min-width:900px) and (max-width:1099px) {
+      #view .grid,#view .cg{grid-template-columns:repeat(4,minmax(0,1fr))}
+    }
+    @media (min-width:1100px) {
+      .app{width:calc(100% - 232px);max-width:none;margin-left:232px;margin-right:0}
+      nav{inset:0 auto 0 0;width:232px}
+      nav>div{max-width:none;margin:0}
+    }
     header{min-height:62px;box-shadow:0 2px 12px rgba(15,23,42,.035)}
     #view.wrap{padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
     #view h2{letter-spacing:-.035em;line-height:1.25}
