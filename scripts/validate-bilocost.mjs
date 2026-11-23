@@ -3,6 +3,7 @@ import vm from "node:vm";
 
 const file = "index.html";
 const html = readFileSync(file, "utf8");
+const responsiveCss = readFileSync("responsive-layout.css", "utf8");
 const firestoreRules = readFileSync("firestore.rules", "utf8");
 const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
@@ -25,6 +26,9 @@ function fail(message) {
   console.error("Bilocost validation failed: " + message);
   process.exit(1);
 }
+
+if (!responsiveCss.includes("@media (min-width: 700px)")) fail("Responsive stylesheet is missing");
+if (!responsiveCss.includes("@media (min-width: 700px)") || !responsiveCss.includes("@media (min-width: 1100px)") || !responsiveCss.includes("grid-template-columns: repeat(5")) fail("Tablet and desktop responsive breakpoints are incomplete");
 
 const appMarker = html.indexOf("const CLOUD=");
 if (appMarker < 0) fail("main application script marker not found");

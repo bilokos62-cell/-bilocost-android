@@ -67,6 +67,9 @@ jobs:
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
 
+      - name: Inject responsive tablet and desktop layout
+        run: python3 scripts/inject-responsive-layout.py
+
       - name: Validate Bilocost source and integrations
         run: npm run build
 
@@ -74,6 +77,7 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
+          cp responsive-layout.css www/responsive-layout.css
           # Copy the local brand assets used by the storefront.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg

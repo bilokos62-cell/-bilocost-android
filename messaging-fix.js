@@ -81,8 +81,8 @@ function openChat(cid,other,ttl,info){
  if(S.unChat){S.unChat();S.unChat=null;}
  if(!CLOUD){renderChat(S.lchats[cid]?S.lchats[cid].msgs:[]);render();return;}
  const F=FB.F;
- S.unChat=F.onSnapshot(F.query(F.collection(FB.db,"chats",cid,"messages"),F.orderBy("at","asc")),
-  s=>renderChat(s.docs.map(d=>({id:d.id,...d.data()}))),
+ S.unChat=F.onSnapshot(F.query(F.collection(FB.db,"chats",cid,"messages"),F.orderBy("at","desc"),F.limit(100)),
+  s=>renderChat(s.docs.map(d=>({id:d.id,...d.data()})).reverse()),
   e=>{console.error("Bilocost chat listener:",e);const el=$("#ch");if(el)el.innerHTML='<p class="warn">'+esc(chatErrorText(e,"écoute des messages"))+'</p>';});
 }
 async function sendMsg(){
