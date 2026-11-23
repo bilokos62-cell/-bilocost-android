@@ -34,25 +34,40 @@ script = r"""<script id="bilocost-native-loader-script">
  layer.id="bilocost-native-loader";
  layer.setAttribute("role","status");
  layer.setAttribute("aria-label","Chargement de Bilocost");
- layer.innerHTML='<div class="bl-wrap"><img class="bl-mark" src="bilocost-loader-logo.jpg" alt="Bilocost"><div class="bl-name">Bilocost</div><div class="bl-tag">L\'ACHAT À BAS PRIX !</div><div class="bl-slogan">Notre marché. Notre plateforme. Notre avenir.</div><div class="bl-track" aria-hidden="true"><div class="bl-fill"></div></div><div class="bl-caption">Préparation de votre espace Bilocost…</div></div>';
+ layer.innerHTML='<div class="bl-wrap"><img class="bl-mark" src="bilocost-loader-logo.jpg" alt="Bilocost"><div class="bl-name">Bilocost</div><div class="bl-tag">L’ACHAT À BAS PRIX !</div><div class="bl-slogan">Notre marché. Notre plateforme. Notre avenir.</div><div class="bl-track" role="progressbar" aria-label="Chargement en cours" aria-valuetext="Progression indéterminée"><div class="bl-fill"></div></div><div class="bl-caption" aria-live="polite">Préparation de votre espace Bilocost…</div></div>';
  document.body.appendChild(layer);
  const startedAt=Date.now();let closed=false,readySince=0;
+ const caption=layer.querySelector(".bl-caption");
+ const setMessage=(message)=>{if(caption)caption.textContent=message};
+ const ensureRetry=()=>{
+  if(layer.querySelector("button"))return;
+  const retry=document.createElement("button");retry.type="button";retry.textContent="Réessayer";
+  retry.style.cssText="margin-top:18px;padding:10px 20px;border:1px solid #b9f5d0;border-radius:24px;background:#063b2b;color:#ffffff;font-weight:700";
+  retry.addEventListener("click",()=>{if(navigator.onLine===false){setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");return}window.location.reload()});
+  layer.querySelector(".bl-wrap").appendChild(retry);
+ };
  const close=()=>{if(closed)return;closed=true;layer.classList.add("bl-out");window.setTimeout(()=>layer.remove(),460)};
+ const updateNetwork=()=>{
+  if(navigator.onLine===false){setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");ensureRetry()}
+  else if(!closed)setMessage("Connexion rétablie. Appuyez sur Réessayer pour reprendre le chargement.");
+ };
+ window.addEventListener("offline",updateNetwork);
+ window.addEventListener("online",updateNetwork);
  const check=()=>{
   if(closed)return;
   const view=document.getElementById("view");
   const ready=document.readyState!=="loading"&&!!view&&(view.childElementCount>0||view.textContent.trim().length>0);
-  if(ready){if(!readySince)readySince=Date.now();if(Date.now()-readySince>=500&&Date.now()-startedAt>=1400){close();return}}else readySince=0;
+  if(ready&&navigator.onLine!==false){if(!readySince)readySince=Date.now();if(Date.now()-readySince>=500&&Date.now()-startedAt>=1400){close();return}}else readySince=0;
   if(Date.now()-startedAt>=10000){
-   const caption=layer.querySelector(".bl-caption");if(caption)caption.textContent="Le chargement continue…";
-   if(ready){close();return}
-   if(!layer.querySelector("button")){const retry=document.createElement("button");retry.type="button";retry.textContent="Réessayer";retry.style.cssText="margin-top:18px;padding:10px 20px;border:1px solid #b9f5d0;border-radius:24px;background:#063b2b;color:#ffffff;font-weight:700";retry.addEventListener("click",()=>window.location.reload(),{once:true});layer.querySelector(".bl-wrap").appendChild(retry)}
+   if(navigator.onLine===false)setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");
+   else setMessage("Le chargement prend plus de temps que prévu. Vérifiez votre connexion puis réessayez.");
+   ensureRetry();
   }
   window.setTimeout(check,160);
  };
- check();window.addEventListener("pagehide",close,{once:true});
+ updateNetwork();check();window.addEventListener("pagehide",close,{once:true});
 })();
-</script>"""
+</script>
 if "bilocost-native-loader-style" not in html:
     if "</head>" not in html: raise SystemExit("Android splash: </head> missing")
     html=html.replace("</head>",style+"\n</head>",1)
@@ -60,4 +75,4 @@ if "bilocost-native-loader-script" not in html:
     if "</body>" not in html: raise SystemExit("Android splash: </body> missing")
     html=html.replace("</body>",script+"\n</body>",1)
 html_path.write_text(html,encoding="utf-8")
-print("Original dark-green Bilocost splash restored for iOS.")
+print("Original dark-green Bilocost splash restored for iOS with honest indeterminate progress and offline recovery.")
