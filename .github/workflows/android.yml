@@ -150,11 +150,11 @@ jobs:
           if launch is None:
               raise SystemExit("Native launch theme AppTheme.NoActionBarLaunch was not found")
           settings = {
-              "windowBackground": "@android:color/white",
-              "statusBarColor": "@android:color/white",
-              "navigationBarColor": "@android:color/white",
-              "windowLightStatusBar": "true",
-              "windowLightNavigationBar": "true",
+              "android:windowBackground": "@android:color/white",
+              "android:statusBarColor": "@android:color/white",
+              "android:navigationBarColor": "@android:color/white",
+              "android:windowLightStatusBar": "true",
+              "android:windowLightNavigationBar": "true",
           }
           for name, value in settings.items():
               item = next((x for x in launch.findall("item") if x.get("name") == name), None)
