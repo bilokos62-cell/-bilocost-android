@@ -272,7 +272,7 @@
 
 /* Mobile product catalogue and detail navigation: prevent the fixed tab bar
    from covering the last rows and keep the detail view vertically scrollable. */
-@media (max-width: 699px) {
+@media (max-width: 599px) {
   html, body {
     min-height: 100%;
     overscroll-behavior-y: auto;
