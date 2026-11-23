@@ -48,8 +48,8 @@ script = r"""<script id="bilocost-native-loader-script">
  };
  const close=()=>{if(closed)return;closed=true;layer.classList.add("bl-out");window.setTimeout(()=>layer.remove(),460)};
  const updateNetwork=()=>{
-  if(navigator.onLine===false){setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");ensureRetry()}
-  else if(!closed)setMessage("Connexion rétablie. Appuyez sur Réessayer pour reprendre le chargement.");
+  if(navigator.onLine===false){wasOffline=true;setMessage("Connexion Internet indisponible. Vérifiez votre réseau puis réessayez.");ensureRetry()}
+  else if(wasOffline&&!closed){wasOffline=false;setMessage("Connexion rétablie. Appuyez sur Réessayer pour reprendre le chargement.");ensureRetry()}
  };
  window.addEventListener("offline",updateNetwork);
  window.addEventListener("online",updateNetwork);
@@ -67,7 +67,7 @@ script = r"""<script id="bilocost-native-loader-script">
  };
  updateNetwork();check();window.addEventListener("pagehide",close,{once:true});
 })();
-</script>
+</script>"""
 if "bilocost-native-loader-style" not in html:
     if "</head>" not in html: raise SystemExit("Android splash: </head> missing")
     html=html.replace("</head>",style+"\n</head>",1)
