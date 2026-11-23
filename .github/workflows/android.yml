@@ -105,7 +105,7 @@ jobs:
           # Fail early if an HTML-referenced local brand image is missing.
           test -s www/IMG-20261024-WA0000.jpg
           # Add the brand mark to the Android-only WebView bundle.
-          cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
+          cp resources/bilocost-app-icon.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
           # Replace the legacy green/video splash with the new white native animation.
           python3 scripts/inject-android-splash.py
