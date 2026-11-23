@@ -69,34 +69,10 @@ jobs:
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
           test -s www/IMG-20261024-WA0000.jpg
-          # Native iOS bundle only: user-provided animated loading clip.
-          test -s resources/Bilocost_Loading_Screen.mp4
-          cp resources/Bilocost_Loading_Screen.mp4 www/bilocost-launch.mp4
-          if [ -f manifest.webmanifest ]; then cp manifest.webmanifest www/; fi
-          if [ -f sw.js ]; then cp sw.js www/; fi
-          if [ -d icons ]; then cp -R icons/. www/icons/; fi
-          # Reuse the Bilocost native loader design, but activate it only inside iOS.
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          workflow = Path(".github/workflows/android.yml").read_text(encoding="utf-8")
-          html_path = Path("www/index.html")
-          html = html_path.read_text(encoding="utf-8")
-          style_match = re.search(r'          style = r"""(.*?)"""', workflow, re.S)
-          script_match = re.search(r'          script = r"""(.*?)"""', workflow, re.S)
-          if not style_match or not script_match:
-              raise SystemExit("Shared Bilocost native loader source was not found")
-          style = style_match.group(1)
-          script = script_match.group(1).replace('cap.getPlatform() !== "android"', 'cap.getPlatform() !== "ios"')
-          if "bilocost-native-loader-style" not in html:
-              html = html.replace("</head>", style + "\n</head>", 1)
-          if "bilocost-native-loader-script" not in html:
-              html = html.replace("</body>", script + "\n</body>", 1)
-          if "bilocost-native-loader-script" not in html:
-              raise SystemExit("iOS native loader injection failed")
-          html_path.write_text(html, encoding="utf-8")
-          print("iOS-only Bilocost loading animation injected; website remains unchanged.")
-          PY
+          # Use the same clean white splash, activated only on iOS.
+          cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
+          test -s www/bilocost-loader-logo.jpg
+          python3 scripts/inject-ios-splash.py
 
       - name: Add Capacitor iOS platform
         run: |
