@@ -8,6 +8,9 @@ const firestoreRules = readFileSync("firestore.rules", "utf8");
 const storageRules = readFileSync("storage.rules", "utf8");
 const firebaseConfig = JSON.parse(readFileSync("firebase.json", "utf8"));
 const firestoreIndexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
+const messagingPatch = readFileSync("messaging-fix.js", "utf8");
+const servicePatch = readFileSync("service-design.js", "utf8");
+const uiRefinementPatch = readFileSync("ui-refinement.js", "utf8");
 const deliveryPatch = readFileSync("delivery-otp.js", "utf8");
 const messagingPatch = readFileSync("messaging-fix.js", "utf8");
 const serviceDesign = readFileSync("service-design.js", "utf8");
@@ -16,6 +19,11 @@ const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const themeRewards = readFileSync("theme-rewards.js", "utf8");
 const themeSettingsEntry = readFileSync("theme-settings-entry.js", "utf8");
+const themeDesigns = readFileSync("personalization-designs.js", "utf8");
+try { new vm.Script(themeDesigns, { filename: "personalization-designs.js" }); } catch (error) { fail("Design personalization syntax error: " + error.message); }
+for (const [name, code] of [["messaging-fix.js", messagingPatch], ["service-design.js", servicePatch], ["ui-refinement.js", uiRefinementPatch], ["theme-rewards.js", themeRewards], ["theme-settings-entry.js", themeSettingsEntry], ["delivery-otp.js", deliveryPatch], ["geography-selector.js", geographyPatch], ["listing-location.js", listingLocationPatch]]) {
+  try { new vm.Script(code, { filename: name }); } catch (error) { fail(name + " syntax error: " + error.message); }
+}
 const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
 const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
@@ -101,6 +109,22 @@ if (!firestoreRules.includes("match /orders/{orderId}") || !firestoreRules.inclu
 if (!functionsSource.includes("exports.createDeliveryOrder") || !functionsSource.includes("exports.confirmDelivery") || !functionsSource.includes("exports.confirmOrderPayment")) fail("Delivery OTP backend functions are incomplete");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "buyerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Buyer order-history index is missing");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "orders" && index.fields.some(field => field.fieldPath === "sellerId") && index.fields.some(field => field.fieldPath === "createdAt"))) fail("Seller order-history index is missing");
+
+if (!/index\s*=\s*1/.test(themeRewards) || !/index\s*>=\s*100/.test(themeRewards)) fail("The 100-color palette generator is incomplete");
+if (!/ACCESS_DURATION_MS\s*=\s*30\s*\*/.test(themeRewards) || !/state\.progress\[id\]\s*>=\s*2/.test(themeRewards)) fail("Premium color unlock must require two rewarded ads and last 30 days");
+if (!/const DAYS=30\*86400000/.test(themeDesigns) || !/state\.progress\[id\]>=2/.test(themeDesigns)) fail("Premium design unlock must require two rewarded ads and last 30 days");
+if (!themeDesigns.includes("window.biloOpenPersonalizationHub") || !themeSettingsEntry.includes("biloOpenPersonalizationHub")) fail("The colors-and-designs personalization hub is not connected");
+const platformWorkflows = [
+  [".github/workflows/android.yml", readFileSync(".github/workflows/android.yml", "utf8")],
+  [".github/workflows/ios.yml", readFileSync(".github/workflows/ios.yml", "utf8")],
+  [".github/workflows/firebase-hosting.yml", readFileSync(".github/workflows/firebase-hosting.yml", "utf8")],
+];
+for (const [path, workflow] of platformWorkflows) {
+  if (!workflow.includes("personalization-designs.js")) fail(path + " does not inject premium design personalization");
+  if (!workflow.includes("theme-rewards.js")) fail(path + " does not inject the rewarded color palettes");
+  if (!workflow.includes("listing-location.js")) fail(path + " does not enforce province and locality on listings");
+}
+
 console.log("Delivery OTP module and backend syntax: valid.");
 console.log("Bilocost source validation passed.");
 console.log("JavaScript syntax: valid");

@@ -27,7 +27,21 @@
     android: "ca-app-pub-3940256099942544/5224354917",
     ios: "ca-app-pub-3940256099942544/1712485313"
   };
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {unlocked:["green"], progress:{}, selected:"green"}; } catch (_) { return {unlocked:["green"],progress:{},selected:"green"}; } };
+  const storageKey = () => {
+    try { const user = window.firebase && firebase.auth && firebase.auth().currentUser; return KEY + "_" + (user && user.uid ? user.uid : "guest"); }
+    catch (_) { return KEY + "_guest"; }
+  };
+  const read = () => {
+    try {
+      const key = storageKey();
+      let raw = localStorage.getItem(key);
+      if (!raw && key !== KEY + "_guest") {
+        raw = localStorage.getItem(KEY + "_guest") || localStorage.getItem(KEY);
+        if (raw) { localStorage.setItem(key, raw); localStorage.removeItem(KEY + "_guest"); localStorage.removeItem(KEY); }
+      }
+      return JSON.parse(raw) || {unlocked:["green"], progress:{}, selected:"green"};
+    } catch (_) { return {unlocked:["green"],progress:{},selected:"green"}; }
+  };
   let state = read();
   if (!Array.isArray(state.unlocked)) state.unlocked = ["green"];
   if (!state.progress || typeof state.progress !== "object") state.progress = {};
@@ -37,7 +51,7 @@
   state.unlocked.filter(id => id !== "green" && COLORS[id]).forEach(id => {
     if (!Number.isFinite(Number(state.expires[id]))) state.expires[id] = migrationNow + ACCESS_DURATION_MS;
   });
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {} };
+  const save = () => { try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch (_) {} };
   function refreshExpirations() {
     const now = Date.now();
     let changed = false;
@@ -85,6 +99,31 @@
     state.selected = id; save();
   };
   apply(state.selected);
+
+  // Keep the selected palette after authentication and every app screen re-render.
+  // The main app can rewrite theme variables while rebuilding its authenticated UI.
+  const ensureSelectedTheme = () => {
+    const c = COLORS[state.selected] || COLORS.green;
+    const root = document.documentElement;
+    if (
+      root.style.getPropertyValue("--pri").trim() !== c.pri ||
+      root.style.getPropertyValue("--pri-d").trim() !== c.dark ||
+      root.style.getPropertyValue("--mint").trim() !== c.mint ||
+      root.style.getPropertyValue("--mint-t").trim() !== c.mintText
+    ) apply(state.selected);
+  };
+  if (window.MutationObserver && document.documentElement) {
+    new MutationObserver(ensureSelectedTheme).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["style"],
+      childList: true,
+      subtree: true
+    });
+  }
+  window.addEventListener("pageshow", ensureSelectedTheme);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) ensureSelectedTheme();
+  });
   scheduleExpiration();
   const adMob = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   const progress = id => Math.min(2, Number(state.progress[id] || 0));
@@ -154,5 +193,6 @@
   const style = document.createElement("style");
   style.textContent = '.bilo-theme-panel{color:var(--ink);max-height:78vh;overflow-y:auto;overscroll-behavior:contain;padding:2px 3px 6px}.bilo-theme-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.bilo-theme-top small{font:800 9px Inter,sans-serif;letter-spacing:.12em;color:var(--pri)}.bilo-theme-top h2{margin:4px 0;font-size:19px}.bilo-theme-top p,.bilo-theme-foot{font-size:12px;color:var(--mute);line-height:1.5;margin:0}.bilo-theme-brand{padding:10px 12px;border-radius:12px;background:var(--pri);color:white;display:grid;place-items:center;font-weight:900;font-size:11px;letter-spacing:.08em;white-space:nowrap}.bilo-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}.bilo-theme-option{display:flex;align-items:center;gap:8px;min-width:0;padding:12px 9px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);text-align:left}.bilo-theme-option.is-locked{background:var(--bg);border-style:dashed}.bilo-theme-option.is-locked .bilo-theme-state{color:var(--mute)}.bilo-theme-swatch{width:24px;height:24px;flex:none;border-radius:8px;background:var(--swatch)}.bilo-theme-name{font-size:11px;font-weight:800;flex:1}.bilo-theme-state{font-size:9px;color:var(--pri);font-weight:800;white-space:nowrap}.bilo-theme-foot{margin:0 0 12px}@media(max-width:360px){.bilo-theme-grid{grid-template-columns:1fr}}';
   document.head.appendChild(style);
+  try { if (window.firebase && firebase.auth) firebase.auth().onAuthStateChanged(() => { state = read(); refreshExpirations(); apply(state.selected); scheduleExpiration(); }); } catch (_) {}
   window.biloOpenThemeCustomizer = openThemeCustomizer;
 })();
