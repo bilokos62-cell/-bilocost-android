@@ -27,8 +27,8 @@ function fail(message) {
   process.exit(1);
 }
 
-if (!responsiveCss.includes("@media (min-width: 700px)")) fail("Responsive stylesheet is missing");
-if (!responsiveCss.includes("@media (min-width: 700px)") || !responsiveCss.includes("@media (min-width: 1100px)") || !responsiveCss.includes("grid-template-columns: repeat(5")) fail("Tablet and desktop responsive breakpoints are incomplete");
+if (!responsiveCss.includes("@media (min-width: 600px)")) fail("Responsive stylesheet is missing");
+if (!responsiveCss.includes("@media (min-width: 600px)") || !responsiveCss.includes("@media (min-width: 1100px)") || !responsiveCss.includes("grid-template-columns: repeat(5")) fail("Tablet and desktop responsive breakpoints are incomplete");
 
 const appMarker = html.indexOf("const CLOUD=");
 if (appMarker < 0) fail("main application script marker not found");
