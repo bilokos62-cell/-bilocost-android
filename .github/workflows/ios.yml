@@ -70,7 +70,7 @@ jobs:
           cp IMG-20261024-WA0000~2.jpg www/IMG-20261024-WA0000~2.jpg
           test -s www/IMG-20261024-WA0000.jpg
           # Use the same clean white splash, activated only on iOS.
-          cp resources/IMG_20261104_114004_803.jpg www/bilocost-loader-logo.jpg
+          cp resources/bilocost-app-icon.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
           python3 scripts/inject-ios-splash.py
 
