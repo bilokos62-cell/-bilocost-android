@@ -6,17 +6,17 @@ if not html_path.is_file() or not logo_path.is_file() or logo_path.stat().st_siz
     raise SystemExit("iOS splash prerequisites are missing")
 html = html_path.read_text(encoding="utf-8")
 style = r"""<style id="bilocost-native-loader-style">
-#bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:#d18f9f;color:#ffffff;opacity:1;transition:opacity .42s ease}
+#bilocost-native-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:hidden;background:#ffffff;color:#087542;opacity:1;transition:opacity .42s ease}
 #bilocost-native-loader:before,#bilocost-native-loader:after{content:"";position:absolute;display:none}
 #bilocost-native-loader:after{display:none}
 #bilocost-native-loader .bl-wrap{position:relative;z-index:1;width:min(88vw,420px);display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 18px}
 #bilocost-native-loader .bl-mark{width:clamp(180px,48vw,240px);height:clamp(180px,48vw,240px);object-fit:contain;border-radius:28px;filter:none;animation:none}
-#bilocost-native-loader .bl-name{font:800 clamp(32px,9vw,42px)/1.1 system-ui,sans-serif;letter-spacing:0;margin-top:18px;color:#ffffff;text-shadow:none;animation:none}
-#bilocost-native-loader .bl-tag{font:700 10px/1.6 system-ui,sans-serif;letter-spacing:2px;color:#ffffff;margin-top:9px;animation:bl-rise .55s .32s both}
-#bilocost-native-loader .bl-slogan{font:600 12px/1.5 system-ui,sans-serif;color:#ffffff;margin-top:18px;letter-spacing:.25px;animation:bl-rise .55s .42s both}
-#bilocost-native-loader .bl-track{height:4px;width:min(68vw,270px);border-radius:10px;background:rgba(255,255,255,.30);overflow:hidden;margin-top:29px}
-#bilocost-native-loader .bl-fill{height:100%;width:38%;border-radius:10px;background:#ffffff;box-shadow:0 0 12px rgba(134,255,157,.7);animation:bl-progress 1.25s ease-in-out infinite alternate}
-#bilocost-native-loader .bl-caption{font:500 11px/1.4 system-ui,sans-serif;color:#ffffff;margin-top:11px}
+#bilocost-native-loader .bl-name{font:800 clamp(32px,9vw,42px)/1.1 system-ui,sans-serif;letter-spacing:0;margin-top:18px;color:#087542;text-shadow:none;animation:none}
+#bilocost-native-loader .bl-tag{font:700 10px/1.6 system-ui,sans-serif;letter-spacing:2px;color:#087542;margin-top:9px;animation:bl-rise .55s .32s both}
+#bilocost-native-loader .bl-slogan{font:600 12px/1.5 system-ui,sans-serif;color:#334155;margin-top:18px;letter-spacing:.25px;animation:bl-rise .55s .42s both}
+#bilocost-native-loader .bl-track{height:4px;width:min(68vw,270px);border-radius:10px;background:rgba(8,117,66,.16);overflow:hidden;margin-top:29px}
+#bilocost-native-loader .bl-fill{height:100%;width:38%;border-radius:10px;background:#087542;box-shadow:0 0 12px rgba(8,117,66,.25);animation:bl-progress 1.25s ease-in-out infinite alternate}
+#bilocost-native-loader .bl-caption{font:500 11px/1.4 system-ui,sans-serif;color:#64748b;margin-top:11px}
 #bilocost-native-loader.bl-out{opacity:0;pointer-events:none}
 @keyframes bl-arrive{0%{opacity:0;transform:scale(.72) rotate(-7deg)}70%{opacity:1;transform:scale(1.05) rotate(1deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 @keyframes bl-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
