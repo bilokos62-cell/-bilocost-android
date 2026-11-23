@@ -28,7 +28,7 @@
     body{background:var(--bg);-webkit-font-smoothing:antialiased}
     .app{width:100%;max-width:560px}
     /* Tablets must use the available canvas, not the phone-sized 560px shell. */
-    @media (min-width:700px) {
+    @media (min-width:600px) {
       .app{width:100%;max-width:none;margin:0 auto}
       header{width:100%;box-sizing:border-box}
       #view.wrap{width:100%;max-width:1440px;box-sizing:border-box;margin:0 auto}
