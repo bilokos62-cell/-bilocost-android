@@ -261,6 +261,33 @@ header>div:last-child{gap:5px!important}
 .brand-ad-card:focus-visible,.brand-ad-rail:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
 @media(min-width:700px){.brand-ad-card{flex-basis:280px}.brand-ad-controls button{cursor:pointer}}
 @media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}
+
+/* bilocost-readable-legacy-typography: restore the clear text scale from the supplied classic Bilocost screen.
+   Additive only: preserve all current screens, layouts, data and interactions. */
+body{font:400 14px/20px 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
+.logo b{font:800 20px/20px 'Plus Jakarta Sans';letter-spacing:-.02em}
+.cat{font:500 12px Inter;color:var(--ink)}
+.hero h1{font:800 24px/30px 'Plus Jakarta Sans';letter-spacing:-.02em}
+.hero p{font-size:14px;line-height:20px}
+h2,.row h2{font:800 20px/26px 'Plus Jakarta Sans';letter-spacing:-.01em}
+.sub,.row .sub{font-size:12px;line-height:1.5;color:var(--mute)}
+.chip{font:600 12px Inter}
+.card h3{font:700 14px/18px 'Plus Jakarta Sans';min-height:0}
+.cdf{font:800 15px/20px 'Plus Jakarta Sans'}
+.usd{font:500 12px Inter;color:var(--mute)}
+.meta{font:500 12px Inter;color:var(--mute)}
+label{font:600 13px Inter}
+.msg p{font-size:13px;line-height:1.5}
+nav button{font:600 11px Inter;color:var(--mute)}
+input,select,textarea,button{font-family:inherit}
+input::placeholder,textarea::placeholder{color:var(--mute);opacity:1}
+#view,#page,.pw,.pbody{color:var(--ink)}
+#view small,.pw small,.pbody small{color:var(--mute)}
+@media(max-width:380px){
+ .hero h1{font-size:22px;line-height:1.3}
+ .card h3{font-size:13px;line-height:18px}
+}
+
 </style>
 </head>
 <body>
