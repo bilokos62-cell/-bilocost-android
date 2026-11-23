@@ -133,6 +133,7 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:0 12px calc(10px + 
 nav div{pointer-events:auto;max-width:496px;margin:0 auto;height:66px;display:grid;grid-template-columns:1fr 1fr 92px 1fr 1fr;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:32px;box-shadow:0 12px 32px -8px rgba(15,23,42,.28)}
 nav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;font:600 11px Inter;color:var(--mute);height:100%;justify-content:center}
 nav button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.reel-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:12px 0}.reel-video{width:100%;max-height:68vh;aspect-ratio:9/16;object-fit:cover;background:#111}.reel-meta{padding:12px}.reel-empty{padding:24px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--mute)}.reel-upload{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
 nav button[aria-current=page]:not(.plus){color:var(--ink)}
 nav button[aria-current=page]:not(.plus) svg{fill:currentColor}
 nav .plus{width:64px;height:64px;margin:-34px auto 0;border-radius:50%;background:var(--pri);color:#fff;justify-content:center;box-shadow:0 0 0 7px var(--card),0 10px 22px -2px rgba(0,154,73,.45)}
@@ -266,12 +267,12 @@ header>div:last-child{gap:5px!important}
 <div class="app"> 
 <header>
   <div class="logo"><img class="lg" width="38" height="38" alt=""><div><b>Bilocost</b><small>ACHAT À BAS PRIX</small></div></div>
-  <div style="display:flex;gap:8px;align-items:center"><button class="commune" id="communeBtn" aria-label="Choisir la commune"><svg class="i" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> <span id="communeLbl">Kinshasa</span> ▾</button><button class="ib" data-go="favs" aria-label="Favoris"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button class="ib" data-t="wallet" aria-label="Portefeuille" title="Mon portefeuille"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M16 14h2"/></svg></button><button class="ib" data-go="cart" aria-label="Panier"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><b class="dot" id="cc" style="display:none"></b></button><button class="av sm" id="hav" data-t="me" aria-label="Profil"></button></div>
+  <div style="display:flex;gap:8px;align-items:center"><button class="commune" id="communeBtn" aria-label="Choisir la commune"><svg class="i" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> <span id="communeLbl">Kinshasa</span> ▾</button><button class="ib" data-t="search" aria-label="Rechercher" title="Rechercher"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button><button class="ib" data-go="favs" aria-label="Favoris"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button class="ib" data-go="cart" aria-label="Panier"><svg class="i" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><b class="dot" id="cc" style="display:none"></b></button><button class="av sm" id="hav" data-t="me" aria-label="Profil"></button></div>
 </header>
 <main id="view" class="wrap"><div class="empty" style="margin:24px 0">Chargement de Bilocost…</div></main>
 <nav aria-label="Navigation principale"><div>
   <button data-t="home" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Accueil</span></button>
-  <button data-t="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Explorer</span></button>
+  <button data-t="reels"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg><span>Réel</span></button>
   <button class="plus" data-t="pub" aria-label="Publier un article"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   <button data-t="msg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg><span>Messages</span><b class="dot" hidden></b></button>
   <button data-t="me"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Profil</span></button>
@@ -437,6 +438,7 @@ async function refreshWallet(){if(!CLOUD||!S.user)return;try{const F=FB.F,q=F.qu
 function walletHistory(){return S.walletTx.length?S.walletTx.map(x=>`<div class="lr"><span class="lic">${I("receipt","",18)}</span><span class="lt"><b>${esc(x.label||x.type||"Transaction")}</b><small class="sub">${x.createdAt&&x.createdAt.toDate?x.createdAt.toDate().toLocaleString("fr-FR"):"Date indisponible"} • ${esc(x.status||"Enregistrée")}</small></span><b>${Number(x.amount||0).toLocaleString("fr-FR")} ${esc(x.currency||"CDF")}</b></div>`).join(""):'<div class="card" style="padding:16px;text-align:center"><p class="sub">Aucune transaction enregistrée.</p></div>'}
 
 const V={
+ reels(){return reelScreen()},
  services(){return servicePage()},
  ads(){return `<h2>Publicité sur Bilocost</h2><p class="sub">Présentez votre entreprise dans nos deux espaces publicitaires.</p><div class="card" style="padding:14px;margin:12px 0"><b>Emplacement 1</b><p class="sub">Visibilité sur la page d’accueil.</p></div><div class="card" style="padding:14px;margin:12px 0"><b>Emplacement 2</b><p class="sub">Deuxième emplacement sur la page d’accueil.</p></div><h3>Demander une campagne</h3><label>Entreprise</label><input class="f" id="adbusiness" placeholder="Nom de l’entreprise"><label>Titre de la publicité *</label><input class="f" id="adtitle" placeholder="Votre offre"><label>Description</label><textarea class="f" id="addesc" placeholder="Présentez votre activité"></textarea><label>Lien HTTPS *</label><input class="f" id="adurl" placeholder="https://..." inputmode="url"><label>Emplacement souhaité</label><select class="f" id="adslot"><option value="slot1">Emplacement 1</option><option value="slot2">Emplacement 2</option><option value="both">Les deux emplacements</option></select><label>Budget proposé (USD)</label><input class="f" id="adbudget" type="number" min="0" placeholder="À convenir"><button class="btn" style="margin-top:12px" data-act="adsubmit">Envoyer la demande</button><div class="warn" style="margin-top:12px">Campagnes soumises à validation. Aucun paiement publicitaire n’est encaissé tant que le tarif et le prestataire ne sont pas configurés.</div>`},
  home(){if(S.mode==="rent")return rentHome();return `${S.cloudError?`<div class="warn"><b>Connexion aux services Bilocost</b><br>${esc(S.cloudError)}</div>`:""}${modeSeg()}<div class="search"><input id="q" type="search" placeholder="Rechercher un article, une catégorie…" value="${esc(S.q)}" aria-label="Rechercher"><button data-sheet="sort" aria-label="Filtres">${I("sliders","",20)}</button></div>${filters()}
@@ -513,6 +515,54 @@ function doAuth(k){
 function phs(){const e=$("#phs");if(e)e.innerHTML=S.photos.map((p,i)=>`<div style="position:relative"><img src="${p}" alt="Photo ${i+1}"><button type="button" class="x" data-rm="${i}" aria-label="Retirer la photo">×</button></div>`).join("")+(S.photos.length<4?`<button type="button" class="add" data-pick>${I("camera","",24)}<small>Ajouter des photos</small></button>`:"")}
 function addPhotos(files){[...files].slice(0,4-S.photos.length).forEach(f=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").imageSmoothingQuality="high";c.getContext("2d").drawImage(im,0,0,c.width,c.height);S.photos.push(c.toDataURL("image/jpeg",.88));phs()};im.src=r.result};r.readAsDataURL(f)})}
 
+
+/* Réels Bilocost : publication réservée aux identités approuvées. */
+let reelSelectedFile=null;
+function reelScreen(){
+ const verified=!!(S.user&&S.user.verificationStatus==="verified");
+ return `<div class="row" style="align-items:center"><div><h2>Réel Bilocost</h2><div class="sub">Des vidéos courtes de 5 à 10 secondes pour présenter un produit</div></div><button class="btn sm" data-act="reel-new">＋ Publier</button></div>
+ <div id="reelFeed"><div class="reel-empty">Chargement des Réels…</div></div>`;
+}
+async function reelLoad(){
+ const root=document.querySelector("#reelFeed");if(!root)return;
+ if(!CLOUD||!FB||!FB.F){root.innerHTML='<div class="reel-empty">Connectez-vous à Internet pour consulter les Réels.</div>';return}
+ try{
+  const q=await FB.F.getDocs(FB.F.query(FB.F.collection(FB.db,"reels"),FB.F.where("status","==","ACTIVE"),FB.F.orderBy("createdAt","desc"),FB.F.limit(30)));
+  if(!q.docs.length){root.innerHTML='<div class="reel-empty">Aucun Réel pour le moment. Soyez parmi les premiers à présenter un produit !</div>';return}
+  root.innerHTML=q.docs.map(d=>{const x=d.data();return '<article class="reel-card"><video class="reel-video" controls playsinline preload="metadata" src="'+esc(x.videoUrl)+'"></video><div class="reel-meta"><b>'+esc(x.productTitle||"Produit Bilocost")+'</b><div class="sub">'+esc(x.ownerName||"Vendeur vérifié")+'</div><div style="margin-top:8px">'+esc(x.caption||"")+'</div><button class="btn out sm" style="margin-top:10px" data-act="reel-boost" data-v="'+esc(d.id)+'">Booster ce Réel</button></div></article>'}).join("");
+ }catch(e){console.error("Reels load",e);root.innerHTML='<div class="reel-empty">Impossible de charger les Réels. Vérifiez la connexion Firebase et les index Firestore.</div>'}
+}
+function reelNewSheet(){
+ if(!S.user)return needUser();
+ if(S.user.verificationStatus!=="verified"){
+  sheet('<h2>Débloquer la publication des Réels</h2><p class="sub">La publication est réservée aux comptes dont l’identité a été vérifiée.</p><div class="warn">Complétez vos informations personnelles et envoyez une pièce d’identité valide dans votre espace de vérification. Le contrôle humain est prévu sous 24 à 72 heures. Vous pourrez publier après approbation.</div><button class="btn" data-act="reel-kyc">Vérifier mon identité</button>');return;
+ }
+ sheet('<h2>Publier un Réel</h2><p class="sub">Vidéo verticale ou horizontale, durée obligatoire : 5 à 10 secondes.</p><div class="reel-upload"><label>Vidéo du produit</label><input id="reelFile" type="file" accept="video/mp4,video/webm,video/quicktime"><label>Nom du produit *</label><input class="f" id="reelTitle" maxlength="100" placeholder="Ex. : Sneakers Nike"><label>Présentation</label><textarea class="f" id="reelCaption" maxlength="240" placeholder="Décrivez brièvement le produit"></textarea><div id="reelPreview" class="sub">Aucune vidéo sélectionnée.</div><button class="btn" data-act="reel-publish">Publier le Réel</button></div><div class="warn">Un boost payant est facultatif. Sans boost, votre Réel peut toujours apparaître dans le fil.</div>');
+}
+async function reelPublish(){
+ if(!S.user||S.user.verificationStatus!=="verified")return toast("Votre identité doit être approuvée avant publication.");
+ const file=(document.querySelector("#reelFile")||{}).files?.[0],title=(document.querySelector("#reelTitle")||{}).value.trim(),caption=(document.querySelector("#reelCaption")||{}).value.trim();
+ if(!file||!title)return toast("Sélectionnez une vidéo et indiquez le nom du produit.");
+ if(!/^video\/(mp4|webm|quicktime)$/.test(file.type))return toast("Format vidéo accepté : MP4, WEBM ou MOV.");
+ if(file.size>30*1024*1024)return toast("La vidéo ne peut pas dépasser 30 Mo.");
+ const temp=document.createElement("video");temp.preload="metadata";const duration=await new Promise((resolve,reject)=>{temp.onloadedmetadata=()=>resolve(temp.duration);temp.onerror=()=>reject(new Error("Vidéo illisible"));temp.src=URL.createObjectURL(file)});
+ if(!Number.isFinite(duration)||duration<5||duration>10){URL.revokeObjectURL(temp.src);return toast("La vidéo doit durer entre 5 et 10 secondes.");}
+ const btn=document.querySelector('[data-act="reel-publish"]');if(btn)btn.disabled=true;
+ try{
+  const id=FB.F.doc(FB.F.collection(FB.db,"reels")).id,path="reels/"+S.user.uid+"/"+id+".mp4",ref=FB.O.ref(FB.st,path);
+  await FB.O.uploadBytes(ref,file,{contentType:file.type});
+  const videoUrl=await FB.O.getDownloadURL(ref);
+  await FB.F.setDoc(FB.F.doc(FB.db,"reels",id),{ownerId:S.user.uid,ownerName:S.user.name,productTitle:title,caption,videoUrl,storagePath:path,durationSeconds:duration,status:"ACTIVE",boostStatus:"NONE",createdAt:FB.F.serverTimestamp()});
+  close_();S.tab="reels";render();setTimeout(reelLoad,0);toast("Votre Réel est publié.");
+ }catch(e){console.error(e);if(btn)btn.disabled=false;toast("Publication impossible : "+(e.code||e.message||"erreur Firebase"))}
+}
+async function reelBoostRequest(id){
+ if(!S.user)return needUser();
+ try{
+  await FB.F.addDoc(FB.F.collection(FB.db,"reelBoostRequests"),{reelId:id,ownerId:S.user.uid,status:"AWAITING_PAYMENT",createdAt:FB.F.serverTimestamp(),note:"Activation uniquement après confirmation du paiement par un administrateur."});
+  toast("Demande de boost enregistrée. Le tarif et le paiement seront confirmés avant activation.");
+ }catch(e){toast("Demande de boost impossible : "+(e.code||"erreur Firebase"))}
+}
 function render(){
  let html="";
  try{const view=V[S.tab];if(typeof view!=="function")throw new Error("Écran inconnu : "+S.tab);html=view()}
@@ -526,6 +576,7 @@ function render(){
  const q=$("#q");if(q&&S.tab==="search"){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
  logos();
  applyUiLanguage(document.body);
+ if(S.tab==="reels")setTimeout(reelLoad,0);
  const ge=$("#goe");if(ge){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};ge.onclick=publishEvent}
  const p=$("#pp");if(p){phs();$("#pf").onchange=e=>{addPhotos(e.target.files);e.target.value=""};
   const u=()=>{const v=+p.value||0,c=$("#pcur").value;$("#eq").textContent="Équivalent : ≈ "+(c==="CDF"?fmt(v/RATE)+" $":fmt(v*RATE)+" CDF")+` (taux indicatif : 1 $ = ${RATE} CDF)`};p.oninput=u;$("#pcur").onchange=u;
@@ -1340,6 +1391,8 @@ async function saveRentDraft(){if(!CLOUD||!FB.F||!FB.O)return toast("Connexion F
 // Auth controls are handled directly inside the fixed auth layer for reliable taps on mobile WebViews.
 const authRoot=document.querySelector("#auth");
 authRoot.addEventListener("click",e=>{const b=e.target.closest("[data-auth]");if(!b)return;e.preventDefault();e.stopPropagation();try{doAuth(b.dataset.auth)}catch(err){console.error("Bilocost auth action failed",err);toast("Action impossible : "+(err&&err.message||"erreur inattendue"))}},true);
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="reelFile"){const f=e.target.files&&e.target.files[0],p=document.querySelector("#reelPreview");if(p)p.textContent=f?f.name+" • "+(f.size/1024/1024).toFixed(1)+" Mo":"Aucune vidéo sélectionnée."}},true);
+document.addEventListener("click",e=>{const b=e.target.closest('[data-act^="reel-"]');if(!b)return;const a=b.dataset.act;e.preventDefault();e.stopImmediatePropagation();if(a==="reel-new")reelNewSheet();else if(a==="reel-kyc"){close_();go("verify")}else if(a==="reel-publish")reelPublish();else if(a==="reel-boost")reelBoostRequest(b.dataset.v)},true);
 const SEL="[data-lang],[data-go],[data-back],[data-act],[data-checkout],[data-sec],[data-t],[data-cat],[data-sort],[data-new],[data-open],[data-fav],[data-close],[data-buy],[data-sheet],[data-chat],[data-c],[data-auth],[data-soc],[data-eye],[data-reset],[data-send],[data-share],[data-rm],[data-pick],[data-logout],#communeBtn,#theme,#sheet";
 document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return;const d=t.dataset;
  if(d.lang){setUiLanguage(d.lang);return}

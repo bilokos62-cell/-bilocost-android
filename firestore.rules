@@ -219,6 +219,42 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Reels: public feed only contains active clips; publishing requires approved KYC.
+    match /reels/{reelId} {
+      allow read: if resource.data.status == "ACTIVE"
+        || (signedIn() && resource.data.ownerId == request.auth.uid)
+        || isAdmin();
+      allow create: if signedIn()
+        && hasVerifiedIdentity(request.auth.uid)
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.productTitle is string
+        && request.resource.data.productTitle.size() > 0
+        && request.resource.data.productTitle.size() <= 100
+        && request.resource.data.durationSeconds is number
+        && request.resource.data.durationSeconds >= 5
+        && request.resource.data.durationSeconds <= 10
+        && request.resource.data.videoUrl is string
+        && request.resource.data.storagePath.matches("reels/" + request.auth.uid + "/.*")
+        && request.resource.data.status == "ACTIVE"
+        && request.resource.data.boostStatus == "NONE";
+      allow update: if isAdmin();
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.ownerId == request.auth.uid);
+    }
+
+    // Boost requests are not activated by the client: an administrator confirms payment.
+    match /reelBoostRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.reelId is string
+        && exists(/databases/$(database)/documents/reels/$(request.resource.data.reelId))
+        && get(/databases/$(database)/documents/reels/$(request.resource.data.reelId)).data.ownerId == request.auth.uid
+        && request.resource.data.status == "AWAITING_PAYMENT";
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.ownerId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
     match /walletTransactions/{transactionId} {
       allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
       allow create, update, delete: if false;
