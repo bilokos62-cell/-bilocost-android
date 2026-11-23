@@ -338,3 +338,108 @@
     scroll-behavior: smooth;
   }
 }
+
+
+/* Product detail: keep the gallery below the device status bar and leave
+   enough scroll space above the fixed bottom navigation. */
+#page .pw {
+  box-sizing: border-box;
+  padding-top: max(22px, env(safe-area-inset-top, 0px));
+  padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px));
+  scroll-margin-top: 22px;
+}
+#page .pw > :first-child {
+  margin-top: 0;
+}
+#page .pw img,
+#page .pw video {
+  display: block;
+  max-width: 100%;
+}
+@media (max-width: 699px) {
+  #page .pw {
+    padding-top: max(24px, env(safe-area-inset-top, 0px));
+    padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+
+/* Product presentation refresh only: catalogue cards and product detail. */
+#view .grid .card,
+#view .cg .card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+#view .grid .card .ph,
+#view .cg .card .ph {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  background: var(--panel);
+  overflow: hidden;
+}
+#view .grid .card .ph img,
+#view .cg .card .ph img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+#view .grid .card .in,
+#view .cg .card .in {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 11px 12px 13px;
+}
+#view .grid .card h3,
+#view .cg .card h3 {
+  display: -webkit-box;
+  min-height: 2.6em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+#view .grid .card .price,
+#view .cg .card .price {
+  color: var(--pri);
+  font-weight: 850;
+  line-height: 1.2;
+}
+#page .pw {
+  color: var(--text, var(--fg, inherit));
+  overflow-wrap: anywhere;
+}
+#page .pw .pbar {
+  max-width: 100%;
+}
+#page .pw img,
+#page .pw video {
+  object-position: center;
+}
+@media (max-width: 699px) {
+  #view .grid, #view .cg {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 11px;
+  }
+  #view .grid .card .in,
+  #view .cg .card .in {
+    padding: 9px 10px 11px;
+  }
+}
+@media (min-width: 700px) {
+  #view .grid, #view .cg {
+    align-items: stretch;
+  }
+}
