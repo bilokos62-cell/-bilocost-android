@@ -9,10 +9,24 @@ on:
     branches:
       - main
 
+# Keep only the newest Bilocost iOS build in the queue.
+# A superseded queued build must not block the latest pull request.
+concurrency:
+  group: bilocost-ios-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-15
+    timeout-minutes: 45
     steps:
+      - name: Diagnose macOS runner and Xcode
+        run: |
+          echo "Runner: $RUNNER_OS / $RUNNER_ARCH"
+          sw_vers
+          xcodebuild -version
+          xcrun simctl list devices available | head -80
+          df -h
       - name: Checkout repository
         uses: actions/checkout@v4
 
