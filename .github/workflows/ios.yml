@@ -9,10 +9,23 @@ on:
     branches:
       - main
 
+concurrency:
+  group: bilocost-ios-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-15
+    timeout-minutes: 45
     steps:
+      - name: Diagnose macOS runner and Xcode
+        run: |
+          echo "Runner: $RUNNER_OS / $RUNNER_ARCH"
+          sw_vers
+          xcodebuild -version
+          xcrun simctl list devices available | head -80
+          df -h
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -134,5 +147,13 @@ jobs:
             -sdk iphonesimulator \
             -configuration Debug \
             -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/ios-derived-data \
             CODE_SIGNING_ALLOWED=NO \
             build
+
+      - name: Upload iOS Simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bilocost-iOS-Simulator-App
+          path: build/ios-derived-data/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
