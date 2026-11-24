@@ -639,7 +639,7 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 
 /* Wallet page: render the back-to-profile control as a normal full-width row.
    The generic .bk class is absolutely positioned and only fits icon buttons. */
-#page .wallet-back {
+#view .wallet-back {
   position:relative !important;
   inset:auto !important;
   display:inline-flex !important;
@@ -660,5 +660,5 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
   white-space:nowrap !important;
   text-align:left !important;
 }
-#page .wallet-back span:first-child { font-size:20px !important; line-height:1 !important; }
-#page .wallet-back:focus-visible { outline:3px solid var(--pri) !important; outline-offset:3px !important; }
+#view .wallet-back span:first-child { font-size:20px !important; line-height:1 !important; }
+#view .wallet-back:focus-visible { outline:3px solid var(--pri) !important; outline-offset:3px !important; }
