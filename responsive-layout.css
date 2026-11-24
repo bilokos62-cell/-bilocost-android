@@ -413,3 +413,97 @@
 @media (min-width: 700px) {
   #view a { line-height: 1.75; }
 }
+
+
+/* Global readability correction for dark and light themes.
+   Explicit foreground colors prevent inherited brand-green text from
+   disappearing on dark surfaces and muted gray copy from fading out. */
+:root { color-scheme: light dark; }
+body, .app, #view, #page, .wrap, .pw {
+  color: var(--ink, #17231c) !important;
+}
+p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
+.usd, .empty, .helper, .supporting-text {
+  opacity: 1 !important;
+}
+@media (prefers-color-scheme: dark) {
+  body, .app, #view, #page, .wrap, .pw {
+    color: #f1f5f9 !important;
+  }
+  p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
+  .usd, .empty, .helper, .supporting-text,
+  #view p, #view small, #view label, #view .sub, #view .meta,
+  #page p, #page small, #page label, #page .sub, #page .meta {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+  }
+  h1, h2, h3, h4, h5, h6, strong, b,
+  #view h1, #view h2, #view h3, #view h4, #view strong, #view b,
+  #page h1, #page h2, #page h3, #page h4, #page strong, #page b {
+    color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+  a:not(.btn):not(button) {
+    color: #93e6b5 !important;
+  }
+  .btn, button.btn, a.btn, .btn.ghost, .btn.alt,
+  #view .btn, #view button, #page .btn, #page button {
+    opacity: 1 !important;
+  }
+  .btn.ghost, a.btn.ghost, button.btn.ghost,
+  #view .btn.ghost, #page .btn.ghost {
+    color: #f8fafc !important;
+    border-color: #34d399 !important;
+    background: rgba(16, 185, 129, .12) !important;
+  }
+  input, select, textarea,
+  input::placeholder, textarea::placeholder {
+    color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #aab8c8 !important;
+  }
+  .hero h1, .hero h2, .hero h3, .hero p, .hero small,
+  .hero span, .hero em, .hero strong {
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+  .hero .btn, .hero button, .hero a.btn,
+  .hero .btn *, .hero button *, .hero a.btn * {
+    color: #064e32 !important;
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    opacity: 1 !important;
+    font-weight: 800 !important;
+  }
+}
+@media (min-width: 700px) {
+  /* All tablet text must be comfortably readable, not just the hero. */
+  body { font-size: 16px; line-height: 1.55; }
+  #view p, #view small, #view label, #view .sub, #view .meta,
+  #page p, #page small, #page label, #page .sub, #page .meta {
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    opacity: 1 !important;
+  }
+  #view .card h3, #page .card h3 { font-size: 17px !important; line-height: 1.45 !important; }
+  a:not(.btn):not(button) {
+    display: inline-block !important;
+    margin: 0 .65em .55em 0 !important;
+    line-height: 1.8 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    vertical-align: baseline;
+  }
+  .btn, button.btn, a.btn, .btn.ghost {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+    font-weight: 800 !important;
+  }
+}
+/* Partner links need their own line and breathing room rather than a run-on sentence. */
+#view a:not(.btn):not(button), #page a:not(.btn):not(button) {
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
