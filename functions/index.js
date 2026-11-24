@@ -218,25 +218,25 @@ exports.notifyChatMessage = onDocumentCreated("chats/{chatId}/messages/{messageI
 const BCC_RATE_URL = "https://www.bcc.cd/marche-des-changes/cours-de-change";
 const parseBccNumber = value => {
   const normalized = String(value || "")
-    .replace(/[\\u00a0\\u202f\\s]/g, "")
+    .replace(/[\u00a0\u202f\s]/g, "")
     .replace(",", ".")
     .replace(/[^0-9.]/g, "");
   const result = Number(normalized);
   return Number.isFinite(result) && result > 0 ? result : null;
 };
 const htmlText = value => String(value || "")
-  .replace(/<script[\\s\\S]*?<\\/script>/gi, " ")
-  .replace(/<style[\\s\\S]*?<\\/style>/gi, " ")
+  .replace(/<script[\s\S]*?<\/script>/gi, " ")
+  .replace(/<style[\s\S]*?<\/style>/gi, " ")
   .replace(/<[^>]+>/g, " ")
   .replace(/&nbsp;|&#160;|&#8239;/gi, " ")
   .replace(/&amp;/gi, "&")
-  .replace(/\\s+/g, " ")
+  .replace(/\s+/g, " ")
   .trim();
 const parseBccUsdRate = html => {
-  const rows = String(html).match(/<tr\\b[\\s\\S]*?<\\/tr>/gi) || [];
+  const rows = String(html).match(/<tr\b[\s\S]*?<\/tr>/gi) || [];
   let usd = null;
   for (const row of rows) {
-    const cells = [...row.matchAll(/<t[dh]\\b[^>]*>([\\s\\S]*?)<\\/t[dh]>/gi)]
+    const cells = [...row.matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)]
       .map(match => htmlText(match[1]));
     if (cells.length >= 5 && /^USD$/i.test(cells[0])) {
       usd = {
@@ -251,7 +251,7 @@ const parseBccUsdRate = html => {
     throw new Error("La ligne USD officielle est absente ou invalide sur la page BCC.");
   }
   const text = htmlText(html);
-  const dateMatch = text.match(/March[eé] officiel des changes\\s+(\\d{2})\\/(\\d{2})\\/(\\d{4})/i);
+  const dateMatch = text.match(/March[eé] officiel des changes\s+(\d{2})\/(\d{2})\/(\d{4})/i);
   if (!dateMatch) throw new Error("Date de publication BCC introuvable : aucune cotation ne sera publiée.");
   const publicationDate = dateMatch[3] + "-" + dateMatch[2] + "-" + dateMatch[1];
   return { ...usd, publicationDate };
