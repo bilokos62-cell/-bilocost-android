@@ -238,6 +238,28 @@ button.seller{background:var(--card);color:inherit}button.pm{width:100%;text-ali
 #sheet .hp .top button:active{transform:scale(.96)}
 #sheet .hp .top button:focus-visible{outline:3px solid #36cf82!important;outline-offset:3px!important}
 </style>
+
+<style id="bilocost-product-actions-final-override">
+/* Final high-specificity override for the three product-photo actions. */
+#sheet #sheetBody .hp .top>button,
+#sheet #sheetBody .hp .top>span>button{
+  appearance:none!important;-webkit-appearance:none!important;
+  background:#14213b!important;background-color:#14213b!important;background-image:none!important;
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+  border:1px solid rgba(255,255,255,.38)!important;
+  box-shadow:0 3px 14px rgba(0,0,0,.42)!important;
+  opacity:1!important;filter:none!important;
+}
+#sheet #sheetBody .hp .top>button svg,
+#sheet #sheetBody .hp .top>span>button svg,
+#sheet #sheetBody .hp .top>button svg *,
+#sheet #sheetBody .hp .top>span>button svg *{
+  color:#fff!important;stroke:#fff!important;fill:none!important;
+  opacity:1!important;visibility:visible!important;
+}
+#sheet #sheetBody .hp .top>button:first-child{background:#14213b!important}
+#sheet #sheetBody .hp .top>span{display:flex!important;gap:9px!important}
+</style>
 </head>
 <body>
 <div class="app"> 
