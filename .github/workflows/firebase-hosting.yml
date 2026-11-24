@@ -96,5 +96,5 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
-          # Deploy Hosting plus the reviewed Firestore rules, indexes, and Storage rules; Functions are intentionally excluded.
-          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136
+          # Publish the website independently; Storage IAM permissions must not block Hosting.
+          firebase deploy --only hosting --project bilocost-a8136
