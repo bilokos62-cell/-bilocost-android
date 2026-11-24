@@ -362,3 +362,6 @@
     padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Product photographs: show the complete item without cropping on every screen. */
+.ph img, .gal img, .card img { object-fit: contain !important; background: var(--panel); }
