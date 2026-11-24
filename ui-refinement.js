@@ -268,6 +268,46 @@
       color: var(--ink) !important;
     }
   `;
+  /* Global secondary-control contrast and wallet header containment. */
+  readabilityStyle.textContent += `
+    /* Outline/secondary actions must use the contrast color for the current theme. */
+    #view .btn.ghost, #view button.btn.ghost, #view a.btn.ghost,
+    #view .btn.outline, #view button.outline, #view .btn.secondary,
+    #view button.secondary, #view button.ghost, #view button.out,
+    #view a.out, #view .action-secondary, #page .btn.ghost,
+    .sheet .btn.ghost, .sheet button.ghost, .sheet button.secondary {
+      color: var(--mint-t) !important;
+      -webkit-text-fill-color: var(--mint-t) !important;
+      opacity: 1 !important;
+      border-color: var(--pri) !important;
+    }
+    #view .btn.ghost *, #view button.btn.ghost *, #view button.ghost *,
+    #view button.out *, #view button.secondary *, #view .btn.secondary * {
+      color: inherit !important; -webkit-text-fill-color: currentColor !important;
+      opacity: 1 !important;
+    }
+    /* Wallet screen: keep the back-to-profile link in normal document flow. */
+    #view .pw > a:first-child, #view .pw > .back:first-child,
+    #view .pw > [data-act="back"]:first-child {
+      position: static !important; inset: auto !important; float: none !important;
+      display: inline-flex !important; align-items: center !important;
+      flex: 0 0 auto !important; width: max-content !important;
+      max-width: 100% !important; min-width: 0 !important;
+      white-space: normal !important; overflow-wrap: normal !important;
+      word-break: normal !important; line-height: 1.4 !important;
+      margin: 0 0 14px !important; transform: none !important;
+      color: var(--mint-t) !important; opacity: 1 !important;
+    }
+    #view .pw > h1:first-of-type, #view .pw > h2:first-of-type {
+      position: relative !important; margin: 0 0 12px !important;
+      clear: both !important; color: var(--ink) !important;
+    }
+    /* Make secondary copy readable consistently on every screen, not only tablets. */
+    #view p, #view small, #view label, #view .sub, #view .meta,
+    #view .hint, #view .muted, #view .usd, #page p, #page small,
+    #page label, #page .sub, #page .meta { opacity: 1 !important; }
+    #view button, #view a, #page button, #page a { text-decoration-thickness: from-font; }
+  `;
   (document.head||document.documentElement).appendChild(readabilityStyle);
 
 })();
