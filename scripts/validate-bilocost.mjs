@@ -14,6 +14,7 @@ const serviceDesign = readFileSync("service-design.js", "utf8");
 const uiRefinement = readFileSync("ui-refinement.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
+const exchangeRatesPatch = readFileSync("exchange-rates.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
 const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
@@ -85,7 +86,11 @@ for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWor
 if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||loc.neighborhood||")) fail("Listing publication must preserve a valid fallback locality");
 if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
 if (!hostingWorkflow.includes("firebase deploy --only hosting --project bilocost-a8136")) fail("Firebase Hosting must deploy independently of Storage and Firestore IAM");
-if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions --project bilocost-a8136")) fail("Cloud Functions deployment workflow is incomplete");
+if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules --project bilocost-a8136")) fail("Cloud Functions and exchange-rate rules deployment workflow is incomplete");
+if (!functionsSource.includes("exports.syncBccExchangeRate = onSchedule") || !functionsSource.includes("exports.refreshBccExchangeRate = onCall")) fail("Automatic BCC exchange-rate synchronization is missing");
+if (!functionsWorkflow.includes("FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136")) fail("Cloud Functions deployment credentials are not configured");
+try { new vm.Script(exchangeRatesPatch, { filename: "exchange-rates.js" }); } catch (error) { fail("Exchange-rate widget syntax error: " + error.message); }
+if (!exchangeRatesPatch.includes("exchange_rates/current") || !exchangeRatesPatch.includes("onSnapshot")) fail("Exchange-rate widget must listen to the live Firestore rate document");
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
