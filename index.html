@@ -260,6 +260,55 @@ button.seller{background:var(--card);color:inherit}button.pm{width:100%;text-ali
 #sheet #sheetBody .hp .top>button:first-child{background:#14213b!important}
 #sheet #sheetBody .hp .top>span{display:flex!important;gap:9px!important}
 </style>
+
+<style id="bilocost-light-theme-contrast-fix">
+/* Light theme: restore readable foregrounds across profile, settings and home. */
+:root[data-theme="light"]{
+  --bg:#ffffff!important;--card:#ffffff!important;--panel:#f1f5f9!important;
+  --ink:#0f172a!important;--mute:#475569!important;--line:#dbe3ed!important;
+  --pri:#008f45!important;--pri-d:#006b35!important;
+  --mint:#e8f8f0!important;--mint-t:#08764c!important;
+  --bar:rgba(255,255,255,.97)!important;color-scheme:light!important
+}
+:root[data-theme="light"] body,
+:root[data-theme="light"] .app,
+:root[data-theme="light"] #page,
+:root[data-theme="light"] #view{color:#0f172a}
+:root[data-theme="light"] header,
+:root[data-theme="light"] header .logo,
+:root[data-theme="light"] header .logo b,
+:root[data-theme="light"] .prof,
+:root[data-theme="light"] .prof h1,
+:root[data-theme="light"] .prof h2,
+:root[data-theme="light"] .stats,
+:root[data-theme="light"] .stats b,
+:root[data-theme="light"] .lr,
+:root[data-theme="light"] .lr .lt,
+:root[data-theme="light"] .lr .lt b,
+:root[data-theme="light"] .pbar,
+:root[data-theme="light"] .pbar h2,
+:root[data-theme="light"] h1,
+:root[data-theme="light"] h2,
+:root[data-theme="light"] h3{color:#0f172a!important}
+:root[data-theme="light"] .sub,
+:root[data-theme="light"] .gt,
+:root[data-theme="light"] .lr .rt,
+:root[data-theme="light"] .logo small,
+:root[data-theme="light"] .prof .sub{color:#475569!important}
+:root[data-theme="light"] .lic{background:#f1f5f9!important;color:#334155!important}
+:root[data-theme="light"] .lic svg,
+:root[data-theme="light"] .lr svg{stroke:currentColor!important}
+:root[data-theme="light"] header .ib,
+:root[data-theme="light"] header .commune,
+:root[data-theme="light"] header .i{color:#0f172a!important;stroke:currentColor!important}
+:root[data-theme="light"] .stats div,
+:root[data-theme="light"] .lr,
+:root[data-theme="light"] .pbar{background-color:#fff}
+:root[data-theme="light"] .stats div{background:#f1f5f9!important}
+:root[data-theme="light"] .lr{border-bottom-color:#e2e8f0!important}
+:root[data-theme="light"] .brand-ad-heading h3,
+:root[data-theme="light"] .brand-ad-heading p{color:#0f172a!important}
+</style>
 </head>
 <body>
 <div class="app"> 
