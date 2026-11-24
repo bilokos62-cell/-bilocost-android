@@ -6,6 +6,8 @@ if not html_path.is_file() or not css_path.is_file():
     raise SystemExit("Responsive layout source files are missing")
 
 html = html_path.read_text(encoding="utf-8")
+# Remove a literal backslash-n accidentally rendered immediately after BODY.
+html = html.replace("<body>" + chr(92) + "n", "<body>" + chr(10), 1)
 link = '<link rel="stylesheet" href="responsive-layout.css">'
 if link in html:
     # Fix only the HTML head boundary; never rewrite JavaScript string escapes.
