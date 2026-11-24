@@ -43,7 +43,7 @@
     #view .grid{gap:12px}
     #view .card .in{padding:11px 12px 13px}
     #view .ph{overflow:hidden;background:var(--panel)}
-    #view .ph img{width:100%;height:100%;object-fit:cover}
+    #view .ph img{width:100%;height:100%;object-fit:contain;padding:6px}
     nav{padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bar);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
     nav>div{max-width:560px;margin:auto}
     nav button{min-height:58px;transition:color .15s ease}
@@ -121,6 +121,11 @@
     #view button:not(.btn):not(.chip):not(.cat):not(.fav),
     #page button:not(.btn),.sheet button:not(.btn){color:inherit}
     .card h3{color:var(--ink)!important;line-height:1.4;overflow-wrap:anywhere}
+    /* Product cards and gallery: show the complete item, never crop it. */
+    #view .card .ph{background:var(--panel)}
+    #view .card .ph img{object-fit:contain!important;padding:8px;background:var(--panel)}
+    #sheetBody .ph img{width:100%;height:100%;object-fit:contain!important;padding:8px;background:var(--panel)}
+    #sheetBody .hp .ph{overflow:hidden}
     .card .cdf{color:var(--pri)!important}
     .card .usd,.card .meta,.card .sub{color:var(--mute)!important}
     /* Product photos must remain fully visible: the previous cover rule cropped
