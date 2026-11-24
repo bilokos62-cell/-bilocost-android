@@ -602,3 +602,90 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 }
 
 /* Force Firebase Hosting rebuild for the verified tablet readability patch. */
+
+
+/* Advertising card: restore a clear vertical banner layout and readable CTA. */
+#view a.brand-ad-card {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  flex:0 0 min(410px, 92%) !important;
+  padding:12px !important;
+  border-radius:20px !important;
+  background:var(--card, #111b2d) !important;
+  overflow:hidden !important;
+}
+#view .brand-ad-card .brand-ad-image,
+#view .brand-ad-card .brand-ad-placeholder {
+  display:grid;
+  width:100% !important;
+  height:88px !important;
+  min-height:88px !important;
+  flex:0 0 88px !important;
+  border-radius:12px !important;
+  object-fit:contain !important;
+}
+#view .brand-ad-card .brand-ad-copy {
+  width:100% !important;
+  padding:10px 2px 2px !important;
+  gap:7px !important;
+}
+#view .brand-ad-card .brand-ad-copy small {
+  font-size:11px !important;
+  line-height:1.35 !important;
+  color:var(--pri, #16a765) !important;
+}
+#view .brand-ad-card .brand-ad-copy b {
+  font-size:17px !important;
+  line-height:1.35 !important;
+}
+#view .brand-ad-card .brand-ad-copy > span {
+  font-size:14px !important;
+  line-height:1.5 !important;
+}
+#view .brand-ad-card .brand-ad-copy a,
+#view .brand-ad-card .brand-ad-copy button,
+#view .brand-ad-card .brand-ad-copy .btn,
+#view .brand-ad-card .brand-ad-copy strong {
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:auto !important;
+  max-width:100% !important;
+  min-height:42px !important;
+  margin:5px 0 0 !important;
+  padding:10px 16px !important;
+  border:1px solid #079653 !important;
+  border-radius:12px !important;
+  background:#079653 !important;
+  color:#ffffff !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  line-height:1.25 !important;
+  text-decoration:none !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+}
+#view .brand-ad-card .brand-ad-copy a *,
+#view .brand-ad-card .brand-ad-copy button *,
+#view .brand-ad-card .brand-ad-copy .btn *,
+#view .brand-ad-card .brand-ad-copy strong * {
+  color:#ffffff !important;
+  opacity:1 !important;
+}
+:root[data-theme="dark"] #view .brand-ad-card {
+  background:#111b2d !important;
+  border-color:#26354b !important;
+}
+:root[data-theme="dark"] #view .brand-ad-card .brand-ad-copy b {
+  color:#f8fafc !important;
+}
+:root[data-theme="dark"] #view .brand-ad-card .brand-ad-copy > span {
+  color:#cbd5e1 !important;
+}
+@media (min-width:700px) {
+  #view a.brand-ad-card { flex-basis:410px !important; }
+  #view .brand-ad-card .brand-ad-image,
+  #view .brand-ad-card .brand-ad-placeholder { height:88px !important; }
+}
