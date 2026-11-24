@@ -123,15 +123,18 @@
     .card h3{color:var(--ink)!important;line-height:1.4;overflow-wrap:anywhere}
     /* Product cards and gallery: show the complete item, never crop it. */
 
-    /* Profile action cards: mint backgrounds need dark, high-contrast copy. */
+    /* Profile action cards follow the live palette in both light and dark themes. */
     #view button.seller[style*="background:var(--mint)"],
-    #view .seller[style*="background:var(--mint)"]{background:var(--mint)!important;color:#12452b!important;border-color:var(--pri)!important}
-    #view button.seller[style*="background:var(--mint)"] b,
-    #view .seller[style*="background:var(--mint)"] b{color:#12452b!important;opacity:1!important}
-    #view button.seller[style*="background:var(--mint)"] small,
-    #view .seller[style*="background:var(--mint)"] small,
-    #view button.seller[style*="background:var(--mint)"] .sub,
-    #view .seller[style*="background:var(--mint)"] .sub{color:#315b43!important;opacity:1!important}
+    #view .seller[style*="background:var(--mint)"]{
+      background:var(--mint)!important;color:var(--mint-t)!important;
+      border-color:var(--pri)!important;opacity:1!important
+    }
+    #view button.seller[style*="background:var(--mint)"] *,
+    #view .seller[style*="background:var(--mint)"] *{
+      color:var(--mint-t)!important;opacity:1!important
+    }
+    #view button.seller[style*="background:var(--mint)"] .i,
+    #view .seller[style*="background:var(--mint)"] .i{color:var(--mint-t)!important;stroke:currentColor!important}
     /* Product detail sheet is viewport-fixed, not constrained by the 560px app shell. */
     .sheet{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
       align-items:center!important;justify-content:center!important;padding:20px!important;
