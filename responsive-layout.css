@@ -526,3 +526,124 @@
     font-size: 13px;
   }
 }
+
+
+/* Product detail visual fixes from real-device review (mobile + tablet). */
+#page .pw {
+  color: var(--ink, #0f172a);
+  min-width: 0;
+}
+#page .pw h1,
+#page .pw h2,
+#page .pw h3,
+#page .pw h4,
+#page .pw strong,
+#page .pw b {
+  color: var(--ink, #0f172a);
+}
+#page .pw .price,
+#page .pw .cdf,
+#page .pw [class*="price"] {
+  color: var(--pri, #009a49);
+}
+#page .pw .mute,
+#page .pw small,
+#page .pw [class*="mute"] {
+  color: var(--mute, #64748b);
+}
+
+/* Stable product gallery: never flatten or crop the product photo. */
+#page .pw .hp {
+  min-width: 0;
+}
+#page .pw .hp > .ph {
+  width: 100%;
+  height: clamp(240px, 46vh, 460px);
+  min-height: 240px;
+  aspect-ratio: 4 / 3 !important;
+  overflow: hidden;
+  background: var(--panel, #f1f5f9);
+  border-radius: 18px;
+}
+#page .pw .hp > .ph img,
+#page .pw .hp > .ph .gal img,
+#page .pw .hp > .ph > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain !important;
+  object-position: center;
+}
+#page .pw .hp > .ph .gal {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Compact, consistent price/delivery and attribute panels. */
+#page .pw .sum,
+#page .pw .tiles > div,
+#page .pw .seller {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#page .pw .sum {
+  line-height: 1.45;
+}
+#page .pw .tiles {
+  align-items: stretch;
+}
+#page .pw .tiles > div {
+  min-height: 72px;
+}
+
+/* Leave the final actions fully reachable above the fixed bottom tabs. */
+#page .pw {
+  padding-bottom: calc(190px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 699px) {
+  #page .pw {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: max(20px, env(safe-area-inset-top, 0px));
+    padding-bottom: calc(205px + env(safe-area-inset-bottom, 0px));
+  }
+  #page .pw .hp > .ph {
+    height: clamp(240px, 42vh, 390px);
+    min-height: 240px;
+  }
+  #page .pw .acts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  #page .pw .acts > :first-child {
+    grid-column: 1 / -1;
+  }
+  #page .pw .acts .btn {
+    min-width: 0;
+    min-height: 54px;
+    height: auto;
+    white-space: normal;
+    line-height: 1.3;
+    padding: 12px 10px;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  #page .pw {
+    color: var(--ink, #f1f5f9);
+  }
+  #page .pw h1,
+  #page .pw h2,
+  #page .pw h3,
+  #page .pw h4,
+  #page .pw strong,
+  #page .pw b {
+    color: var(--ink, #f1f5f9);
+  }
+  #page .pw .hp > .ph {
+    background: var(--panel, #18223a);
+  }
+}
