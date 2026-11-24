@@ -309,5 +309,28 @@
     #view button, #view a, #page button, #page a { text-decoration-thickness: from-font; }
   `;
   (document.head||document.documentElement).appendChild(readabilityStyle);
+  /* Give the Bilocost wallet shortcut its own recognizable wallet icon. */
+  const walletIcon = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4.5 6.5h13a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-12a2 2 0 0 1 2-2h12" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 9h17v-1a2 2 0 0 0-2-2h-13" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.5 12h2v4h-2a2 2 0 0 1 0-4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M17 14h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  function biloApplyWalletIcon(){
+    const root=document.getElementById("view");
+    if(!root)return;
+    root.querySelectorAll(".seller").forEach(card=>{
+      if(!/Mon portefeuille Bilocost/i.test(card.textContent||""))return;
+      const icon=card.querySelector(".i");
+      if(!icon||icon.dataset.biloWalletIcon==="true")return;
+      icon.innerHTML=walletIcon;
+      icon.dataset.biloWalletIcon="true";
+      icon.setAttribute("aria-label","Portefeuille");
+      icon.style.display="grid";
+      icon.style.placeItems="center";
+      icon.style.color="var(--mint-t)";
+    });
+  }
+  biloApplyWalletIcon();
+  const walletIconObserver=new MutationObserver(biloApplyWalletIcon);
+  const walletRoot=document.getElementById("view");
+  if(walletRoot)walletIconObserver.observe(walletRoot,{childList:true,subtree:true});
+  document.addEventListener("click",()=>requestAnimationFrame(biloApplyWalletIcon),true);
+
 
 })();
