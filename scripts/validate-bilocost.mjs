@@ -84,7 +84,7 @@ for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWor
 }
 if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||loc.neighborhood||")) fail("Listing publication must preserve a valid fallback locality");
 if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
-if (!hostingWorkflow.includes("firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --project bilocost-a8136")) fail("Firebase deployment must include the reviewed security rules and indexes");
+if (!hostingWorkflow.includes("firebase deploy --only hosting --project bilocost-a8136")) fail("Firebase Hosting must deploy independently of Storage and Firestore IAM");
 if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions --project bilocost-a8136")) fail("Cloud Functions deployment workflow is incomplete");
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
