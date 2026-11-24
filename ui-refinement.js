@@ -100,4 +100,64 @@
   `;
   (document.head||document.documentElement).appendChild(requestStyle);
 
+  /* Readability pass: enforce legible contrast for small text, form fields,
+     product metadata and all dialog copy on mobile, tablet and desktop. */
+  const readabilityStyle=document.createElement("style");
+  readabilityStyle.id="bilocost-readable-text";
+  readabilityStyle.textContent=`
+    body,#view,.app,#page,.pw{color:var(--ink)}
+    #view p,#view small,#view label,#view .sub,#view .usd,#view .meta,
+    #view .msg p,#view .lt small,#view .gt,#view .tag,
+    #page p,#page small,#page label,#page .sub,#page .usd,#page .meta,
+    .sheet p,.sheet small,.sheet label{color:var(--mute)}
+    #view h1,#view h2,#view h3,#view h4,#view strong,#view b,
+    #page h1,#page h2,#page h3,#page h4,#page strong,#page b,
+    .sheet h1,.sheet h2,.sheet h3,.sheet h4,.sheet strong,.sheet b{color:var(--ink)}
+    #view input,#view select,#view textarea,#page input,#page select,#page textarea,
+    .sheet input,.sheet select,.sheet textarea{color:var(--ink);background:var(--card);border-color:var(--line)}
+    #view input::placeholder,#view textarea::placeholder,
+    #page input::placeholder,#page textarea::placeholder,
+    .sheet input::placeholder,.sheet textarea::placeholder{color:var(--mute);opacity:1}
+    #view button:not(.btn):not(.chip):not(.cat):not(.fav),
+    #page button:not(.btn),.sheet button:not(.btn){color:inherit}
+    .card h3{color:var(--ink)!important;line-height:1.4;overflow-wrap:anywhere}
+    .card .cdf{color:var(--pri)!important}
+    .card .usd,.card .meta,.card .sub{color:var(--mute)!important}
+    .hero h1,.hero p,.hero em,.hero .btn.sm{color:#fff}
+    .chip[aria-pressed=true],.cat[aria-pressed=true] span,.btn,.btn.alt{color:#fff}
+    .btn.ghost{color:var(--ink)}
+    [role="dialog"],[role="alertdialog"],dialog[open],.modal,.dialog,.popup,
+    .sheet,.bottom-sheet,.drawer,.prompt,.confirm,.request-modal,.permission-modal{
+      color:#17231c!important;background:#fff!important
+    }
+    [role="dialog"] p,[role="dialog"] small,[role="dialog"] label,
+    [role="alertdialog"] p,[role="alertdialog"] small,[role="alertdialog"] label,
+    dialog[open] p,dialog[open] small,dialog[open] label,
+    .modal p,.modal small,.modal label,.dialog p,.dialog small,.dialog label,
+    .popup p,.popup small,.popup label,.sheet p,.sheet small,.sheet label,
+    .prompt p,.prompt small,.prompt label,.confirm p,.confirm small,.confirm label{
+      color:#475569!important;opacity:1!important
+    }
+    [role="dialog"] h1,[role="dialog"] h2,[role="dialog"] h3,
+    [role="alertdialog"] h1,[role="alertdialog"] h2,[role="alertdialog"] h3,
+    dialog[open] h1,dialog[open] h2,dialog[open] h3,
+    .modal h1,.modal h2,.modal h3,.dialog h1,.dialog h2,.dialog h3,
+    .popup h1,.popup h2,.popup h3,.sheet h1,.sheet h2,.sheet h3{
+      color:#17231c!important
+    }
+    @media(max-width:699px){
+      body{font-size:14px;line-height:1.5}
+      #view .card h3{font-size:13px;line-height:1.4}
+      #view .cdf{font-size:15px;line-height:1.35}
+      #view .meta{font-size:11px;line-height:1.4}
+      nav button{font-size:11px;line-height:1.3}
+    }
+    @media(min-width:700px){
+      #view .card h3{font-size:15px;line-height:1.45}
+      #view .meta,#view .sub,#view .usd{font-size:13px}
+    }
+    @media(prefers-reduced-motion:reduce){#view *,#page *{transition:none!important}}
+  `;
+  (document.head||document.documentElement).appendChild(readabilityStyle);
+
 })();
