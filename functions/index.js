@@ -294,7 +294,7 @@ const syncOfficialExchangeRate = async () => {
 };
 
 exports.syncBccExchangeRate = onSchedule({
-  schedule: "0 10,14 * * 1-5",
+  schedule: "0 * * * *",
   timeZone: "Africa/Kinshasa",
   timeoutSeconds: 60,
   memory: "256MiB"
