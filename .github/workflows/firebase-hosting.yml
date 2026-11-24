@@ -55,6 +55,7 @@ jobs:
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
+          exchange_rates = Path("exchange-rates.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
