@@ -105,3 +105,6 @@ console.log("Optional AI integration: removed.");
 console.log("Note: this validates source structure only; it does not prove live Firebase, payment, escrow, or device behavior.");
 
 if (androidWorkflow.includes("theme-rewards.js") || androidWorkflow.includes("theme-settings-entry.js")) fail("Removed 100-colour palette is still injected");
+for (const [platform, workflow] of [["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
+  if (workflow.includes("theme-rewards.js") || workflow.includes("theme-settings-entry.js")) fail("Removed 100-colour palette is still injected in " + platform);
+}
