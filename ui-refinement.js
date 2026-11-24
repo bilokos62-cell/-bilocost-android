@@ -238,6 +238,49 @@
       #view button:not(.plus),#view .btn:not(.plus) { font-weight:700; }
     }
   `;
+  /* Final dark-surface contrast override: avoid near-black --mute/--ink text on navy surfaces. */
+  readabilityStyle.textContent += `
+    @media (prefers-color-scheme: dark) {
+      #view, #view p, #view small, #view label, #view span,
+      #view .sub, #view .meta, #view .muted, #view .hint, #view .usd,
+      #view .tag, #view .gt, #view .lt, #view .cdf,
+      #page, #page p, #page small, #page label, #page span,
+      .sheet, .sheet p, .sheet small, .sheet label, .sheet span,
+      .bottom-sheet, .bottom-sheet p, .bottom-sheet small,
+      .modal, .dialog, [role="dialog"] {
+        color: #e5edf7 !important; opacity: 1 !important;
+      }
+      #view h1, #view h2, #view h3, #view h4, #view strong, #view b,
+      #page h1, #page h2, #page h3, #page h4, #page strong, #page b,
+      .sheet h1, .sheet h2, .sheet h3, .sheet h4, .sheet strong, .sheet b,
+      .bottom-sheet h1, .bottom-sheet h2, .bottom-sheet h3 {
+        color: #ffffff !important; opacity: 1 !important;
+      }
+      #view .btn.ghost, #view button.out, #view a.out, #view .lnk, #view button.lnk {
+        color: #8af0bb !important; border-color: #34d399 !important;
+      }
+      #view input, #view select, #view textarea, .sheet input, .sheet select, .sheet textarea {
+        color: #f8fafc !important; opacity: 1 !important;
+      }
+      #view input::placeholder, #view textarea::placeholder { color: #b8c5d4 !important; }
+      #view .hero h1, #view .hero h2, #view .hero h3, #view .hero p, #view .hero span, #view .hero strong { color: #ffffff !important; }
+      #view .hero .btn, #view .hero .btn *, #view .hero button, #view .hero button * { color: #075b35 !important; background: #ffffff !important; }
+    }
+    :root[data-theme="dark"] #view p, :root[data-theme="dark"] #view small,
+    :root[data-theme="dark"] #view label, :root[data-theme="dark"] #view span,
+    :root[data-theme="dark"] #view .sub, :root[data-theme="dark"] #view .meta,
+    :root[data-theme="dark"] #view .muted, :root[data-theme="dark"] #view .hint,
+    :root[data-theme="dark"] #view .usd, :root[data-theme="dark"] #page p,
+    :root[data-theme="dark"] #page small, :root[data-theme="dark"] .sheet p,
+    :root[data-theme="dark"] .sheet small, body.dark #view p, body.dark #view small,
+    body.dark #view .sub, body.dark #view .meta, body.dark #view label, body.dark #view span {
+      color: #e5edf7 !important; opacity: 1 !important;
+    }
+    :root[data-theme="dark"] #view h1, :root[data-theme="dark"] #view h2,
+    :root[data-theme="dark"] #view h3, :root[data-theme="dark"] #view h4,
+    :root[data-theme="dark"] #view strong, body.dark #view h1, body.dark #view h2,
+    body.dark #view h3, body.dark #view h4, body.dark #view strong { color: #ffffff !important; }
+  `;
   (document.head||document.documentElement).appendChild(readabilityStyle);
 
 })();
