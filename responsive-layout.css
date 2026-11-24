@@ -600,3 +600,5 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
   #view .brand-ad-copy b { font-size:17px; }
   #view .brand-ad-copy > span { font-size:14px; }
 }
+
+/* Force Firebase Hosting rebuild for the verified tablet readability patch. */
