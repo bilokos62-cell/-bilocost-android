@@ -636,3 +636,29 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
   outline:3px solid #38c879 !important;
   outline-offset:3px !important;
 }
+
+/* Wallet page: render the back-to-profile control as a normal full-width row.
+   The generic .bk class is absolutely positioned and only fits icon buttons. */
+#page .wallet-back {
+  position:relative !important;
+  inset:auto !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  width:auto !important;
+  max-width:100% !important;
+  min-height:42px !important;
+  height:auto !important;
+  margin:0 0 12px !important;
+  padding:8px 12px !important;
+  border:1px solid var(--line) !important;
+  border-radius:12px !important;
+  background:var(--panel) !important;
+  color:var(--pri) !important;
+  font:700 14px/1.3 Inter,system-ui,sans-serif !important;
+  white-space:nowrap !important;
+  text-align:left !important;
+}
+#page .wallet-back span:first-child { font-size:20px !important; line-height:1 !important; }
+#page .wallet-back:focus-visible { outline:3px solid var(--pri) !important; outline-offset:3px !important; }
