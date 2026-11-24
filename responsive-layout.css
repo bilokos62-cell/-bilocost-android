@@ -365,3 +365,51 @@
 
 /* Product photographs: show the complete item without cropping on every screen. */
 .ph img, .gal img, .card img { object-fit: contain !important; background: var(--panel); }
+
+
+/* Tablet readability repair: strengthen hero contrast and separate partner links. */
+.hero h1,
+#view .hero h1 {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 45, 25, .24);
+}
+.hero p,
+#view .hero p {
+  color: rgba(255, 255, 255, .96) !important;
+  opacity: 1 !important;
+}
+.hero .btn,
+.hero button,
+#view .hero .btn,
+#view .hero button {
+  color: #075b35 !important;
+  background: #ffffff !important;
+  border: 2px solid #ffffff !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+.hero .btn *,
+.hero button *,
+#view .hero .btn *,
+#view .hero button * {
+  color: #075b35 !important;
+  opacity: 1 !important;
+}
+/* Keep small supporting copy readable on the light catalogue background. */
+#view p, #view small, #view label, #view .sub, #view .meta,
+#view .usd, #view .muted {
+  opacity: 1 !important;
+}
+#view a {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.65;
+}
+#view a + a {
+  margin-left: .4em;
+}
+@media (min-width: 700px) {
+  #view a { line-height: 1.75; }
+}
