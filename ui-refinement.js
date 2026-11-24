@@ -198,6 +198,46 @@
     }
     @media(prefers-reduced-motion:reduce){#view *,#page *{transition:none!important}}
   `;
+
+  /* Final tablet-wide readability override: higher specificity than the
+     generic muted-copy and button rules above. */
+  readabilityStyle.textContent += `
+    @media (min-width:700px) {
+      #view, #view * { text-shadow:none; }
+      #view p, #view small, #view label, #view .sub, #view .meta,
+      #view .usd, #view .hint, #view .muted,
+      #page p, #page small, #page label, #page .sub, #page .meta {
+        color:#46564c !important; opacity:1 !important;
+      }
+      #view h1,#view h2,#view h3,#view h4,#view b,#view strong,
+      #page h1,#page h2,#page h3,#page h4,#page b,#page strong {
+        color:#17231c !important; opacity:1 !important;
+      }
+      #view .hero h1,#view .hero h2,#view .hero h3,
+      #view .hero p,#view .hero small,#view .hero span,
+      #view .hero em,#view .hero strong {
+        color:#ffffff !important; opacity:1 !important;
+      }
+      #view .hero button,#view .hero a.btn,#view .hero .btn,
+      #view .hero button span,#view .hero a.btn span,
+      #view .hero .btn span,#view .hero button b,#view .hero .btn b {
+        color:#075b35 !important; background:#ffffff !important;
+        border-color:#ffffff !important; opacity:1 !important;
+        font-weight:800 !important;
+      }
+      #view a:not(.btn) {
+        display:inline-block !important; margin:0 .55em .45em 0 !important;
+        line-height:1.8 !important; vertical-align:baseline;
+        overflow-wrap:anywhere !important; white-space:normal !important;
+      }
+      #view input,#view select,#view textarea,
+      #view input::placeholder,#view textarea::placeholder {
+        color:#24352b !important; opacity:1 !important;
+      }
+      #view button,#view .btn { opacity:1 !important; }
+      #view button:not(.plus),#view .btn:not(.plus) { font-weight:700; }
+    }
+  `;
   (document.head||document.documentElement).appendChild(readabilityStyle);
 
 })();
