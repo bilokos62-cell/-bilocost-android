@@ -1,5 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp, FieldPath } = require("firebase-admin/firestore");
@@ -208,4 +209,100 @@ exports.notifyChatMessage = onDocumentCreated("chats/{chatId}/messages/{messageI
       if (error.code !== 6 && error.code !== "already-exists") throw error;
     }
   }
+});
+
+
+/* Automatic official USD/CDF reference rate from the Banque Centrale du Congo.
+   The BCC publishes daily official buy, mean and sell quotes. We store the
+   publication date separately from fetch time and never synthesize a rate. */
+const BCC_RATE_URL = "https://www.bcc.cd/marche-des-changes/cours-de-change";
+const parseBccNumber = value => {
+  const normalized = String(value || "")
+    .replace(/[\u00a0\u202f\s]/g, "")
+    .replace(",", ".")
+    .replace(/[^0-9.]/g, "");
+  const result = Number(normalized);
+  return Number.isFinite(result) && result > 0 ? result : null;
+};
+const htmlText = value => String(value || "")
+  .replace(/<script[\s\S]*?<\/script>/gi, " ")
+  .replace(/<style[\s\S]*?<\/style>/gi, " ")
+  .replace(/<[^>]+>/g, " ")
+  .replace(/&nbsp;|&#160;|&#8239;/gi, " ")
+  .replace(/&amp;/gi, "&")
+  .replace(/\s+/g, " ")
+  .trim();
+const parseBccUsdRate = html => {
+  const rows = String(html).match(/<tr\b[\s\S]*?<\/tr>/gi) || [];
+  let usd = null;
+  for (const row of rows) {
+    const cells = [...row.matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)]
+      .map(match => htmlText(match[1]));
+    if (cells.length >= 5 && /^USD$/i.test(cells[0])) {
+      usd = {
+        mean: parseBccNumber(cells[2]),
+        buy: parseBccNumber(cells[3]),
+        sell: parseBccNumber(cells[4])
+      };
+      break;
+    }
+  }
+  if (!usd || !usd.mean || !usd.buy || !usd.sell) {
+    throw new Error("La ligne USD officielle est absente ou invalide sur la page BCC.");
+  }
+  const text = htmlText(html);
+  const dateMatch = text.match(/March[eé] officiel des changes\s+(\d{2})\/(\d{2})\/(\d{4})/i);
+  if (!dateMatch) throw new Error("Date de publication BCC introuvable : aucune cotation ne sera publiée.");
+  const publicationDate = dateMatch[3] + "-" + dateMatch[2] + "-" + dateMatch[1];
+  return { ...usd, publicationDate };
+};
+const syncOfficialExchangeRate = async () => {
+  const response = await fetch(BCC_RATE_URL, {
+    headers: { "User-Agent": "BilocostExchangeRateBot/1.0 (official BCC quote sync)" },
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!response.ok) throw new Error("BCC HTTP " + response.status);
+  const html = await response.text();
+  const rate = parseBccUsdRate(html);
+  // Guard against malformed page content and implausible values.
+  if (rate.mean < 500 || rate.mean > 10000 || rate.buy < 500 || rate.sell > 10000 ||
+      rate.buy > rate.sell || rate.mean < rate.buy || rate.mean > rate.sell) {
+    throw new Error("La cotation USD/CDF reçue ne passe pas les contrôles de cohérence.");
+  }
+  const currentRef = db.collection("exchange_rates").doc("current");
+  const historyRef = db.collection("exchange_rate_history").doc(rate.publicationDate);
+  const now = FieldValue.serverTimestamp();
+  const result = await db.runTransaction(async tx => {
+    const [currentSnap, historySnap] = await Promise.all([tx.get(currentRef), tx.get(historyRef)]);
+    const previous = currentSnap.exists ? currentSnap.data() : {};
+    const changed = !currentSnap.exists || previous.publicationDate !== rate.publicationDate ||
+      previous.mean !== rate.mean || previous.buy !== rate.buy || previous.sell !== rate.sell;
+    const record = {
+      base: "USD", quote: "CDF",
+      mean: rate.mean, buy: rate.buy, sell: rate.sell,
+      source: "BCC", sourceUrl: BCC_RATE_URL,
+      publicationDate: rate.publicationDate,
+      fetchedAt: now,
+      status: "official"
+    };
+    tx.set(currentRef, record, { merge: true });
+    if (!historySnap.exists || changed) tx.set(historyRef, record, { merge: true });
+    return { changed, publicationDate: rate.publicationDate, mean: rate.mean, buy: rate.buy, sell: rate.sell };
+  });
+  console.log("Bilocost BCC USD/CDF sync:", JSON.stringify(result));
+  return result;
+};
+
+exports.syncBccExchangeRate = onSchedule({
+  schedule: "0 * * * *",
+  timeZone: "Africa/Kinshasa",
+  timeoutSeconds: 60,
+  memory: "256MiB"
+}, async () => {
+  await syncOfficialExchangeRate();
+});
+
+exports.refreshBccExchangeRate = onCall(async request => {
+  requireAdmin(request);
+  return await syncOfficialExchangeRate();
 });

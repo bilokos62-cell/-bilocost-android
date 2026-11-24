@@ -2,6 +2,13 @@ name: Deploy Bilocost Cloud Functions
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
+      - 'firebase.json'
+      - '.github/workflows/firebase-functions.yml'
 
 permissions:
   contents: read
@@ -35,4 +42,4 @@ jobs:
             exit 1
           fi
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
-          firebase deploy --only functions --project bilocost-a8136
+          firebase deploy --only functions,firestore:rules --project bilocost-a8136
