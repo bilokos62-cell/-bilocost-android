@@ -2,6 +2,9 @@ name: Deploy Bilocost Website to Firebase
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
