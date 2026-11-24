@@ -41,8 +41,6 @@ jobs:
               "geography-selector.js",
               "listing-location.js",
               "ui-refinement.js",
-              "theme-rewards.js",
-              "theme-settings-entry.js",
           ]
           additions = []
           for name in modules:
