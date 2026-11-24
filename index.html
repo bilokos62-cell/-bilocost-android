@@ -27,7 +27,7 @@ button{cursor:pointer;border:0;background:none}
 :focus-visible{outline:3px solid var(--pri);outline-offset:2px}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bar);backdrop-filter:blur(10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
 .logo{display:flex;align-items:center;gap:8px}
-.brand-mark{width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border-radius:12px;background:linear-gradient(145deg,#16a34a,#08743b);color:#fff;font:900 27px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:-.09em;box-shadow:inset 0 1px 0 #ffffff55,0 3px 8px #08743b30}.brand-mark.large{width:84px;height:84px;flex-basis:84px;border-radius:25px;font-size:60px}.brand-mark.hero{width:110px;height:110px;flex-basis:110px;border-radius:32px;font-size:78px}.logo .brand-mark{margin-right:1px}
+.logo img{border-radius:10px}
 .logo b{font:800 20px/20px 'Plus Jakarta Sans';letter-spacing:-.02em;display:block}
 .logo small{font:600 9px/12px Inter;color:var(--mute);letter-spacing:.06em}
 .commune{display:flex;gap:6px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font:600 13px Inter}
@@ -81,7 +81,7 @@ textarea.f{height:90px;padding:12px}
 .msg p{margin:2px 0;color:var(--mute);font-size:13px}
 .bub{max-width:80%;padding:10px 14px;border-radius:18px;margin:6px 0;background:var(--panel)}
 .bub.me{background:var(--pri);color:#fff;margin-left:auto}
-.toast{position:fixed;left:50%;bottom:128px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;z-index:60;font-weight:600;display:none}
+.toast{position:fixed;left:50%;bottom:128px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;z-index:30;font-weight:600;display:none}
 .prof{text-align:center;padding:20px 0}
 .prof .av{width:76px;height:76px;margin:0 auto 10px;font-size:28px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
@@ -94,7 +94,7 @@ textarea.f{height:90px;padding:12px}
 .hero{display:flex;gap:12px;align-items:flex-end;justify-content:space-between}.hero>div{flex:1}
 .flag{width:84px;height:56px;border-radius:8px;flex:none;box-shadow:0 4px 14px rgba(0,0,0,.3);transform:rotate(-4deg)}
 .lnk{color:var(--pri);font-weight:700;text-decoration:underline;padding:8px}
-.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--panel);image-rendering:auto}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .fbar{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}
 .fbar select{flex:none;height:38px;border:1px solid var(--line);border-radius:999px;padding:0 12px;background:var(--bg);font:600 12px Inter}
 .cg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -133,7 +133,6 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:0 12px calc(10px + 
 nav div{pointer-events:auto;max-width:496px;margin:0 auto;height:66px;display:grid;grid-template-columns:1fr 1fr 92px 1fr 1fr;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:32px;box-shadow:0 12px 32px -8px rgba(15,23,42,.28)}
 nav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;font:600 11px Inter;color:var(--mute);height:100%;justify-content:center}
 nav button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.reel-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:12px 0}.reel-video{width:100%;max-height:68vh;aspect-ratio:9/16;object-fit:cover;background:#111}.reel-meta{padding:12px}.reel-empty{padding:24px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--mute)}.reel-upload{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
 nav button[aria-current=page]:not(.plus){color:var(--ink)}
 nav button[aria-current=page]:not(.plus) svg{fill:currentColor}
 nav .plus{width:64px;height:64px;margin:-34px auto 0;border-radius:50%;background:var(--pri);color:#fff;justify-content:center;box-shadow:0 0 0 7px var(--card),0 10px 22px -2px rgba(0,154,73,.45)}
@@ -188,131 +187,8 @@ button.seller{background:var(--card);color:inherit}button.pm{width:100%;text-ali
 
 .bst{position:absolute;left:8px;top:8px;z-index:1;background:#0f172a;color:#fff;font:700 10px Inter;border-radius:999px;padding:3px 9px}.bst.star{background:var(--star);color:#1a1200}
 .bx{border:1px solid var(--line);border-radius:18px;padding:8px 10px;margin:16px 0}
-.gal{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.gal img{position:static;flex:0 0 100%;width:100%;height:100%;object-fit:contain;background:var(--panel);image-rendering:auto;scroll-snap-align:center}
+.gal{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.gal img{position:static;flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center}
 .pm.on{border-color:var(--pri);background:var(--mint)}
-
-/* Bilocost home refresh — presentation only; existing actions and markup stay unchanged. */
-header{padding:13px 14px;gap:8px;box-shadow:0 3px 14px rgba(15,23,42,.045)}
-.logo{gap:10px;min-width:0}.logo b{font-size:21px;letter-spacing:-.04em}.logo small{font-size:9px;letter-spacing:.09em}
-header>div:last-child{gap:5px!important}
-.commune{min-height:38px;background:var(--card);border-color:var(--line);box-shadow:0 2px 8px rgba(15,23,42,.045);font-weight:700}
-.ib{width:36px;height:36px;background:var(--panel);color:var(--ink);border:1px solid var(--line)}
-.wrap{padding:16px 15px 24px}
-.search{gap:9px;margin:2px 0 16px}
-.search input{height:50px;border:1px solid var(--line);background:var(--panel);border-radius:17px;padding:0 16px;font-size:13px;font-weight:600;color:var(--ink);box-shadow:inset 0 1px 1px rgba(15,23,42,.025)}
-.search input::placeholder{color:var(--mute);opacity:1;font-weight:500}
-.search input:focus{outline:0;border-color:var(--pri);box-shadow:0 0 0 3px rgba(0,154,73,.13);background:var(--card)}
-.search button{width:50px;height:50px;border:1px solid var(--line);background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(15,23,42,.04)}
-.hero{position:relative;isolation:isolate;min-height:178px;padding:20px;border-radius:24px;overflow:hidden;background:linear-gradient(125deg,#064e2b 0%,#008b45 58%,#11a66b 100%);box-shadow:0 12px 26px -15px rgba(0,95,48,.55);margin:4px 0 18px}
-.hero:after{content:"";position:absolute;z-index:-1;width:190px;height:190px;border:1px solid rgba(255,255,255,.15);border-radius:50%;right:-72px;top:-92px;box-shadow:0 0 0 22px rgba(255,255,255,.045),0 0 0 46px rgba(255,255,255,.035)}
-.hero h1{font-size:23px;line-height:1.2;letter-spacing:-.035em;max-width:270px;margin:13px 0 7px}
-.hero p{font-size:12px;line-height:1.55;max-width:260px;opacity:.94}
-.hero .btn.sm{height:38px;padding:0 16px;font-size:12px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.12)}
-.two{gap:9px!important}.two .btn{min-height:46px;height:auto;padding:9px 10px;border-radius:15px;font-size:11px;line-height:1.35;white-space:normal}
-.row{align-items:center;gap:8px;margin:20px 0 12px}.row h2{font-size:18px;line-height:1.25;letter-spacing:-.025em}.row .sub{margin-top:4px;font-size:11px;line-height:1.45}
-.lnk{font-size:12px;white-space:nowrap}
-.sort{gap:7px;padding:1px 0 4px}.chip{padding:8px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:11px}.chip[aria-pressed=true]{border-color:var(--pri);background:var(--pri);color:#fff}
-.grid{gap:11px}.card{border-radius:19px;box-shadow:0 4px 16px rgba(15,23,42,.055);transition:transform .16s ease,box-shadow .16s ease}.card .in{padding:10px 11px 12px}.card h3{font-size:13px;line-height:1.4;min-height:36px}
-.cdf{font-size:15px;letter-spacing:-.02em}.usd{font-size:11px}.meta{font-size:10px;gap:6px;flex-wrap:wrap}.ph{background:var(--panel)}.badge{font-size:10px;padding:4px 9px}.fav{box-shadow:0 2px 8px rgba(15,23,42,.12)}.empty{line-height:1.6}
-@media (max-width:380px){header{padding-left:10px;padding-right:10px}.commune{padding:7px 8px}.wrap{padding-left:12px;padding-right:12px}.hero{padding:17px}.hero h1{font-size:21px}.grid{gap:9px}.card .in{padding:9px}.card h3{font-size:12px}}
-@media (prefers-reduced-motion:reduce){.card{transition:none}}
-
-/* Privacy, cookie consent and file-permission surfaces */
-.bilo-consent-backdrop{position:fixed;inset:0;z-index:10050;background:rgba(8,18,14,.58);display:flex;align-items:flex-end;justify-content:center;padding:16px}
-.bilo-consent-backdrop[hidden],#bilo-cookie-banner[hidden]{display:none!important}
-.bilo-consent-panel{width:min(100%,480px);max-height:min(84vh,720px);overflow:auto;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 22px 70px rgba(0,0,0,.25);animation:biloConsentIn .18s ease-out}
-.bilo-consent-panel h2{font-size:20px;line-height:1.25;margin:0 0 8px;letter-spacing:-.03em}
-.bilo-consent-panel p{color:var(--mute);font-size:13px;line-height:1.6;margin:0 0 14px}
-.bilo-consent-icon{width:44px;height:44px;border-radius:14px;background:var(--mint);color:var(--pri);display:grid;place-items:center;font-size:22px;margin-bottom:14px}
-.bilo-consent-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
-.bilo-consent-actions .primary{background:var(--pri);color:#fff;border:1px solid var(--pri)}
-.bilo-consent-actions button,.bilo-cookie-banner button{min-height:44px;border-radius:13px;padding:10px 13px;font-weight:800;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
-.bilo-consent-actions .wide{grid-column:1/-1}
-.bilo-cookie-banner{position:fixed;z-index:10040;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin:auto;width:min(100% - 24px,520px);padding:17px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 44px rgba(15,23,42,.2)}
-.bilo-cookie-banner h2{font-size:16px;margin:0 0 5px}.bilo-cookie-banner p{font-size:12px;line-height:1.5;color:var(--mute);margin:0 0 12px}
-.bilo-cookie-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bilo-cookie-actions .primary{grid-column:1/-1;background:var(--pri);color:white;border-color:var(--pri)}
-.bilo-cookie-link{border:0!important;background:transparent!important;color:var(--pri)!important;text-decoration:underline;min-height:36px!important;padding:5px!important}
-.bilo-choice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line);font-size:13px}
-.bilo-choice small{display:block;color:var(--mute);font-size:11px;line-height:1.45;margin-top:3px}
-.bilo-choice input{width:20px;height:20px;accent-color:var(--pri)}
-@keyframes biloConsentIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.bilo-consent-panel{animation:none}}
-@media(min-width:700px){.bilo-consent-backdrop{align-items:center}.bilo-cookie-banner{bottom:20px}}
-
-
-/* Espace publicitaire horizontal des marques partenaires */
-.brand-ad-section{margin:20px 0 24px;padding:16px 0 4px;border-top:1px solid var(--line)}
-.brand-ad-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:12px}
-.brand-ad-heading>div{min-width:0}.brand-ad-heading small{font:800 9px Inter,sans-serif;letter-spacing:.12em;color:var(--pri)}
-.brand-ad-heading h3{font:800 18px/24px 'Plus Jakarta Sans';margin:3px 0;color:var(--ink)}
-.brand-ad-heading p{font:500 11px/16px Inter,sans-serif;color:var(--mute);margin:0}
-.brand-ad-heading .lnk{white-space:nowrap;font-size:11px;padding:5px 0}
-.brand-ad-controls{display:flex;justify-content:flex-end;gap:7px;margin:0 0 8px}
-.brand-ad-controls button{width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);font-size:22px;line-height:1}
-.brand-ad-rail{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--pri) var(--panel);padding:2px 2px 12px;touch-action:pan-x}
-.brand-ad-card{display:flex;flex:0 0 248px;min-height:112px;gap:11px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:17px;background:var(--card);color:var(--ink);text-decoration:none;box-shadow:var(--sh);scroll-snap-align:start;overflow:hidden}
-.brand-ad-image{width:78px;height:88px;flex:0 0 78px;object-fit:cover;border-radius:12px;background:var(--panel)}
-.brand-ad-placeholder,.brand-ad-empty .brand-ad-placeholder{display:grid;place-items:center;width:78px;height:88px;flex:0 0 78px;border-radius:12px;background:linear-gradient(145deg,#08743b,#16a34a);color:white;font:900 42px 'Plus Jakarta Sans'}
-.brand-ad-copy{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
-.brand-ad-copy small{font:800 8px Inter,sans-serif;letter-spacing:.08em;color:var(--pri)}
-.brand-ad-copy b{font:800 13px/17px 'Plus Jakarta Sans';color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.brand-ad-copy>span{font:500 10px/14px Inter,sans-serif;color:var(--mute);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.brand-ad-copy strong{font:800 10px Inter,sans-serif;color:var(--pri);margin-top:3px}
-.brand-ad-card:focus-visible,.brand-ad-rail:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
-@media(min-width:700px){.brand-ad-card{flex-basis:280px}.brand-ad-controls button{cursor:pointer}}
-@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}
-
-/* bilocost-readable-legacy-typography: restore the clear text scale from the supplied classic Bilocost screen.
-   Additive only: preserve all current screens, layouts, data and interactions. */
-body{font:400 14px/20px 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
-.logo b{font:800 20px/20px 'Plus Jakarta Sans';letter-spacing:-.02em}
-.cat{font:500 12px Inter;color:var(--ink)}
-.hero h1{font:800 24px/30px 'Plus Jakarta Sans';letter-spacing:-.02em}
-.hero p{font-size:14px;line-height:20px}
-h2,.row h2{font:800 20px/26px 'Plus Jakarta Sans';letter-spacing:-.01em}
-.sub,.row .sub{font-size:12px;line-height:1.5;color:var(--mute)}
-.chip{font:600 12px Inter}
-.card h3{font:700 14px/18px 'Plus Jakarta Sans';min-height:0}
-.cdf{font:800 15px/20px 'Plus Jakarta Sans'}
-.usd{font:500 12px Inter;color:var(--mute)}
-.meta{font:500 12px Inter;color:var(--mute)}
-label{font:600 13px Inter}
-.msg p{font-size:13px;line-height:1.5}
-nav button{font:600 11px Inter;color:var(--mute)}
-input,select,textarea,button{font-family:inherit}
-input::placeholder,textarea::placeholder{color:var(--mute);opacity:1}
-#view,#page,.pw,.pbody{color:var(--ink)}
-#view small,.pw small,.pbody small{color:var(--mute)}
-@media(max-width:380px){
- .hero h1{font-size:22px;line-height:1.3}
- .card h3{font-size:13px;line-height:18px}
-}
-
-
-/* bilocost-readable-legacy-typography-extended: restore hierarchy and contrast only. */
-:root{--ink:#0f172a;--mute:#64748b}
-body,#view,#page,#auth,.sheet,.pw,.pbody{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
-#view p,#page p,#auth p,.sheet p,.pbody p,.faq p,.warn,.safe,.sum,.lr,.lt,.seller,.pm,.steps li{font-size:13px;line-height:1.55}
-#view small,#page small,#auth small,.sheet small,.pbody small,.meta,.sub,.usd,.tag,.gt{font-size:12px;line-height:1.5;color:var(--mute)}
-#view h1,#page h1,#auth h1,.sheet h1{font:800 24px/1.25 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
-#view h2,#page h2,#auth h2,.sheet h2,.pbar h2{font:800 20px/1.3 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
-#view h3,#page h3,#auth h3,.sheet h3,.pbody h3{font:700 15px/1.4 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
-.card h3,.mini b,.brand-ad-copy b{font:700 14px/18px 'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink)}
-.cdf,.stats b,.tiles b{color:var(--pri);font-weight:800}
-label,.fld small{font:600 13px/1.45 Inter,sans-serif;color:var(--ink)}
-input,select,textarea,.fld input{font-size:14px;line-height:1.45}
-input::placeholder,textarea::placeholder{color:var(--mute);opacity:1}
-button,.tabs button,.chip,.commune{line-height:1.4}
-.msg p,.faq p,.lt small,.lr small{font-size:13px;line-height:1.5}
-@media(max-width:380px){
- #view p,#page p,#auth p,.sheet p,.pbody p{font-size:13px}
- #view h2,#page h2,#auth h2,.sheet h2{font-size:19px}
-}
-@media(prefers-color-scheme:dark){
- :root:not([data-theme="light"]){--ink:#f1f5f9;--mute:#b2bfd2}
-}
-:root[data-theme="dark"]{--ink:#f1f5f9;--mute:#b2bfd2}
-
 </style>
 </head>
 <body>
