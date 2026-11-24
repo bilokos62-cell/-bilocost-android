@@ -18,7 +18,16 @@
         ]
       },
       {
-        "source": "**/*.@(js|css|jpg|jpeg|png|webp|svg|woff|woff2|mp4)",
+        "source": "/responsive-layout.css",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, max-age=0, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(js|jpg|jpeg|png|webp|svg|woff|woff2|mp4)",
         "headers": [
           {
             "key": "Cache-Control",
