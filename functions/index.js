@@ -306,3 +306,59 @@ exports.refreshBccExchangeRate = onCall(async request => {
   requireAdmin(request);
   return await syncOfficialExchangeRate();
 });
+
+
+/*
+ * One-time developer bootstrap.
+ * Configure BILOCOST_DEVELOPER_ADMIN_UID in the Functions environment before use.
+ * Only that exact, email-verified Firebase Auth account can invoke this callable.
+ * It grants the admin custom claim and marks the account as a developer test identity.
+ * Never expose service-account credentials to the client.
+ */
+const { defineString } = require("firebase-functions/params");
+const developerAdminUid = defineString("BILOCOST_DEVELOPER_ADMIN_UID", { default: "" });
+
+exports.provisionDeveloperAdmin = onCall({ maxInstances: 1 }, async request => {
+  const uid = requireAuth(request);
+  const allowedUid = developerAdminUid.value().trim();
+
+  if (!allowedUid || uid !== allowedUid) {
+    throw new HttpsError("permission-denied", "Provisionnement réservé au compte développeur configuré.");
+  }
+
+  const auth = require("firebase-admin/auth");
+  const user = await auth.getAuth().getUser(uid);
+  if (!user.emailVerified) {
+    throw new HttpsError("failed-precondition", "Vérifiez d'abord l'adresse e-mail de votre compte Bilocost.");
+  }
+
+  await auth.getAuth().setCustomUserClaims(uid, {
+    ...(user.customClaims || {}),
+    admin: true
+  });
+
+  const verificationRef = db.collection("identity_verifications").doc(uid);
+  const verificationSnap = await verificationRef.get();
+  const existing = verificationSnap.exists ? verificationSnap.data() : {};
+
+  // Do not overwrite a real verification record. Only initialize the developer
+  // test status when no approved verification already exists.
+  if (existing.status !== "verified") {
+    await verificationRef.set({
+      uid,
+      status: "verified",
+      verificationType: "developer_test",
+      reviewedBy: "developer_bootstrap",
+      verifiedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+  }
+
+  return {
+    ok: true,
+    uid,
+    admin: true,
+    identityStatus: "verified",
+    verificationType: existing.verificationType || "developer_test",
+    message: "Compte développeur configuré. Déconnectez-vous puis reconnectez-vous pour actualiser le jeton."
+  };
+});
