@@ -123,6 +123,14 @@
     .card h3{color:var(--ink)!important;line-height:1.4;overflow-wrap:anywhere}
     .card .cdf{color:var(--pri)!important}
     .card .usd,.card .meta,.card .sub{color:var(--mute)!important}
+    /* Product photos must remain fully visible: the previous cover rule cropped
+       shoes, devices and other listings. Keep the catalogue and gallery uncropped. */
+    #view .card .ph img,.card .ph img{object-fit:contain!important;padding:8px;background:var(--panel)}
+    #page .hp .ph>.gal img,#page .hp .ph>img{object-fit:contain!important;padding:10px;background:var(--panel)}
+    /* Product sheets follow the active theme; never force pale text on white. */
+    .sheet,.bottom-sheet{background:var(--bg)!important;color:var(--ink)!important}
+    .sheet h1,.sheet h2,.sheet h3,.sheet h4,.bottom-sheet h1,.bottom-sheet h2,.bottom-sheet h3{color:var(--ink)!important}
+    .sheet p,.sheet small,.sheet label,.bottom-sheet p,.bottom-sheet small,.bottom-sheet label{color:var(--mute)!important;opacity:1!important}
     .hero h1,.hero p,.hero em,.hero .btn.sm{color:#fff}
     .chip[aria-pressed=true],.cat[aria-pressed=true] span,.btn,.btn.alt{color:#fff}
     .btn.ghost{color:var(--ink)}
