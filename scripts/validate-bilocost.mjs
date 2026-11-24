@@ -14,8 +14,6 @@ const serviceDesign = readFileSync("service-design.js", "utf8");
 const uiRefinement = readFileSync("ui-refinement.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
-const themeRewards = readFileSync("theme-rewards.js", "utf8");
-const themeSettingsEntry = readFileSync("theme-settings-entry.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
 const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
@@ -91,9 +89,6 @@ if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includ
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
 try { new vm.Script(geographyPatch, { filename: "geography-selector.js" }); } catch (error) { fail("Geography selector syntax error: " + error.message); }
-try { new vm.Script(themeRewards, { filename: "theme-rewards.js" }); } catch (error) { fail("Theme rewards syntax error: " + error.message); }
-try { new vm.Script(themeSettingsEntry, { filename: "theme-settings-entry.js" }); } catch (error) { fail("Theme settings entry syntax error: " + error.message); }
-if (!themeSettingsEntry.includes("biloOpenThemeCustomizer") || !themeRewards.includes("window.biloOpenThemeCustomizer")) fail("Theme palette settings entry is not connected");
 try { new vm.Script(functionsSource, { filename: "functions/index.js" }); } catch (error) { fail("Cloud Functions syntax error: " + error.message); }
 if (firebaseConfig.functions?.source !== "functions") fail("Cloud Functions source is not configured in firebase.json");
 if (firebaseConfig.functions?.runtime !== "nodejs22") fail("Cloud Functions must use the supported Node.js 22 runtime");
@@ -108,3 +103,8 @@ console.log("Core integrations detected: " + checks.length);
 if (/gemini|aiModel|improveListingWithAI/i.test(html)) fail("Optional AI integration is still present");
 console.log("Optional AI integration: removed.");
 console.log("Note: this validates source structure only; it does not prove live Firebase, payment, escrow, or device behavior.");
+
+if (androidWorkflow.includes("theme-rewards.js") || androidWorkflow.includes("theme-settings-entry.js")) fail("Removed 100-colour palette is still injected");
+for (const [platform, workflow] of [["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
+  if (workflow.includes("theme-rewards.js") || workflow.includes("theme-settings-entry.js")) fail("Removed 100-colour palette is still injected in " + platform);
+}

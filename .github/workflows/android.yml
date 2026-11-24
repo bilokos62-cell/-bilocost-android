@@ -78,9 +78,7 @@ jobs:
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          theme_rewards = Path("theme-rewards.js").read_text(encoding="utf-8")
-          theme_entry = Path("theme-settings-entry.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + theme_rewards + "\n" + theme_entry + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -124,7 +122,7 @@ jobs:
           }
           EOF
           npx cap add android
-          # Keep the native Android launch window white before the WebView appears.
+          # Match the native launch window to the Bilocost reference green before the WebView appears.
           python3 - <<'PY'
           from pathlib import Path
           import xml.etree.ElementTree as ET
@@ -150,11 +148,11 @@ jobs:
           if launch is None:
               raise SystemExit("Native launch theme AppTheme.NoActionBarLaunch was not found")
           settings = {
-              "android:windowBackground": "@android:color/white",
-              "android:statusBarColor": "@android:color/white",
-              "android:navigationBarColor": "@android:color/white",
-              "android:windowLightStatusBar": "true",
-              "android:windowLightNavigationBar": "true",
+              "android:windowBackground": "#073F30",
+              "android:statusBarColor": "#073F30",
+              "android:navigationBarColor": "#073F30",
+              "android:windowLightStatusBar": "false",
+              "android:windowLightNavigationBar": "false",
           }
           for name, value in settings.items():
               item = next((x for x in launch.findall("item") if x.get("name") == name), None)

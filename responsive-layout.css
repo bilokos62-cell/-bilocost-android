@@ -338,3 +338,27 @@
     scroll-behavior: smooth;
   }
 }
+
+
+/* Product detail: keep the gallery below the device status bar and leave
+   enough scroll space above the fixed bottom navigation. */
+#page .pw {
+  box-sizing: border-box;
+  padding-top: max(22px, env(safe-area-inset-top, 0px));
+  padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px));
+  scroll-margin-top: 22px;
+}
+#page .pw > :first-child {
+  margin-top: 0;
+}
+#page .pw img,
+#page .pw video {
+  display: block;
+  max-width: 100%;
+}
+@media (max-width: 699px) {
+  #page .pw {
+    padding-top: max(24px, env(safe-area-inset-top, 0px));
+    padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -2,6 +2,9 @@ name: Deploy Bilocost Website to Firebase
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -52,8 +55,6 @@ jobs:
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          theme_rewards = Path("theme-rewards.js").read_text(encoding="utf-8")
-          theme_entry = Path("theme-settings-entry.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
@@ -62,7 +63,7 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + theme_rewards + "\n" + theme_entry + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
