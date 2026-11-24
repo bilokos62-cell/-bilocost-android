@@ -2,6 +2,13 @@ name: Deploy Bilocost Cloud Functions
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
+      - 'firebase.json'
+      - '.github/workflows/firebase-functions.yml'
 
 permissions:
   contents: read
