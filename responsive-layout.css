@@ -602,3 +602,37 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 }
 
 /* Force Firebase Hosting rebuild for the verified tablet readability patch. */
+
+/* Final contrast fix for the empty advertiser placeholder CTA.
+   Scope only the "Devenir annonceur" action; keep real partner-card labels unchanged. */
+#view .brand-ad-card.brand-ad-empty .brand-ad-copy > strong {
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  min-height:44px !important;
+  width:auto !important;
+  max-width:100% !important;
+  margin:8px 0 0 !important;
+  padding:11px 18px !important;
+  border:1px solid #08753e !important;
+  border-radius:12px !important;
+  background:#08753e !important;
+  color:#ffffff !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+  line-height:1.3 !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+  -webkit-text-fill-color:#ffffff !important;
+}
+#view .brand-ad-card.brand-ad-empty .brand-ad-copy > strong *,
+#view .brand-ad-card.brand-ad-empty .brand-ad-copy > strong span {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  opacity:1 !important;
+}
+#view .brand-ad-card.brand-ad-empty .brand-ad-copy > strong:focus-visible {
+  outline:3px solid #38c879 !important;
+  outline-offset:3px !important;
+}
