@@ -11,11 +11,11 @@ on:
 
 concurrency:
   group: bilocost-ios-build
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-15-intel
     timeout-minutes: 45
     steps:
       - name: Diagnose macOS runner and Xcode
