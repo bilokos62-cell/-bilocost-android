@@ -332,5 +332,42 @@
   if(walletRoot)walletIconObserver.observe(walletRoot,{childList:true,subtree:true});
   document.addEventListener("click",()=>requestAnimationFrame(biloApplyWalletIcon),true);
 
+  /* Final light-surface contrast pass: prevent pale labels and washed-out form fields. */
+  const contrastCleanupStyle=document.createElement("style");
+  contrastCleanupStyle.id="bilocost-final-contrast-cleanup";
+  contrastCleanupStyle.textContent=`
+    #view label, #page label {
+      color:var(--ink,#0f172a)!important;
+      -webkit-text-fill-color:var(--ink,#0f172a)!important;
+      opacity:1!important;
+    }
+    #view input.f, #view select.f, #view textarea.f,
+    #page input.f, #page select.f, #page textarea.f {
+      color:var(--ink,#0f172a)!important;
+      -webkit-text-fill-color:var(--ink,#0f172a)!important;
+      background:var(--card,#fff)!important;
+      border-color:var(--line,#dbe3ed)!important;
+      opacity:1!important;
+    }
+    #view input.f::placeholder, #view textarea.f::placeholder,
+    #page input.f::placeholder, #page textarea.f::placeholder {
+      color:#64748b!important;
+      -webkit-text-fill-color:#64748b!important;
+      opacity:1!important;
+    }
+    #view .sub, #page .sub, #view .hint, #page .hint,
+    #view .meta, #page .meta {
+      color:var(--mute,#475569)!important;
+      opacity:1!important;
+    }
+    /* Remove the unsolicited home-page privacy banner; legal consent at signup
+       and the full privacy policy/settings remain available in the account. */
+    #bilo-cookie-banner {
+      display:none!important;
+      visibility:hidden!important;
+      pointer-events:none!important;
+    }
+  `;
+  (document.head||document.documentElement).appendChild(contrastCleanupStyle);
 
 })();
