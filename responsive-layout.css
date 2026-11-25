@@ -733,3 +733,79 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     align-items: stretch;
   }
 }
+
+
+/* Advertising cards: compact vertical banner and high-contrast call to action.
+   Scope to the live brand-ad markup; preserve the existing horizontal carousel. */
+#view a.brand-ad-card {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  flex-basis: min(340px, 88vw) !important;
+  min-height: 0 !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  background: var(--card) !important;
+  color: var(--ink) !important;
+}
+#view .brand-ad-card .brand-ad-image,
+#view .brand-ad-card .brand-ad-placeholder {
+  display: grid;
+  width: 100% !important;
+  height: 88px !important;
+  min-height: 88px !important;
+  flex: 0 0 88px !important;
+  object-fit: contain !important;
+  border-radius: 12px !important;
+  background: var(--panel);
+}
+#view .brand-ad-card .brand-ad-copy {
+  width: 100%;
+  padding: 10px 2px 2px;
+  gap: 7px;
+}
+#view .brand-ad-card .brand-ad-copy small {
+  color: var(--pri);
+  font-size: 11px;
+  line-height: 1.35;
+}
+#view .brand-ad-card .brand-ad-copy b {
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.35;
+}
+#view .brand-ad-card .brand-ad-copy > span {
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.5;
+}
+#view .brand-ad-card .brand-ad-copy > strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-height: 42px !important;
+  margin: 7px 0 0 !important;
+  padding: 10px 16px !important;
+  border: 1px solid #079653 !important;
+  border-radius: 12px !important;
+  background: #079653 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+}
+#view .brand-ad-card .brand-ad-copy > strong * {
+  color: #ffffff !important;
+}
+:root[data-theme="dark"] #view .brand-ad-card {
+  border-color: #26354b !important;
+  background: #111b2d !important;
+}
+:root[data-theme="dark"] #view .brand-ad-card .brand-ad-copy b {
+  color: #f8fafc !important;
+}
+:root[data-theme="dark"] #view .brand-ad-card .brand-ad-copy > span {
+  color: #cbd5e1 !important;
+}
