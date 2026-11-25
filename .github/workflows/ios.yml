@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: bilocost-ios-build
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
