@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087542">
+<title>Télécharger Bilocost</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+:root{color-scheme:light;--green:#087542;--ink:#172033;--muted:#64748b;--line:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;background:#f8fafc;color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{width:min(760px,calc(100% - 32px));margin:48px auto}.brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}.brand img{width:52px;height:52px}.brand strong{font-size:22px}.brand small{display:block;color:var(--muted)}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;margin:0 0 12px}p{color:var(--muted)}
+.card{background:white;border:1px solid var(--line);border-radius:20px;padding:24px;margin:20px 0;box-shadow:0 8px 28px #0f172a0a}
+.badge{display:inline-block;background:#e8f5ee;color:#08643a;padding:5px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}.btn{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:750;border:1px solid var(--green);background:var(--green);color:white;cursor:pointer}.btn.alt{background:white;color:var(--green)}
+.note{font-size:14px}.hidden{display:none!important}footer{font-size:13px;color:var(--muted);margin-top:28px}
+</style>
+</head>
+<body>
+<main>
+<div class="brand"><img src="/icons/bilocost.svg" alt=""><div><strong>Bilocost</strong><small>Notre marché. Notre plateforme. Notre avenir.</small></div></div>
+<span class="badge" id="device">Détection de votre appareil…</span>
+<h1>Bilocost s’adapte à votre appareil.</h1>
+<p>Cette page détecte automatiquement votre plateforme et vous présente la meilleure façon d’utiliser Bilocost.</p>
+<section class="card" id="android">
+<h2>Android</h2><p>Installez la version Android bêta ou utilisez Bilocost comme application web installable.</p>
+<div class="actions"><a class="btn" href="https://github.com/bilokos62-cell/-bilocost-android/releases/download/android-beta/app-debug.apk" id="apk">Télécharger l’APK Android (bêta)</a><button class="btn alt hidden" id="install">Installer Bilocost</button><a class="btn alt" href="/">Ouvrir Bilocost</a></div>
+<p class="note">L’APK actuel est une version de test (debug), pas encore une version Play Store signée pour la production.</p>
+</section>
+<section class="card" id="ios">
+<h2>iPhone et iPad</h2><p>Ouvrez Bilocost dans Safari, touchez <strong>Partager</strong>, puis <strong>Sur l’écran d’accueil</strong> pour l’installer comme application web.</p>
+<div class="actions"><a class="btn" href="/">Ouvrir Bilocost</a></div>
+<p class="note">La version native iOS distribuée via TestFlight ou App Store nécessite encore la signature et la configuration du compte Apple.</p>
+</section>
+<section class="card" id="desktop">
+<h2>Ordinateur</h2><p>Utilisez Bilocost sur grand écran. Dans Chrome ou Edge, vous pouvez installer l’application depuis l’icône d’installation de la barre d’adresse.</p>
+<div class="actions"><button class="btn hidden" id="install-desktop">Installer Bilocost</button><a class="btn alt" href="/">Ouvrir la version PC</a></div>
+</section>
+<section class="card" id="other"><h2>Autre appareil</h2><p>Ouvrez Bilocost dans votre navigateur. L’interface s’adapte à la taille de l’écran.</p><div class="actions"><a class="btn" href="/">Ouvrir Bilocost</a></div></section>
+<footer>La version web est commune aux appareils. Les versions natives restent soumises à leur processus de signature et de publication.</footer>
+</main>
+<script>
+(function(){
+ const ua=navigator.userAgent||"";
+ const ios=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+ const android=/Android/i.test(ua);
+ const mobile=/Mobi|Android|iPhone|iPad/i.test(ua);
+ const device=document.getElementById("device");
+ ["android","ios","desktop","other"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+ if(android){device.textContent="Appareil détecté : Android";document.getElementById("android").classList.remove("hidden")}
+ else if(ios){device.textContent="Appareil détecté : iPhone / iPad";document.getElementById("ios").classList.remove("hidden")}
+ else if(!mobile){device.textContent="Appareil détecté : ordinateur";document.getElementById("desktop").classList.remove("hidden")}
+ else{device.textContent="Appareil détecté";document.getElementById("other").classList.remove("hidden")}
+ let promptEvent=null;
+ window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();promptEvent=e;const b=document.getElementById(android?"install":"install-desktop");if(b)b.classList.remove("hidden")});
+ async function install(){if(!promptEvent)return;promptEvent.prompt();await promptEvent.userChoice;promptEvent=null}
+ ["install","install-desktop"].forEach(id=>{const b=document.getElementById(id);if(b)b.addEventListener("click",install)});
+ if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+})();
+</script>
+</body></html>
