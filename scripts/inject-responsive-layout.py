@@ -12,7 +12,7 @@ html = html_path.read_text(encoding="utf-8")
 html = re.sub(r"(<body\b[^>]*>\s*)\\n", r"\1", html, count=1, flags=re.IGNORECASE)
 
 # Version the stylesheet URL so browsers cannot reuse an older cached copy.
-version = "20261124-2310"
+version = "20261126-contrast-01"
 link = f'<link rel="stylesheet" href="responsive-layout.css?v={version}">'
 html = re.sub(r'<link rel="stylesheet" href="responsive-layout\.css(?:\?[^"]*)?">', link, html, count=1)
 if link not in html:
