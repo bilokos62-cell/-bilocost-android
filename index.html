@@ -1544,16 +1544,7 @@ document.addEventListener("input",e=>{const id=e.target.id;
  if(id==="mq"){const v=e.target.value.toLowerCase();document.querySelectorAll(".msg").forEach(m=>m.style.display=m.textContent.toLowerCase().includes(v)?"":"none")}});
 /* Permission explicite avant chaque ouverture du sélecteur de fichiers. */
 const filePurpose=input=>({pf:"lire les photos choisies pour illustrer votre annonce",rpf:"lire les photos choisies pour illustrer votre annonce de location",svf:"lire la photo choisie pour votre vitrine professionnelle",avf:"lire la photo choisie comme photo de profil",iddoc:"lire le justificatif choisi pour la vérification privée",csvf:"lire le fichier CSV choisi pour importer vos annonces",apf:"lire la photo choisie pour compléter votre annonce"}[input.id]||"lire uniquement le fichier que vous choisissez");
- document.addEventListener("click",e=>{
- const input=e.target.closest&&e.target.closest('input[type="file"]');
- // Ask for this confirmation only when adding photos to a listing being published.
- // Other file actions (profile, identity, CSV, service photo) use the device picker directly.
- if(!input||!["pf","rpf"].includes(input.id))return;
- if(input.dataset.biloApprovedClick==="1"){delete input.dataset.biloApprovedClick;return}
- e.preventDefault();e.stopImmediatePropagation();delete input.dataset.biloConsentGranted;
- window.showBiloFilePermission(input);
- },true);
-document.addEventListener("change",e=>{if(e.target.matches&&e.target.matches('input[type="file"]')&&e.target.files&&e.target.files.length&&!e.target.dataset.biloConsentGranted){e.target.value="";toast("Autorisation requise avant l’accès au fichier");return}const f=e.target.dataset.f;if(f){S[f]=e.target.value;render()}
+document.addEventListener("change",e=>{const f=e.target.dataset.f;if(f){S[f]=e.target.value;render()}
  if(e.target.id==="rs"||e.target.id==="re")updateRentQuote();
  if(e.target.id==="rc")$("#rextra").innerHTML=rExtra(e.target.value);
  if(e.target.id==="rpf"&&e.target.files.length){addRPhotos(e.target.files);e.target.value=""}
@@ -1627,15 +1618,6 @@ if(Q.get("a")){S.deep=Q.get("a");setTimeout(tryDeep,300)}if(Q.get("e")){S.deepE=
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 </script>
 
-<div id="bilo-file-permission" class="bilo-consent-backdrop" hidden>
- <section class="bilo-consent-panel" role="dialog" aria-modal="true" aria-labelledby="bilo-file-title">
-  
-  <h2 id="bilo-file-title">Autorisation d'accès à vos fichiers</h2>
-  <p id="bilo-file-description">Bilocost souhaite accéder uniquement au fichier que vous choisissez pour cette fonction. Aucun autre fichier ne sera parcouru automatiquement.</p>
-  <p>Le sélecteur sécurisé de votre appareil va s'ouvrir. Vous gardez le contrôle sur les éléments sélectionnés.</p>
-  <div class="bilo-consent-actions"><button type="button" id="bilo-file-later">Plus tard</button><button type="button" class="primary" id="bilo-file-allow">Continuer</button></div>
- </section>
-</div>
 <aside id="bilo-cookie-banner" class="bilo-cookie-banner" hidden aria-label="Préférences de confidentialité">
  <h2>Votre confidentialité compte</h2>
  <p>Bilocost utilise des éléments indispensables à son fonctionnement. Les options facultatives restent désactivées par défaut. Vous pouvez personnaliser votre choix à tout moment.</p>
@@ -1658,7 +1640,7 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.s
  "use strict";
  const KEY="bilocost_cookie_consent_v1";
  const $=id=>document.getElementById(id);
- const banner=$("bilo-cookie-banner"),cookieModal=$("bilo-cookie-modal"),fileModal=$("bilo-file-permission");
+ const banner=$("bilo-cookie-banner"),cookieModal=$("bilo-cookie-modal");
  const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}};
  const hide=el=>{if(el)el.hidden=true},show=el=>{if(el)el.hidden=false};
  const save=(analytics,marketing)=>{const value={version:1,necessary:true,analytics:!!analytics,marketing:!!marketing,updatedAt:new Date().toISOString()};try{localStorage.setItem(KEY,JSON.stringify(value))}catch(e){}hide(banner);hide(cookieModal);return value};
@@ -1671,14 +1653,7 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.s
  $("bilo-cookie-save").addEventListener("click",()=>save($("bilo-cookie-analytics").checked,$("bilo-cookie-marketing").checked));
  $("bilo-cookie-deny-all").addEventListener("click",()=>save(false,false));
  document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("#bilo-cookie-open")){e.preventDefault();openCookieSettings()}});
- window.showBiloFilePermission=function(input){
-  const purpose=({pf:"sélectionner les photos de votre annonce",rpf:"sélectionner les photos de votre annonce de location",svf:"sélectionner la photo de votre vitrine professionnelle",avf:"sélectionner votre photo de profil",iddoc:"sélectionner un justificatif privé pour la vérification",csvf:"sélectionner un fichier CSV à importer",apf:"sélectionner une photo pour compléter votre annonce"}[input.id]||"sélectionner le fichier demandé");
-  $("bilo-file-description").textContent="Bilocost a besoin de votre autorisation pour "+purpose+". Aucun autre fichier de votre appareil ne sera parcouru automatiquement.";
-  show(fileModal);
-  $("bilo-file-later").onclick=()=>hide(fileModal);
-  $("bilo-file-allow").onclick=()=>{hide(fileModal);input.dataset.biloConsentGranted="1";input.dataset.biloApprovedClick="1";input.click()};
- };
- document.addEventListener("keydown",e=>{if(e.key==="Escape"){hide(cookieModal);hide(fileModal)}});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){hide(cookieModal)}});
  window.biloOpenCookieSettings=openCookieSettings;
 })();
 </script>
