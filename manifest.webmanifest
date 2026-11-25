@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "Bilocost – Notre marché. Notre plateforme. Notre avenir.",
+  "short_name": "Bilocost",
+  "description": "La marketplace locale de Bilocost.",
+  "lang": "fr-CD",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#087542",
+  "icons": [
+    {
+      "src": "/icons/bilocost.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

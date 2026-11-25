@@ -89,6 +89,35 @@ jobs:
           if [ -d icons ]; then cp -R icons/. www/icons/; fi
           test -s www/IMG-20261024-WA0000.jpg
 
+          # Publish the device-aware download page and installable PWA assets.
+          cp download.html www/download.html
+          cp manifest.webmanifest www/manifest.webmanifest
+          cp sw.js www/sw.js
+          mkdir -p www/icons
+          cp icons/bilocost.svg www/icons/bilocost.svg
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("www/index.html")
+          html = p.read_text(encoding="utf-8")
+          head = """
+          <link rel="manifest" href="/manifest.webmanifest">
+          <meta name="theme-color" content="#087542">
+          <meta name="apple-mobile-web-app-capable" content="yes">
+          <meta name="apple-mobile-web-app-title" content="Bilocost">
+          <link rel="apple-touch-icon" href="/icons/bilocost.svg">
+          <script>
+          if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+          }
+          </script>
+          """
+          if 'rel="manifest"' not in html:
+              if "</head>" not in html:
+                  raise SystemExit("HTML head closing tag missing")
+              html = html.replace("</head>", head + "\n</head>", 1)
+          p.write_text(html, encoding="utf-8")
+          PY
+
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
