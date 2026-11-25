@@ -390,7 +390,7 @@
       padding:8px 0 24px;
       color:var(--ink,#0f172a);
     }
-    #auth .au > div:first-child:not(.blob) {
+    #auth .au > div:nth-child(2) {
       position:relative;
       padding:0 38px;
       margin-bottom:8px;
@@ -533,7 +533,7 @@
     @media (max-width:600px) {
       #auth {padding-left:16px;padding-right:16px}
       #auth .au {max-width:480px}
-      #auth .au > div:first-child:not(.blob) {padding-left:32px;padding-right:32px}
+      #auth .au > div:nth-child(2) {padding-left:32px;padding-right:32px}
       #auth .au h2 {font-size:25px!important}
     }
     @media (min-width:700px) {
@@ -558,7 +558,7 @@
         align-items:start;
         max-width:760px;
       }
-      #auth .au:has(#an) > div:first-child:not(.blob),
+      #auth .au:has(#an) > div:nth-child(2),
       #auth .au:has(#an) > p:first-of-type,
       #auth .au:has(#an) > .card,
       #auth .au:has(#an) > .btn,
