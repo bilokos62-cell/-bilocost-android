@@ -1545,7 +1545,10 @@ document.addEventListener("input",e=>{const id=e.target.id;
 /* Permission explicite avant chaque ouverture du sélecteur de fichiers. */
 const filePurpose=input=>({pf:"lire les photos choisies pour illustrer votre annonce",rpf:"lire les photos choisies pour illustrer votre annonce de location",svf:"lire la photo choisie pour votre vitrine professionnelle",avf:"lire la photo choisie comme photo de profil",iddoc:"lire le justificatif choisi pour la vérification privée",csvf:"lire le fichier CSV choisi pour importer vos annonces",apf:"lire la photo choisie pour compléter votre annonce"}[input.id]||"lire uniquement le fichier que vous choisissez");
  document.addEventListener("click",e=>{
- const input=e.target.closest&&e.target.closest('input[type="file"]');if(!input)return;
+ const input=e.target.closest&&e.target.closest('input[type="file"]');
+ // Ask for this confirmation only when adding photos to a listing being published.
+ // Other file actions (profile, identity, CSV, service photo) use the device picker directly.
+ if(!input||!["pf","rpf"].includes(input.id))return;
  if(input.dataset.biloApprovedClick==="1"){delete input.dataset.biloApprovedClick;return}
  e.preventDefault();e.stopImmediatePropagation();delete input.dataset.biloConsentGranted;
  window.showBiloFilePermission(input);
@@ -1626,7 +1629,7 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.s
 
 <div id="bilo-file-permission" class="bilo-consent-backdrop" hidden>
  <section class="bilo-consent-panel" role="dialog" aria-modal="true" aria-labelledby="bilo-file-title">
-  <div class="bilo-consent-icon" aria-hidden="true">▧</div>
+  
   <h2 id="bilo-file-title">Autorisation d'accès à vos fichiers</h2>
   <p id="bilo-file-description">Bilocost souhaite accéder uniquement au fichier que vous choisissez pour cette fonction. Aucun autre fichier ne sera parcouru automatiquement.</p>
   <p>Le sélecteur sécurisé de votre appareil va s'ouvrir. Vous gardez le contrôle sur les éléments sélectionnés.</p>
