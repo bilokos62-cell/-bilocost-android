@@ -362,6 +362,10 @@ jobs:
           name: Bilocost-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Prepare stable APK filename
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Bilocost-Android.apk
+
       - name: Publish Android beta APK download
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -371,4 +375,4 @@ jobs:
           prerelease: true
           make_latest: false
           overwrite_files: true
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: Bilocost-Android.apk
