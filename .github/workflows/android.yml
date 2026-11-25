@@ -121,75 +121,43 @@ jobs:
           python3 scripts/inject-android-splash.py
 
 
-      - name: Display file consent as a centered modal
+      - name: Fix native file consent modal without moving its DOM
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path("www/index.html")
           html = p.read_text(encoding="utf-8")
-          script = r"""
-          <style id="bilo-file-consent-modal-style">
-          #bilo-file-consent-overlay {
+          # Remove the decorative glyph that appears as a stray grid in the corner.
+          old = '<div class="bilo-consent-icon" aria-hidden="true">▧</div>'
+          html = html.replace(old, '', 1)
+          # Keep the original #bilo-file-permission element in place. Its existing
+          # show()/hide() logic and Continue handler depend on that DOM container.
+          css = """
+          /* Bilocost file permission: native fixed modal, original DOM preserved */
+          #bilo-file-permission:not([hidden]) {
             position: fixed !important; inset: 0 !important; z-index: 2147483000 !important;
             display: grid !important; place-items: center !important;
-            padding: max(18px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom)) !important;
-            box-sizing: border-box !important; background: rgba(2, 8, 18, .76) !important;
+            box-sizing: border-box !important;
+            padding: max(20px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)) !important;
+            background: rgba(2, 8, 18, .78) !important;
             backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
           }
-          #bilo-file-consent-overlay > [data-bilo-consent-card] {
+          #bilo-file-permission .bilo-consent-panel {
             position: relative !important; inset: auto !important; transform: none !important;
-            width: min(560px, 100%) !important; max-width: 100% !important;
-            max-height: min(78dvh, 680px) !important; overflow: auto !important;
+            width: min(520px, 100%) !important; max-width: 100% !important;
+            max-height: min(78dvh, 640px) !important; overflow-y: auto !important;
             box-sizing: border-box !important; margin: auto !important;
-            border-radius: 24px !important; box-shadow: 0 24px 80px rgba(0,0,0,.48) !important;
+            border-radius: 22px !important;
           }
-          @media (max-width: 480px) {
-            #bilo-file-consent-overlay { padding-left: 14px !important; padding-right: 14px !important; }
-            #bilo-file-consent-overlay > [data-bilo-consent-card] { border-radius: 20px !important; }
-          }
-          </style>
-          <script id="bilo-file-consent-modal-fix">
-          (() => {
-            const title = "Autorisation d'accès à vos fichiers";
-            const install = () => {
-              if (document.getElementById("bilo-file-consent-overlay")) return;
-              const nodes = [...document.querySelectorAll("body *")].filter(el =>
-                el.children.length === 0 && (el.textContent || "").trim().includes(title)
-              );
-              for (const heading of nodes) {
-                let card = heading;
-                while (card && card !== document.body) {
-                  const text = (card.innerText || card.textContent || "");
-                  if (text.includes("Continuer") && text.includes("Plus tard")) break;
-                  card = card.parentElement;
-                }
-                if (!card || card === document.body) continue;
-                const overlay = document.createElement("div");
-                overlay.id = "bilo-file-consent-overlay";
-                overlay.setAttribute("role", "presentation");
-                card.setAttribute("data-bilo-consent-card", "");
-                card.setAttribute("role", "dialog");
-                card.setAttribute("aria-modal", "true");
-                overlay.appendChild(card);
-                document.body.appendChild(overlay);
-                return;
-              }
-            };
-            const start = () => {
-              install();
-              new MutationObserver(install).observe(document.body, {childList:true,subtree:true});
-            };
-            if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, {once:true});
-            else start();
-          })();
-          </script>
           """
-          if "bilo-file-consent-modal-fix" not in html:
-              if "</body>" not in html:
-                  raise SystemExit("HTML body closing tag not found")
-              html = html.replace("</body>", script + "\n</body>", 1)
+          if "Bilocost file permission: native fixed modal" not in html:
+              if "</style>" not in html:
+                  raise SystemExit("No inline stylesheet found")
+              html = html.replace("</style>", css + "\\n</style>", 1)
+          if "bilo-file-consent-modal-fix" in html or "bilo-file-consent-overlay" in html:
+              raise SystemExit("Obsolete DOM-moving modal patch still present")
           p.write_text(html, encoding="utf-8")
-          print("File consent dialog is positioned as a centered modal overlay.")
+          print("File consent modal keeps its original DOM; decorative grid removed.")
           PY
 
       - name: Install dependencies
