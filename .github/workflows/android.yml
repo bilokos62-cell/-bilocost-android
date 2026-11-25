@@ -92,6 +92,18 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("www/index.html")
+          html = p.read_text(encoding="utf-8")
+          old = "<p><b>Contact.</b> Le canal officiel de contact relatif aux données personnelles doit être renseigné et vérifié par Bilocost avant le lancement public.</p>"
+          new = "<p><b>Contact relatif aux données personnelles.</b> Pour exercer vos demandes d’accès, de correction ou de suppression, contactez Bilocost à <a href=\"mailto:josephkanku007@gmail.com\">josephkanku007@gmail.com</a>. Les demandes sont traitées par le responsable de la plateforme.</p>"
+          if old in html:
+              html = html.replace(old, new, 1)
+          elif new not in html:
+              raise SystemExit("Privacy contact placeholder not found; refusing an incomplete privacy policy")
+          p.write_text(html, encoding="utf-8")
+          PY
           cp responsive-layout.css www/responsive-layout.css
           # The storefront references this local brand image; include it in the WebView bundle.
           cp IMG-20261024-WA0000.jpg www/IMG-20261024-WA0000.jpg
@@ -254,6 +266,49 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Apply privacy-first Android file access
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          if not manifest.is_file():
+              raise SystemExit("Android manifest not found after Capacitor sync")
+          android = "http://schemas.android.com/apk/res/android"
+          ET.register_namespace("android", android)
+          tree = ET.parse(manifest)
+          root = tree.getroot()
+          blocked = {
+              "android.permission.READ_EXTERNAL_STORAGE",
+              "android.permission.WRITE_EXTERNAL_STORAGE",
+              "android.permission.MANAGE_EXTERNAL_STORAGE",
+              "android.permission.READ_MEDIA_IMAGES",
+              "android.permission.READ_MEDIA_VIDEO",
+              "android.permission.READ_MEDIA_AUDIO",
+              "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+          }
+          removed = []
+          for node in list(root):
+              if node.tag.endswith("uses-permission") or node.tag.endswith("uses-permission-sdk-23"):
+                  name = node.get(f"{{{android}}}name")
+                  if name in blocked:
+                      root.remove(node)
+                      removed.append(name)
+          tree.write(manifest, encoding="utf-8", xml_declaration=True)
+          ET.parse(manifest)
+          remaining = []
+          for node in root:
+              if node.tag.endswith("uses-permission") or node.tag.endswith("uses-permission-sdk-23"):
+                  name = node.get(f"{{{android}}}name")
+                  if name in blocked:
+                      remaining.append(name)
+          if remaining:
+              raise SystemExit("Broad media/storage permissions remain: " + ", ".join(remaining))
+          print("Privacy-first file access applied. Removed broad permissions:", removed or "none present")
+          print("User-selected files continue through Android's system document/photo picker.")
+          PY
 
       - name: Build APK
         run: |
