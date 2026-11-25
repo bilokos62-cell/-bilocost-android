@@ -565,7 +565,7 @@
       #auth .au:has(#an) > .soc,
       #auth .au:has(#an) > p,
       #auth .au:has(#an) > .sub {grid-column:1/-1}
-      #auth .au:has(#an) > .fld {margin-bottom:2px}
+      #auth .au:has(#an) > .fld {margin-bottom:2px}\n      #auth .au:has(#an) > .fld:last-of-type {grid-column:1/-1}
       #auth .au:has(#an) > .card {margin-top:14px!important}
       #auth .au:has(#an) > .btn {margin-top:4px}
       #auth .au:has(#an) > .soc {margin-top:8px}
