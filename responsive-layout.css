@@ -800,3 +800,202 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     align-items: stretch;
   }
 }
+
+
+/* Final white-background contrast repair for customer-support and identity pages.
+   Some legacy pages do not set data-theme="light", and unavailable contact rows
+   used parent opacity which faded every child, including headings and icons. */
+:root:not([data-theme="dark"]) #page .pbar,
+:root:not([data-theme="dark"]) #page .pbar h2,
+:root:not([data-theme="dark"]) #page .pbody,
+:root:not([data-theme="dark"]) #page .prof,
+:root:not([data-theme="dark"]) #page .prof h1,
+:root:not([data-theme="dark"]) #page .prof h2,
+:root:not([data-theme="dark"]) #page .prof h3,
+:root:not([data-theme="dark"]) #page h1,
+:root:not([data-theme="dark"]) #page h2,
+:root:not([data-theme="dark"]) #page h3,
+:root:not([data-theme="dark"]) #page h4 {
+  color: var(--ink, #0f172a) !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: var(--ink, #0f172a) !important;
+}
+:root:not([data-theme="dark"]) #page .lr {
+  opacity: 1 !important;
+  color: var(--ink, #0f172a) !important;
+}
+:root:not([data-theme="dark"]) #page .lr .lt,
+:root:not([data-theme="dark"]) #page .lr .lt b,
+:root:not([data-theme="dark"]) #page .lr .lt small {
+  opacity: 1 !important;
+  color: var(--ink, #0f172a) !important;
+  -webkit-text-fill-color: var(--ink, #0f172a) !important;
+}
+:root:not([data-theme="dark"]) #page .lr .lt small,
+:root:not([data-theme="dark"]) #page .lr .sub,
+:root:not([data-theme="dark"]) #page .gt,
+:root:not([data-theme="dark"]) #page .prof .sub,
+:root:not([data-theme="dark"]) #page .pbody > p,
+:root:not([data-theme="dark"]) #page .pbody > small {
+  color: var(--mute, #475569) !important;
+  -webkit-text-fill-color: var(--mute, #475569) !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .tag {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .lic {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page label {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page input.f,
+:root:not([data-theme="dark"]) #page select.f,
+:root:not([data-theme="dark"]) #page textarea.f {
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  opacity: 1 !important;
+  color-scheme: light !important;
+}
+:root:not([data-theme="dark"]) #page input.f::placeholder,
+:root:not([data-theme="dark"]) #page textarea.f::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page input[type="file"].f {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+:root:not([data-theme="dark"]) #page input[type="file"].f::file-selector-button {
+  color: #172033 !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 7px 10px !important;
+  margin-right: 10px !important;
+}
+:root:not([data-theme="dark"]) #page .warn,
+:root:not([data-theme="dark"]) #page .safe {
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .warn b,
+:root:not([data-theme="dark"]) #page .safe b {
+  color: var(--ink, #0f172a) !important;
+}
+
+/* Explicit dark theme keeps the same components readable without light surfaces. */
+:root[data-theme="dark"] #page .pbar h2,
+:root[data-theme="dark"] #page .prof h1,
+:root[data-theme="dark"] #page .prof h2,
+:root[data-theme="dark"] #page h1,
+:root[data-theme="dark"] #page h2,
+:root[data-theme="dark"] #page h3,
+:root[data-theme="dark"] #page h4,
+:root[data-theme="dark"] #page .lr .lt b {
+  color: var(--ink, #f1f5f9) !important;
+  -webkit-text-fill-color: var(--ink, #f1f5f9) !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .lr { opacity: 1 !important; }
+:root[data-theme="dark"] #page .lr .lt small,
+:root[data-theme="dark"] #page .gt,
+:root[data-theme="dark"] #page .prof .sub,
+:root[data-theme="dark"] #page .pbody > p,
+:root[data-theme="dark"] #page .pbody > small {
+  color: var(--mute, #94a3b8) !important;
+  -webkit-text-fill-color: var(--mute, #94a3b8) !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .tag {
+  background: #25314d !important;
+  color: #e2e8f0 !important;
+  -webkit-text-fill-color: #e2e8f0 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page label { color: #e2e8f0 !important; opacity: 1 !important; }
+:root[data-theme="dark"] #page input.f,
+:root[data-theme="dark"] #page select.f,
+:root[data-theme="dark"] #page textarea.f {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  background: #111a2e !important;
+  border-color: #475569 !important;
+  color-scheme: dark !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page input.f::placeholder,
+:root[data-theme="dark"] #page textarea.f::placeholder {
+  color: #aab8c8 !important;
+  -webkit-text-fill-color: #aab8c8 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page input[type="file"].f::file-selector-button {
+  color: #f8fafc !important;
+  background: #25314d !important;
+  border: 1px solid #475569 !important;
+  border-radius: 8px !important;
+  padding: 7px 10px !important;
+  margin-right: 10px !important;
+}
+
+/* Automatic device-dark mode, unless the user explicitly chose the light theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #page .pbar h2,
+  :root:not([data-theme="light"]) #page .prof h1,
+  :root:not([data-theme="light"]) #page .prof h2,
+  :root:not([data-theme="light"]) #page h1,
+  :root:not([data-theme="light"]) #page h2,
+  :root:not([data-theme="light"]) #page h3,
+  :root:not([data-theme="light"]) #page h4,
+  :root:not([data-theme="light"]) #page .lr .lt b {
+    color: #f1f5f9 !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
+    opacity: 1 !important;
+  }
+  :root:not([data-theme="light"]) #page .lr { opacity: 1 !important; }
+  :root:not([data-theme="light"]) #page .lr .lt small,
+  :root:not([data-theme="light"]) #page .gt,
+  :root:not([data-theme="light"]) #page .prof .sub,
+  :root:not([data-theme="light"]) #page .pbody > p,
+  :root:not([data-theme="light"]) #page .pbody > small {
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
+    opacity: 1 !important;
+  }
+  :root:not([data-theme="light"]) #page .tag {
+    background: #25314d !important;
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+  }
+  :root:not([data-theme="light"]) #page label { color: #e2e8f0 !important; }
+  :root:not([data-theme="light"]) #page input.f,
+  :root:not([data-theme="light"]) #page select.f,
+  :root:not([data-theme="light"]) #page textarea.f {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    background: #111a2e !important;
+    border-color: #475569 !important;
+    color-scheme: dark !important;
+  }
+  :root:not([data-theme="light"]) #page input.f::placeholder,
+  :root:not([data-theme="light"]) #page textarea.f::placeholder {
+    color: #aab8c8 !important;
+    -webkit-text-fill-color: #aab8c8 !important;
+  }
+  :root:not([data-theme="light"]) #page input[type="file"].f::file-selector-button {
+    color: #f8fafc !important;
+    background: #25314d !important;
+    border: 1px solid #475569 !important;
+  }
+}
