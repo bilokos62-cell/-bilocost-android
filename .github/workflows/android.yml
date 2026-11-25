@@ -121,43 +121,67 @@ jobs:
           python3 scripts/inject-android-splash.py
 
 
-      - name: Fix native file consent modal without moving its DOM
+      - name: Force file permission modal dismissal and refresh cache
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path("www/index.html")
           html = p.read_text(encoding="utf-8")
-          # Remove the decorative glyph that appears as a stray grid in the corner.
-          old = '<div class="bilo-consent-icon" aria-hidden="true">▧</div>'
-          html = html.replace(old, '', 1)
-          # Keep the original #bilo-file-permission element in place. Its existing
-          # show()/hide() logic and Continue handler depend on that DOM container.
-          css = """
-          /* Bilocost file permission: native fixed modal, original DOM preserved */
+          html = html.replace('<div class="bilo-consent-icon" aria-hidden="true">▧</div>', '', 1)
+          fix = r"""
+          <style id="bilo-file-modal-final-fix">
+          #bilo-file-permission[hidden], #bilo-cookie-modal[hidden], #bilo-cookie-banner[hidden] {
+            display: none !important;
+          }
           #bilo-file-permission:not([hidden]) {
             position: fixed !important; inset: 0 !important; z-index: 2147483000 !important;
             display: grid !important; place-items: center !important;
-            box-sizing: border-box !important;
             padding: max(20px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)) !important;
-            background: rgba(2, 8, 18, .78) !important;
+            box-sizing: border-box !important; background: rgba(2,8,18,.78) !important;
             backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
           }
           #bilo-file-permission .bilo-consent-panel {
-            position: relative !important; inset: auto !important; transform: none !important;
-            width: min(520px, 100%) !important; max-width: 100% !important;
-            max-height: min(78dvh, 640px) !important; overflow-y: auto !important;
-            box-sizing: border-box !important; margin: auto !important;
-            border-radius: 22px !important;
+            position: relative !important; width: min(520px,100%) !important; max-width: 100% !important;
+            max-height: min(78dvh,640px) !important; overflow-y: auto !important;
+            box-sizing: border-box !important; margin: auto !important; border-radius: 22px !important;
           }
+          </style>
+          <script id="bilo-file-modal-final-fix-js">
+          (() => {
+            const modal = document.getElementById("bilo-file-permission");
+            if (!modal || modal.dataset.finalFix === "1") return;
+            modal.dataset.finalFix = "1";
+            const original = window.showBiloFilePermission;
+            if (typeof original !== "function") return;
+            window.showBiloFilePermission = function(input) {
+              original(input);
+              const button = document.getElementById("bilo-file-allow");
+              if (!button) return;
+              button.onclick = function(ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                modal.hidden = true;
+                modal.style.setProperty("display", "none", "important");
+                input.dataset.biloConsentGranted = "1";
+                input.dataset.biloApprovedClick = "1";
+                // Keep the picker invocation synchronous within the trusted tap.
+                input.click();
+              };
+              const later = document.getElementById("bilo-file-later");
+              if (later) later.onclick = () => {
+                modal.hidden = true;
+                modal.style.setProperty("display", "none", "important");
+              };
+            };
+          })();
+          </script>
           """
-          if "Bilocost file permission: native fixed modal" not in html:
-              if "</style>" not in html:
-                  raise SystemExit("No inline stylesheet found")
-              html = html.replace("</style>", css + "\\n</style>", 1)
-          if "bilo-file-consent-modal-fix" in html or "bilo-file-consent-overlay" in html:
-              raise SystemExit("Obsolete DOM-moving modal patch still present")
+          if "bilo-file-modal-final-fix" not in html:
+              if "</body>" not in html:
+                  raise SystemExit("HTML body closing tag not found")
+              html = html.replace("</body>", fix + "\n</body>", 1)
           p.write_text(html, encoding="utf-8")
-          print("File consent modal keeps its original DOM; decorative grid removed.")
+          print("File modal now has an explicit hidden state and synchronous picker invocation.")
           PY
 
       - name: Install dependencies
