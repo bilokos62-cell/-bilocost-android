@@ -12,6 +12,8 @@ on:
       - 'index.html'
       - '.github/workflows/android.yml'
       - '.github/workflows/ios.yml'
+      - 'marketplace-search.js'
+      - '*.js'
 
 jobs:
   build:
