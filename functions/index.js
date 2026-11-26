@@ -316,20 +316,25 @@ exports.refreshBccExchangeRate = onCall(async request => {
  * Never expose service-account credentials to the client.
  */
 const { defineString } = require("firebase-functions/params");
-const developerAdminUid = defineString("BILOCOST_DEVELOPER_ADMIN_UID", { default: "" });
+const developerAdminEmail = defineString("BILOCOST_DEVELOPER_ADMIN_EMAIL", {
+  default: "josephkanku007@gmail.com"
+});
 
 exports.provisionDeveloperAdmin = onCall({ maxInstances: 1 }, async request => {
   const uid = requireAuth(request);
-  const allowedUid = developerAdminUid.value().trim();
+  const allowedEmail = developerAdminEmail.value().trim().toLowerCase();
+  const tokenEmail = String(request.auth.token.email || "").trim().toLowerCase();
 
-  if (!allowedUid || uid !== allowedUid) {
-    throw new HttpsError("permission-denied", "Provisionnement réservé au compte développeur configuré.");
+  // Only the explicitly configured, email-verified owner account may bootstrap
+  // its own admin claim. No client can nominate another account.
+  if (!allowedEmail || tokenEmail !== allowedEmail || request.auth.token.email_verified !== true) {
+    throw new HttpsError("permission-denied", "Provisionnement réservé au compte propriétaire vérifié.");
   }
 
   const auth = require("firebase-admin/auth");
   const user = await auth.getAuth().getUser(uid);
-  if (!user.emailVerified) {
-    throw new HttpsError("failed-precondition", "Vérifiez d'abord l'adresse e-mail de votre compte Bilocost.");
+  if (!user.emailVerified || String(user.email || "").trim().toLowerCase() !== allowedEmail) {
+    throw new HttpsError("failed-precondition", "Le compte propriétaire doit avoir une adresse e-mail vérifiée.");
   }
 
   await auth.getAuth().setCustomUserClaims(uid, {
@@ -337,28 +342,10 @@ exports.provisionDeveloperAdmin = onCall({ maxInstances: 1 }, async request => {
     admin: true
   });
 
-  const verificationRef = db.collection("identity_verifications").doc(uid);
-  const verificationSnap = await verificationRef.get();
-  const existing = verificationSnap.exists ? verificationSnap.data() : {};
-
-  // Do not overwrite a real verification record. Only initialize the developer
-  // test status when no approved verification already exists.
-  if (existing.status !== "verified") {
-    await verificationRef.set({
-      uid,
-      status: "verified",
-      verificationType: "developer_test",
-      reviewedBy: "developer_bootstrap",
-      verifiedAt: FieldValue.serverTimestamp()
-    }, { merge: true });
-  }
-
   return {
     ok: true,
     uid,
     admin: true,
-    identityStatus: "verified",
-    verificationType: existing.verificationType || "developer_test",
-    message: "Compte développeur configuré. Déconnectez-vous puis reconnectez-vous pour actualiser le jeton."
+    message: "Compte administrateur configuré. Actualisez votre session pour appliquer les droits."
   };
 });
