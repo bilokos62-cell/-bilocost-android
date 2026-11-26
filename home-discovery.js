@@ -40,7 +40,7 @@
       if(end>=0){
         let heroHtml=html.slice(hero,end+10);
         heroHtml=heroHtml.replace('<section class="hero">','<section class="hero bilo-hero-reference">');
-        const heroArt='<div class="bilo-hero-art" aria-hidden="true"><img src="/assets/bilocost-hero-2026.webp" alt="" decoding="async" fetchpriority="high"></div><button type="button" class="bilo-hero-click" data-t="search" aria-label="Découvrir les annonces"></button>';
+        const heroArt='<div class="bilo-hero-art" data-t="search" role="button" tabindex="0" aria-label="Découvrir les annonces"><img src="/assets/bilocost-hero-2026.webp" alt="Bilocost RDC : trouvez de bonnes affaires près de chez vous" decoding="async" fetchpriority="high"></div>';
         heroHtml=heroHtml.replace('</section>',heroArt+'</section>');
         html=html.slice(0,hero)+heroHtml+html.slice(end+10);
       }
@@ -137,14 +137,13 @@
 
   /* Approved full-width campaign artwork; preserve the existing search action. */
   style.textContent += `
-    #view .bilo-hero-reference{position:relative!important;display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:1536/446!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:24px!important;background:#006b43!important;box-shadow:0 10px 28px rgba(0,35,25,.22)!important}
+    #view .bilo-hero-reference{position:relative!important;display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:1536/513!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:24px!important;background:#006b43!important;box-shadow:0 10px 28px rgba(0,35,25,.22)!important}
     #view .bilo-hero-reference:before,#view .bilo-hero-reference:after{display:none!important}
-    #view .bilo-hero-reference>*:not(.bilo-hero-art):not(.bilo-hero-click){display:none!important}
-    #view .bilo-hero-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;opacity:1!important}
-    #view .bilo-hero-art img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important}
-    #view .bilo-hero-reference button.bilo-hero-click{position:absolute!important;z-index:5!important;left:5.8%!important;top:69%!important;width:19%!important;height:21%!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:18px!important;background:transparent!important;background-color:transparent!important;color:transparent!important;border:0!important;box-shadow:none!important;appearance:none!important;-webkit-appearance:none!important;cursor:pointer!important}
-    #view .bilo-hero-click:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}
-    @media(max-width:600px){#view .bilo-hero-reference{border-radius:16px!important}.bilo-hero-click{border-radius:12px!important}}
+    #view .bilo-hero-reference>*:not(.bilo-hero-art){display:none!important}
+    #view .bilo-hero-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;opacity:1!important;cursor:pointer!important}
+    #view .bilo-hero-art img{display:block!important;width:100%!important;height:100%!important;object-fit:fill!important;object-position:center!important}
+
+    @media(max-width:600px){#view .bilo-hero-reference{border-radius:16px!important}.bilo-hero-art{border-radius:12px!important}}
   `;
   (document.head||document.documentElement).appendChild(style);
   const attachAdCarousel=()=>{
