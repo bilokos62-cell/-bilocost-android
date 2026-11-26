@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#087542">
+<title>Bilocost Admin</title>
+<script src="/__/firebase/10.12.2/firebase-app-compat.js"></script>
+<script src="/__/firebase/10.12.2/firebase-auth-compat.js"></script>
+<script src="/__/firebase/10.12.2/firebase-firestore-compat.js"></script>
+<script src="/__/firebase/10.12.2/firebase-functions-compat.js"></script>
+<script src="/__/firebase/init.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b1110;--panel:#131e1a;--line:#263a31;--green:#18a765;--text:#f2f7f4;--muted:#9eafa5;--danger:#e05d5d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px Inter,system-ui,sans-serif}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:800;font-size:20px}.brand span{color:#25c47b}main{width:min(1120px,100%);margin:auto;padding:22px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.login{max-width:430px;margin:8vh auto}.muted{color:var(--muted)}label{display:block;margin:14px 0 6px;color:var(--muted);font-size:13px}
+input,select{width:100%;padding:12px;border-radius:9px;border:1px solid var(--line);background:#0c1511;color:var(--text);font:inherit}
+button{border:0;border-radius:9px;padding:10px 14px;background:var(--green);color:#06150d;font-weight:750;cursor:pointer}
+button.secondary{background:#263a31;color:var(--text)}button.reject{background:#512b2b;color:#ffe5e5}
+button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflow:auto;margin:18px 0}
+.tabs button{white-space:nowrap}.tabs button.active{outline:2px solid #8be3b6}
+.item{padding:16px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px}
+.item h3{margin:0 0 6px;font-size:16px}.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.notice{padding:12px;border-radius:10px;background:#172a20;color:#b8e9cc;margin:12px 0}
+.error{color:#ffaaaa}.hidden{display:none!important}.top-actions{display:flex;align-items:center;gap:10px}
+@media(max-width:620px){main{padding:14px}.item{grid-template-columns:1fr}.top-actions{flex-wrap:wrap}header{padding:14px}}
+</style>
+</head>
+<body>
+<header><div class="brand">BILO<span>COST</span> <small class="muted">ADMIN</small></div><div class="top-actions"><span id="who" class="muted"></span><button id="logout" class="secondary hidden">Déconnexion</button></div></header>
+<main>
+<section id="login" class="panel login">
+<h1>Administration Bilocost</h1><p class="muted">Accès réservé au compte administrateur autorisé.</p>
+<label for="email">Adresse e-mail</label><input id="email" type="email" autocomplete="username" value="Josephkanku007@gmail.com">
+<label for="password">Mot de passe</label><input id="password" type="password" autocomplete="current-password">
+<button id="loginBtn" style="width:100%;margin-top:18px">Se connecter</button><p id="loginError" class="error" role="alert"></p>
+</section>
+<section id="dashboard" class="hidden">
+<div class="notice" id="welcome">Vérification des autorisations…</div>
+<div class="tabs" id="tabs">
+<button data-tab="identity" class="active">Identités / KYC</button>
+<button data-tab="services">Services</button>
+<button data-tab="rentals">Locations</button>
+<button data-tab="ads">Publicités</button>
+</div>
+<section class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2 id="sectionTitle" style="margin:0">Identités en attente</h2><p class="muted" id="sectionHint">Vérifier les dossiers avant toute décision.</p></div><button id="refresh" class="secondary">Actualiser</button></div><div id="list" style="margin-top:14px" class="muted">Chargement…</div></section>
+<p class="muted" style="font-size:12px;margin-top:14px">Les activations payantes exigent une vérification effective du paiement hors application. Les actions sont protégées par les droits Firebase côté serveur (custom claim admin).</p>
+</section>
+</main>
+<script>
+(function(){
+ const $=id=>document.getElementById(id), login=$("login"), dashboard=$("dashboard");
+ if(!window.firebase||!firebase.apps||!firebase.apps.length){$("loginError").textContent="Firebase n’est pas initialisé sur cet hébergement."; $("loginBtn").disabled=true;return;}
+ const auth=firebase.auth(), db=firebase.firestore();
+ let currentTab="identity", currentUser=null, allowed=false;
+ const tabs={
+  identity:{title:"Identités en attente",hint:"Examinez les justificatifs dans l’espace sécurisé.",collection:"identity_verifications",status:"pending"},
+  services:{title:"Services à activer",hint:"Activation uniquement après vérification de l’abonnement de 6 USD.",collection:"services",status:"PENDING_SUBSCRIPTION"},
+  rentals:{title:"Locations à examiner",hint:"Vérifiez le dossier et les conditions avant publication.",collection:"rentalListings",status:"PENDING_REVIEW"},
+  ads:{title:"Demandes publicitaires",hint:"Accord commercial et paiement à vérifier avant activation.",collection:"adCampaignRequests",status:"PENDING_REVIEW"}
+ };
+ function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+ function message(t){$("welcome").textContent=t;}
+ async function check(user){
+  currentUser=user;
+  if(!user){allowed=false;login.classList.remove("hidden");dashboard.classList.add("hidden");$("logout").classList.add("hidden");$("who").textContent="";return;}
+  $("who").textContent=user.email||user.uid;$("logout").classList.remove("hidden");
+  try{const token=await user.getIdTokenResult(true);allowed=token.claims.admin===true;
+   if(!allowed){await auth.signOut();$("loginError").textContent="Ce compte ne possède pas le rôle administrateur.";return;}
+   login.classList.add("hidden");dashboard.classList.remove("hidden");message("Accès administrateur confirmé.");await load();
+  }catch(e){message("Impossible de vérifier les droits : "+e.message);}
+ }
+ async function load(){
+  if(!allowed)return;
+  const cfg=tabs[currentTab];$("sectionTitle").textContent=cfg.title;$("sectionHint").textContent=cfg.hint;$("list").textContent="Chargement…";
+  try{
+   const snap=await db.collection(cfg.collection).where("status","==",cfg.status).limit(50).get();
+   if(snap.empty){$("list").textContent="Aucun dossier en attente.";return;}
+   $("list").innerHTML=snap.docs.map(doc=>{
+    const d=doc.data(), title=d.title||d.name||d.fullName||d.ownerName||"Dossier "+doc.id;
+    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
+    return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">Approuver</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
+   }).join("");
+  }catch(e){$("list").innerHTML='<p class="error">Lecture refusée ou indisponible : '+esc(e.message)+'</p>';}
+ }
+ async function review(id,approve){
+  if(!allowed||!currentUser)return;
+  const cfg=tabs[currentTab], ref=db.collection(cfg.collection).doc(id);
+  if(currentTab==="services"||currentTab==="ads"){
+   if(approve&&!window.confirm("Confirmez-vous avoir vérifié le paiement réel et l’accord commercial correspondant ?"))return;
+  }
+  if(!window.confirm((approve?"Approuver":"Refuser")+" ce dossier ?"))return;
+  try{
+   const patch={reviewedBy:currentUser.uid,reviewedAt:firebase.firestore.FieldValue.serverTimestamp(),status:""};
+   if(currentTab==="identity")patch.status=approve?"verified":"rejected";
+   if(currentTab==="services"){patch.status=approve?"ACTIVE":"REJECTED";if(approve)patch.expiresAt=firebase.firestore.Timestamp.fromDate(new Date(Date.now()+30*86400000));}
+   if(currentTab==="rentals")patch.status=approve?"BOOKABLE":"REJECTED";
+   if(currentTab==="ads"){
+    patch.status=approve?"APPROVED":"REJECTED";
+    if(approve){const data=(await ref.get()).data();const slot=window.prompt("Emplacement publicitaire : slot1 ou slot2","slot1");if(!["slot1","slot2"].includes(slot))throw new Error("Emplacement invalide; opération annulée.");await db.collection("ads").add({title:data.title||"Publicité",description:data.description||"",url:data.url,slot,image:data.image||"",status:"ACTIVE",createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+   }
+   await ref.update(patch);await load();
+  }catch(e){window.alert("Action non effectuée : "+e.message);}
+ }
+ $("loginBtn").addEventListener("click",async()=>{ $("loginError").textContent="";$("loginBtn").disabled=true;try{await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value);}catch(e){$("loginError").textContent="Connexion impossible : "+e.message;}finally{$("loginBtn").disabled=false;}});
+ $("logout").addEventListener("click",()=>auth.signOut());$("refresh").addEventListener("click",load);
+ $("tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;currentTab=b.dataset.tab;document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("active",x===b));load();});
+ $("list").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)review(b.dataset.id,b.dataset.action==="approve");});
+ auth.onAuthStateChanged(check);
+})();
+</script>
+</body></html>
