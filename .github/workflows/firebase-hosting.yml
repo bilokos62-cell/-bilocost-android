@@ -93,6 +93,7 @@ jobs:
           exchange_rates = Path("exchange-rates.js").read_text(encoding="utf-8")
           marketplace_search = Path("marketplace-search.js").read_text(encoding="utf-8")
           order_ui = Path("order-ui-fix.js").read_text(encoding="utf-8")
+          startup_screen = Path("startup-screen.js").read_text(encoding="utf-8")
           home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
@@ -102,7 +103,7 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + order_ui + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + order_ui + "\n" + startup_screen + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
@@ -114,6 +115,7 @@ jobs:
         run: |
           node --check marketplace-search.js
           node --check order-ui-fix.js
+          node --check startup-screen.js
 
       - name: Validate Bilocost source and integrations
         run: npm run build
