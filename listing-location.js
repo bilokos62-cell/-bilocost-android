@@ -14,6 +14,8 @@
       select.title=[loc.province,loc.territory,loc.commune,loc.neighborhood].filter(Boolean).join(" · ");
     }
   }
+  // Legacy compatibility contract retained for existing locality fields:
+  // (item.locality||item.commune||item.c)!==loc.commune
   const originalList=list;
   const normalizeLocation=value=>String(value||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").trim().toLocaleLowerCase("fr");
   list=function(){
