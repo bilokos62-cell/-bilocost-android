@@ -40,17 +40,7 @@
       if(end>=0){
         let heroHtml=html.slice(hero,end+10);
         heroHtml=heroHtml.replace('<section class="hero">','<section class="hero bilo-hero-reference">');
-        const heroArt='<div class="bilo-hero-art" aria-hidden="true">'+
-          '<svg viewBox="0 0 520 300" role="img" xmlns="http://www.w3.org/2000/svg">'+
-          '<defs><linearGradient id="biloPhone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#24f58a"/><stop offset="1" stop-color="#007c50"/></linearGradient><linearGradient id="biloScreen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#102b3b"/><stop offset="1" stop-color="#06151f"/></linearGradient><linearGradient id="biloShoe" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#b9d5d2"/></linearGradient><filter id="biloShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#001b17" flood-opacity=".45"/></filter></defs>'+
-          '<circle cx="385" cy="130" r="125" fill="#00e68a" opacity=".12"/><path d="M20 260 Q130 205 225 255 T500 238" fill="none" stroke="#46ffae" stroke-opacity=".45" stroke-width="3"/>'+
-          '<g filter="url(#biloShadow)" transform="translate(245 28) rotate(7 75 115)"><rect x="18" y="0" width="128" height="238" rx="25" fill="#07121d" stroke="#8eeac2" stroke-width="4"/><rect x="27" y="13" width="110" height="210" rx="17" fill="url(#biloScreen)"/><rect x="58" y="82" width="49" height="49" rx="13" fill="url(#biloPhone)"/><path d="M70 115l10-22 10 22h-7l-3-7-3 7z" fill="white"/><rect x="62" y="19" width="40" height="5" rx="3" fill="#8aa7a1"/></g>'+
-          '<g filter="url(#biloShadow)" transform="translate(360 135) rotate(-8)"><path d="M15 48 Q-2 4 32 0 Q63 -2 60 38 L58 74 Q56 100 37 99 Q18 98 18 78Z" fill="none" stroke="#0a1722" stroke-width="17"/><path d="M15 48 Q-2 4 32 0 Q63 -2 60 38 L58 74 Q56 100 37 99 Q18 98 18 78Z" fill="none" stroke="#a9ffe0" stroke-width="5"/><path d="M18 55h-9v22h14M58 55h10v22H55" fill="none" stroke="#12d987" stroke-width="12" stroke-linecap="round"/></g>'+
-          '<g filter="url(#biloShadow)" transform="translate(365 225)"><path d="M0 33h120l-16 38H12z" fill="#102c39" stroke="#78eac0" stroke-width="3"/><path d="M15 30l12-25h72l12 25" fill="#182e3a" stroke="#b7f6e0" stroke-width="3"/><path d="M15 31h97" stroke="#4ef5a6" stroke-width="3"/></g>'+
-          '<g filter="url(#biloShadow)" transform="translate(28 174)"><path d="M8 20h70l-7 68H16z" fill="#f5a623" stroke="#ffe2a3" stroke-width="4"/><path d="M14 18l12-13h37l12 13" fill="none" stroke="#ffe2a3" stroke-width="5"/><circle cx="28" cy="94" r="9" fill="#071d27" stroke="#a6f7d4" stroke-width="4"/><circle cx="65" cy="94" r="9" fill="#071d27" stroke="#a6f7d4" stroke-width="4"/><path d="M25 27l11 36h27l9-36" fill="none" stroke="#fff0c4" stroke-width="4"/><path d="M18 38h52M24 51h40" stroke="#fff0c4" stroke-width="3"/></g>'+
-          '<g transform="translate(120 228) rotate(-8)" filter="url(#biloShadow)"><path d="M0 28q30-4 45-23l20 13q15 10 36 10 17 0 24 14l-5 17H8Q-6 50 0 28Z" fill="url(#biloShoe)" stroke="#d6f5e9" stroke-width="3"/><path d="M42 20l29 8m-23-15l28 9m-21-15l25 13" stroke="#17c978" stroke-width="4" stroke-linecap="round"/><path d="M7 52h111" stroke="#fff" stroke-width="5"/></g>'+
-          '<path d="M40 40l40 0 28 24-28 24H40z" fill="#00a95e" stroke="#61ffb5" stroke-width="2"/><path d="M53 49l23 0 17 15-17 15H53z" fill="#f7d54b"/><path d="M53 49l23 0-17 15-6 15z" fill="#e33c3c"/>'+
-          '</svg></div>';
+        const heroArt='<div class="bilo-hero-art" aria-hidden="true"><img src="https://raw.githubusercontent.com/bilokos62-cell/-bilocost-android/main/assets/bilocost-hero-2026.webp" alt="" decoding="async" fetchpriority="high"></div><button type="button" class="bilo-hero-click" data-t="search" aria-label="Découvrir les annonces"></button>';
         heroHtml=heroHtml.replace('</section>',heroArt+'</section>');
         html=html.slice(0,hero)+heroHtml+html.slice(end+10);
       }
@@ -143,6 +133,18 @@
       #view .bilo-hero-reference .btn,#view .bilo-hero-reference button{min-height:42px!important;padding:9px 15px!important;font-size:13px!important}
     }
     @media(prefers-reduced-motion:reduce){#view .bilo-hero-reference{scroll-behavior:auto}}
+  `;
+
+  /* Approved full-width campaign artwork; preserve the existing search action. */
+  style.textContent += `
+    #view .bilo-hero-reference{position:relative!important;display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:1536/444!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:24px!important;background:#006b43!important;box-shadow:0 10px 28px rgba(0,35,25,.22)!important}
+    #view .bilo-hero-reference:before,#view .bilo-hero-reference:after{display:none!important}
+    #view .bilo-hero-reference>*:not(.bilo-hero-art):not(.bilo-hero-click){display:none!important}
+    #view .bilo-hero-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;opacity:1!important}
+    #view .bilo-hero-art img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important}
+    #view .bilo-hero-click{position:absolute!important;z-index:5!important;left:5.8%!important;top:69%!important;width:19%!important;height:21%!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:18px!important;background:transparent!important;box-shadow:none!important;cursor:pointer!important}
+    #view .bilo-hero-click:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}
+    @media(max-width:600px){#view .bilo-hero-reference{border-radius:16px!important}.bilo-hero-click{border-radius:12px!important}}
   `;
   (document.head||document.documentElement).appendChild(style);
   const attachAdCarousel=()=>{
