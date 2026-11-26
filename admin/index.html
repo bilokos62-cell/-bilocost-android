@@ -11,22 +11,46 @@
 <script src="/__/firebase/10.12.2/firebase-functions-compat.js"></script>
 <script src="/__/firebase/init.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#0b1110;--panel:#131e1a;--line:#263a31;--green:#18a765;--text:#f2f7f4;--muted:#9eafa5;--danger:#e05d5d}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px Inter,system-ui,sans-serif}
-header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{font-weight:800;font-size:20px}.brand span{color:#25c47b}main{width:min(1120px,100%);margin:auto;padding:22px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
-.login{max-width:430px;margin:8vh auto}.muted{color:var(--muted)}label{display:block;margin:14px 0 6px;color:var(--muted);font-size:13px}
-input,select{width:100%;padding:12px;border-radius:9px;border:1px solid var(--line);background:#0c1511;color:var(--text);font:inherit}
-button{border:0;border-radius:9px;padding:10px 14px;background:var(--green);color:#06150d;font-weight:750;cursor:pointer}
-button.secondary{background:#263a31;color:var(--text)}button.reject{background:#512b2b;color:#ffe5e5}
-button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflow:auto;margin:18px 0}
-.tabs button{white-space:nowrap}.tabs button.active{outline:2px solid #8be3b6}
-.item{padding:16px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px}
-.item h3{margin:0 0 6px;font-size:16px}.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
-.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.notice{padding:12px;border-radius:10px;background:#172a20;color:#b8e9cc;margin:12px 0}
-.error{color:#ffaaaa}.hidden{display:none!important}.top-actions{display:flex;align-items:center;gap:10px}
-@media(max-width:620px){main{padding:14px}.item{grid-template-columns:1fr}.top-actions{flex-wrap:wrap}header{padding:14px}}
+:root{color-scheme:dark;--bg:#07110d;--surface:#101d17;--surface2:#14251c;--line:#263d30;--green:#16a765;--mint:#7be0ad;--text:#f3faf5;--muted:#9db2a4;--danger:#e05d5d;--shadow:0 22px 70px rgba(0,0,0,.28)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% -10%,rgba(22,167,101,.18),transparent 38%),linear-gradient(180deg,#09150f 0%,var(--bg) 65%);color:var(--text);font:15px Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;letter-spacing:.01em}
+header{position:sticky;top:0;z-index:5;padding:15px clamp(18px,4vw,52px);border-bottom:1px solid rgba(123,224,173,.12);background:rgba(7,17,13,.88);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-weight:900;font-size:20px;letter-spacing:.09em}.brand span{color:var(--mint)}header small{font-size:10px;letter-spacing:.18em;margin-left:8px;color:var(--muted)}
+main{width:min(1180px,100%);margin:auto;padding:clamp(20px,4vw,48px)}
+.panel{background:linear-gradient(145deg,rgba(20,37,28,.96),rgba(13,27,20,.98));border:1px solid rgba(123,224,173,.16);border-radius:22px;padding:clamp(20px,3vw,32px);box-shadow:var(--shadow)}
+.login{max-width:460px;margin:7vh auto;position:relative;overflow:hidden}
+.login:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#0c7446,#45d58e,#b0f4cc)}
+.login h1,.login h2{font-size:clamp(24px,4vw,30px);letter-spacing:-.04em;margin:8px 0 10px}
+.muted{color:var(--muted);line-height:1.6}
+label{display:block;margin:18px 0 8px;color:#c0d2c7;font-size:12px;font-weight:700;letter-spacing:.04em}
+input,select{width:100%;padding:14px 15px;border-radius:12px;border:1px solid #304a3a;background:#09150f;color:var(--text);font:inherit;outline:none;transition:border-color .18s,box-shadow .18s}
+input:focus,select:focus{border-color:var(--mint);box-shadow:0 0 0 3px rgba(123,224,173,.12)}
+button{border:1px solid transparent;border-radius:11px;padding:11px 16px;background:linear-gradient(135deg,#21b875,#0c8a51);color:#04140b;font-weight:800;cursor:pointer;transition:transform .16s,filter .16s,background .16s;white-space:nowrap}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:active{transform:translateY(0)}
+button.secondary{background:#1b3024;border-color:#34523e;color:#d8eee0}button.reject{background:#472626;border-color:#713b3b;color:#ffdede}
+button:disabled{opacity:.48;cursor:not-allowed;transform:none}
+#dashboard{animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#dashboard:before{content:"ESPACE DE PILOTAGE";display:block;color:var(--mint);font-size:11px;font-weight:850;letter-spacing:.2em;margin:0 0 9px}
+#dashboard:after{content:"Gérez les demandes et les opérations de votre marketplace depuis un seul espace.";display:block;color:var(--muted);font-size:14px;margin:0 0 24px}
+.notice{padding:14px 17px;border:1px solid rgba(123,224,173,.2);border-radius:13px;background:linear-gradient(90deg,rgba(22,167,101,.14),rgba(22,167,101,.04));color:#c9f3d9;margin:0 0 20px;display:flex;align-items:center;gap:10px}
+.tabs{display:flex;gap:9px;overflow-x:auto;padding:4px 2px 14px;margin:0 0 8px;scrollbar-width:thin}
+.tabs button{background:#102017;border:1px solid #294333;color:#b8cdbf;padding:12px 17px;border-radius:12px}
+.tabs button.active{background:linear-gradient(135deg,#1da967,#087544);border-color:#49d28d;color:#03150b;box-shadow:0 7px 22px rgba(22,167,101,.18)}
+#dashboard>.panel{padding:clamp(20px,3vw,30px);background:linear-gradient(145deg,#14241b,#0e1a14)}
+#sectionTitle{font-size:clamp(20px,3vw,25px);letter-spacing:-.035em}
+#sectionHint{margin:7px 0 0}
+#refresh{font-size:13px}
+.item{padding:19px 0;border-top:1px solid rgba(157,178,164,.14);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+.item h3{margin:0 0 8px;font-size:16px;letter-spacing:-.02em}
+.meta{font-size:12px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.error{color:#ffaaaa}.hidden{display:none!important}.top-actions{display:flex;align-items:center;gap:12px}
+#who{font-size:12px;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#loginError,#bootstrapError{font-size:13px;line-height:1.5}
+#loginBtn{padding:14px;font-size:14px;letter-spacing:.02em}
+@media(max-width:680px){main{padding:18px 14px}.item{grid-template-columns:1fr;gap:12px}.actions button{flex:1}.top-actions{gap:8px}header{padding:13px 15px}#who{max-width:130px}.tabs button{font-size:12px;padding:11px 13px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -40,7 +64,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflo
 </section>
 <section id="bootstrap" class="panel login hidden"><h2>Activer l’accès administrateur</h2><p class="muted">Ce compte correspond à l’adresse propriétaire configurée. L’adresse doit être vérifiée dans Firebase Authentication.</p><button id="bootstrapBtn" style="width:100%">Activer mon accès propriétaire</button><p id="bootstrapError" class="error" role="alert"></p></section>
 <section id="dashboard" class="hidden">
-<div class="notice" id="welcome">Vérification des autorisations…</div>
+<div class="notice" id="welcome"><span>●</span> Vérification des autorisations…</div>
 <div class="tabs" id="tabs">
 <button data-tab="identity" class="active">Identités / KYC</button>
 <button data-tab="services">Services</button>
