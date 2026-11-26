@@ -40,7 +40,7 @@
       if(end>=0){
         let heroHtml=html.slice(hero,end+10);
         heroHtml=heroHtml.replace('<section class="hero">','<section class="hero bilo-hero-reference">');
-        const heroArt='<div class="bilo-hero-art" aria-hidden="true"><img src="https://raw.githubusercontent.com/bilokos62-cell/-bilocost-android/main/assets/bilocost-hero-2026.webp" alt="" decoding="async" fetchpriority="high"></div><button type="button" class="bilo-hero-click" data-t="search" aria-label="Découvrir les annonces"></button>';
+        const heroArt='<div class="bilo-hero-art" aria-hidden="true"><img src="/assets/bilocost-hero-2026.webp" alt="" decoding="async" fetchpriority="high"></div><button type="button" class="bilo-hero-click" data-t="search" aria-label="Découvrir les annonces"></button>';
         heroHtml=heroHtml.replace('</section>',heroArt+'</section>');
         html=html.slice(0,hero)+heroHtml+html.slice(end+10);
       }
