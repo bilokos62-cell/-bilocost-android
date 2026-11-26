@@ -70,7 +70,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflo
   if(!user){allowed=false;login.classList.remove("hidden");dashboard.classList.add("hidden");bootstrap.classList.add("hidden");$("logout").classList.add("hidden");$("who").textContent="";return;}
   $("who").textContent=user.email||user.uid;$("logout").classList.remove("hidden");
   try{const token=await user.getIdTokenResult(true);allowed=token.claims.admin===true;
-   if(!allowed){dashboard.classList.add("hidden");if((user.email||"").toLowerCase()==="josephkanku007@gmail.com"&&user.emailVerified){login.classList.add("hidden");bootstrap.classList.remove("hidden");}else{bootstrap.classList.add("hidden");await auth.signOut();$("loginError").textContent="Ce compte ne possède pas le rôle administrateur.";}return;} bootstrap.classList.add("hidden");
+   if(!allowed){dashboard.classList.add("hidden");if((user.email||"").trim().toLowerCase()==="josephkanku007@gmail.com"){login.classList.add("hidden");bootstrap.classList.remove("hidden");$("bootstrapError").textContent=user.emailVerified?"Compte reconnu. L’activation du rôle administrateur est en attente du déploiement serveur.":"Compte reconnu, mais l’adresse e-mail Firebase doit d’abord être vérifiée. Vérifiez votre boîte e-mail puis reconnectez-vous.";$("bootstrapBtn").disabled=!user.emailVerified;}else{bootstrap.classList.add("hidden");await auth.signOut();$("loginError").textContent="Ce compte ne possède pas le rôle administrateur.";}return;} bootstrap.classList.add("hidden");
    login.classList.add("hidden");dashboard.classList.remove("hidden");message("Accès administrateur confirmé.");await load();
   }catch(e){message("Impossible de vérifier les droits : "+e.message);}
  }
