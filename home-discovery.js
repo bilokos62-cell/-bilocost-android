@@ -40,8 +40,6 @@
       if(end>=0){
         let heroHtml=html.slice(hero,end+10);
         heroHtml=heroHtml.replace('<section class="hero">','<section class="hero bilo-hero-reference">');
-        const heroArt='<div class="bilo-hero-art" data-t="search" role="button" tabindex="0" aria-label="Découvrir les annonces"><img src="/assets/bilocost-hero-2026.webp" alt="Bilocost RDC : trouvez de bonnes affaires près de chez vous" decoding="async" fetchpriority="high"></div>';
-        heroHtml=heroHtml.replace('</section>',heroArt+'</section>');
         html=html.slice(0,hero)+heroHtml+html.slice(end+10);
       }
     }
@@ -97,55 +95,8 @@
     "#view .bilo-home-services .bilo-service-invite>.btn{display:block!important;position:static!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:14px 0 0!important;white-space:normal!important}"
   ].join("\n");
 
-  style.textContent += `
-    /* Rebuild the home discovery hero to match the approved Bilocost green campaign banner. */
-    #view .bilo-hero-reference{
-      position:relative!important;isolation:isolate;display:flex!important;align-items:center!important;
-      box-sizing:border-box!important;min-height:250px!important;padding:28px clamp(22px,4vw,48px)!important;
-      overflow:hidden!important;border:1.5px solid #16d982!important;border-radius:26px!important;
-      background:radial-gradient(ellipse at 84% 8%,rgba(47,255,158,.42),transparent 36%),
-        radial-gradient(ellipse at 5% 100%,rgba(0,255,156,.28),transparent 38%),
-        linear-gradient(112deg,#005b39 0%,#008d50 48%,#003b38 100%)!important;
-      box-shadow:0 14px 34px rgba(0,35,25,.28),inset 0 0 0 1px rgba(255,255,255,.10)!important;
-    }
-    #view .bilo-hero-reference:before,#view .bilo-hero-reference:after{
-      content:"";position:absolute;z-index:-1;pointer-events:none;border:1px solid rgba(98,255,185,.32);
-      border-radius:50%;transform:rotate(-20deg)
-    }
-    #view .bilo-hero-reference:before{width:54%;height:180%;right:-12%;top:-105%;box-shadow:0 0 0 14px rgba(36,245,138,.05),0 0 0 30px rgba(36,245,138,.04)}
-    #view .bilo-hero-reference:after{width:42%;height:130%;left:-25%;bottom:-105%;box-shadow:0 0 0 18px rgba(36,245,138,.05)}
-    #view .bilo-hero-reference>*:not(.bilo-hero-art){position:relative;z-index:2;max-width:58%;min-width:0}
-    #view .bilo-hero-reference h1{max-width:620px!important;color:#fff!important;font-size:clamp(25px,3.3vw,42px)!important;font-weight:850!important;line-height:1.12!important;letter-spacing:-.035em!important;text-shadow:0 2px 12px rgba(0,0,0,.16)}
-    #view .bilo-hero-reference p{max-width:580px!important;color:#e3fff1!important;font-size:clamp(14px,1.5vw,18px)!important;line-height:1.45!important}
-    #view .bilo-hero-reference .btn,#view .bilo-hero-reference button{
-      min-height:48px!important;padding:12px 24px!important;border:1px solid #fff!important;border-radius:16px!important;
-      background:linear-gradient(180deg,#fff,#e8fff3)!important;color:#064b32!important;font-weight:850!important;
-      box-shadow:0 7px 20px rgba(0,0,0,.16)!important
-    }
-    #view .bilo-hero-art{position:absolute;z-index:1;right:1.5%;top:2%;bottom:2%;width:46%;display:flex;align-items:center;justify-content:center;pointer-events:none}
-    #view .bilo-hero-art svg{display:block;width:100%;height:100%;max-height:290px;overflow:visible}
-    @media(max-width:600px){
-      #view .bilo-hero-reference{min-height:230px!important;padding:20px!important;border-radius:20px!important}
-      #view .bilo-hero-reference>*:not(.bilo-hero-art){max-width:68%}
-      #view .bilo-hero-reference h1{font-size:clamp(21px,6vw,30px)!important}
-      #view .bilo-hero-reference p{font-size:12px!important}
-      #view .bilo-hero-art{right:-5%;width:48%;opacity:.9}
-      #view .bilo-hero-reference .btn,#view .bilo-hero-reference button{min-height:42px!important;padding:9px 15px!important;font-size:13px!important}
-    }
-    @media(prefers-reduced-motion:reduce){#view .bilo-hero-reference{scroll-behavior:auto}}
-  `;
-
-  /* Approved full-width campaign artwork; preserve the existing search action. */
-  style.textContent += `
-    #view .bilo-hero-reference{position:relative!important;display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:1536/513!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:24px!important;background:#006b43!important;box-shadow:0 10px 28px rgba(0,35,25,.22)!important}
-    #view .bilo-hero-reference:before,#view .bilo-hero-reference:after{display:none!important}
-    #view .bilo-hero-reference>*:not(.bilo-hero-art){display:none!important}
-    #view .bilo-hero-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;opacity:1!important;cursor:pointer!important}
-    #view .bilo-hero-art img{display:block!important;width:100%!important;height:100%!important;object-fit:fill!important;object-position:center!important}
-
-    @media(max-width:600px){#view .bilo-hero-reference{border-radius:16px!important}.bilo-hero-art{border-radius:12px!important}}
-  `;
-  (document.head||document.documentElement).appendChild(style);
+  /* Keep the native hero markup and its real Découvrir button.
+     The original .hero, .btn.sm and .flag styles in index.html are authoritative. */
   const attachAdCarousel=()=>{
     document.querySelectorAll("#view .brand-ad-section .brand-ad-rail").forEach(rail=>{
       if(rail.dataset.biloAutoCarousel==="1")return;
