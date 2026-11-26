@@ -62,8 +62,7 @@ jobs:
             overflow-wrap: break-word;
             word-break: normal;
           }
-          /* Emergency guard: hide the broken empty-state invitation on all devices. */
-          #view .bilo-home-services .bilo-service-invite { display: none !important; }
+          /* Keep the services empty-state invitation visible; its collapsed copy was removed in PR #106. */
           #view img { max-width: 100%; }
           @media (max-width: 390px) {
             header { padding: 10px 10px; gap: 5px; }
