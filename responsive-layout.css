@@ -1370,3 +1370,26 @@ input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 
   stroke: currentColor !important;
   opacity: 1 !important;
 }
+
+
+/* Final settings icon-tile correction.
+   The automatic theme can render the dark Bilocost palette without setting
+   data-theme="dark"; therefore theme-attribute selectors alone miss this screen.
+   Match the actual settings icon tile directly and use a dark emerald surface. */
+#page .lic {
+  background: #102a20 !important;
+  background-color: #102a20 !important;
+  color: #f1fff7 !important;
+  border: 1px solid rgba(52, 211, 153, .28) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+#page .lic svg,
+#page .lic i,
+#page .lic .i,
+#page .lic path {
+  color: #f1fff7 !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
