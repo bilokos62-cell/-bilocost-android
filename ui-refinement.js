@@ -3,6 +3,13 @@
   if(window.__bilocostUiRefinementInstalled)return;
   window.__bilocostUiRefinementInstalled=true;
 
+  /* Restore the original Bilocost midnight appearance as the default.
+     Keep an explicitly selected light theme untouched. */
+  try{
+    const root=document.documentElement;
+    if(root&&!root.hasAttribute("data-theme"))root.setAttribute("data-theme","dark");
+  }catch(_){}
+
   /* The intro is a one-time onboarding step, not a screen to replay on every launch. */
   const markIntroSeen=()=>{
     try{
