@@ -20,6 +20,31 @@ jobs:
           html = Path("index.html").read_text(encoding="utf-8")
           # Correct the mobile header: keep wallet access inside the profile area.
           responsive_css = """
+          /* Branded Bilocost startup state; no changes to normal home or theme surfaces. */
+          #view .bilo-startup-loading{
+            display:flex!important;
+            min-height:270px!important;
+            flex-direction:column!important;
+            align-items:center!important;
+            justify-content:center!important;
+            gap:12px!important;
+            margin:28px auto!important;
+            padding:34px 22px!important;
+            text-align:center!important;
+            background:var(--card)!important;
+            border:1px solid var(--line)!important;
+            border-radius:24px!important;
+          }
+          #view .bilo-startup-brand{display:flex;flex-direction:column;align-items:center;gap:7px;margin:0 0 4px}
+          #view .bilo-startup-mark{position:relative;display:grid;place-items:center;width:84px;height:84px;margin-bottom:5px}
+          #view .bilo-startup-logo{display:block;width:58px;height:58px;object-fit:contain;border-radius:15px;position:relative;z-index:2}
+          #view .bilo-startup-orbit{position:absolute;inset:1px;border:3px solid var(--line);border-top-color:var(--pri);border-right-color:var(--pri);border-radius:50%;animation:biloStartupOrbit 1.6s linear infinite}
+          #view .bilo-startup-brand strong{font-size:23px;line-height:1.2;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+          #view .bilo-startup-brand small{font-size:11px;line-height:1.5;color:var(--mute);letter-spacing:.025em}
+          #view .bilo-startup-loading>p{max-width:420px;margin:0!important;color:var(--mute)!important}
+          @keyframes biloStartupOrbit{to{transform:rotate(360deg)}}
+          @media(prefers-reduced-motion:reduce){#view .bilo-startup-orbit{animation:none}}
+          
           /* Bilocost responsive header and text containment */
           header { gap: 8px; min-width: 0; }
           header .logo { flex: 0 0 auto; min-width: 0; }
