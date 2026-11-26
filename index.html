@@ -1556,7 +1556,7 @@ document.addEventListener("click",e=>{const t=e.target.closest(SEL);if(!t)return
 document.addEventListener("input",e=>{const id=e.target.id;
  if(id==="rq"){S.rq=e.target.value;const g=$("#rg");if(g)g.innerHTML=rentGridHtml()}
  if(id==="cm"){const w=$("#cw");if(w)w.innerHTML=scam(e.target.value)?SCAMHTML:TIP}
- if(id==="q"){S.q=e.target.value;if(S.tab==="search")render();else{const g=$("#g");if(g)g.innerHTML=grid()}}
+ if(id==="q"){S.q=e.target.value;if(S.tab==="search"){const pos=e.target.selectionStart;render();const q=$("#q");if(q){q.focus();try{q.setSelectionRange(pos,pos)}catch(_){}}}else{const g=$("#g");if(g)g.innerHTML=grid()}}
  if(id==="mq"){const v=e.target.value.toLowerCase();document.querySelectorAll(".msg").forEach(m=>m.style.display=m.textContent.toLowerCase().includes(v)?"":"none")}});
 /* Permission explicite avant chaque ouverture du sélecteur de fichiers. */
 const filePurpose=input=>({pf:"lire les photos choisies pour illustrer votre annonce",rpf:"lire les photos choisies pour illustrer votre annonce de location",svf:"lire la photo choisie pour votre vitrine professionnelle",avf:"lire la photo choisie comme photo de profil",iddoc:"lire le justificatif choisi pour la vérification privée",csvf:"lire le fichier CSV choisi pour importer vos annonces",apf:"lire la photo choisie pour compléter votre annonce"}[input.id]||"lire uniquement le fichier que vous choisissez");
