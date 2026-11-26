@@ -1337,3 +1337,36 @@ input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 
     padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+
+/* Settings icon contrast: match icon tiles to the active dark surface.
+   Keep pale tiles only in an explicitly light theme. */
+:root[data-theme="dark"] #page .lic,
+@media-placeholder {
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #page .lic {
+    background: #102a20 !important;
+    color: #f1fff7 !important;
+    border: 1px solid rgba(52, 211, 153, .24) !important;
+    opacity: 1 !important;
+  }
+  :root:not([data-theme="light"]) #page .lic svg,
+  :root:not([data-theme="light"]) #page .lic i {
+    color: #f1fff7 !important;
+    stroke: currentColor !important;
+    opacity: 1 !important;
+  }
+}
+:root[data-theme="dark"] #page .lic {
+  background: #102a20 !important;
+  color: #f1fff7 !important;
+  border: 1px solid rgba(52, 211, 153, .24) !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .lic svg,
+:root[data-theme="dark"] #page .lic i {
+  color: #f1fff7 !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
