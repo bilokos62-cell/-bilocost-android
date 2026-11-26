@@ -37,6 +37,8 @@ jobs:
             overflow-wrap: break-word;
             word-break: normal;
           }
+          /* Emergency guard: hide the broken empty-state invitation on all devices. */
+          #view .bilo-home-services .bilo-service-invite { display: none !important; }
           #view img { max-width: 100%; }
           @media (max-width: 390px) {
             header { padding: 10px 10px; gap: 5px; }
@@ -116,7 +118,7 @@ jobs:
           <link rel="apple-touch-icon" href="/icons/bilocost.svg">
           <script>
           if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+            window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js?v=4", { updateViaCache: "none" }).then(reg => reg.update()).catch(() => {}));
           }
           </script>
           """
