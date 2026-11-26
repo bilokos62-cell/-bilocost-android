@@ -89,6 +89,9 @@ jobs:
       - name: Prepare website
         run: |
           mkdir -p www/icons www/resources
+          # Publish storefront assets (including the approved homepage hero image).
+          if [ -d assets ]; then mkdir -p www/assets && cp -R assets/. www/assets/; fi
+          test -s www/assets/bilocost-hero-2026.webp
           cp index.html www/index.html
           cp responsive-layout.css www/responsive-layout.css
           # Copy the local brand assets used by the storefront.
