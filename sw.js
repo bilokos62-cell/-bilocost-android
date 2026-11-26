@@ -1,4 +1,4 @@
-const CACHE = "bilocost-shell-v5";
+const CACHE = "bilocost-shell-v6";
 const CORE = ["/", "/index.html", "/responsive-layout.css", "/manifest.webmanifest", "/icons/bilocost.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
