@@ -1287,3 +1287,31 @@ input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 
     z-index: 100 !important;
   }
 }
+
+
+/* Critical fix: settings and all stacked subpages are rendered in #page,
+   a fixed full-screen layer. Keep that layer itself vertically scrollable.
+   Do not transfer scrolling to body or set #page overflow to visible. */
+@media (max-width: 699px) {
+  #page {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    z-index: 60 !important;
+  }
+  #page .pw {
+    min-height: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
