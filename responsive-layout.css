@@ -1194,210 +1194,125 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 }
 
 
-/* Bilocost light visual identity — white canvas with Bilocost green accents.
-   Keep the default experience light; do not apply the experimental black wallpaper globally. */
-:root:not([data-theme="dark"]) {
-  color-scheme: light !important;
-  --bg: #ffffff !important;
-  --card: #ffffff !important;
-  --panel: #f3f7f4 !important;
-  --ink: #17231b !important;
-  --mute: #64746a !important;
-  --line: #e2e9e4 !important;
-  --pri: #079447 !important;
-  --mint: #e8f7ee !important;
-  --mint-t: #08783c !important;
-  --bar: rgba(255,255,255,.97) !important;
+/* Bilocost homepage restoration: deep black + emerald palette. */
+:root {
+  color-scheme: dark !important;
+  --bg: #050b08 !important;
+  --card: #0b1711 !important;
+  --panel: #102219 !important;
+  --ink: #f5fff8 !important;
+  --mute: #b7c9bd !important;
+  --line: rgba(123, 190, 151, .22) !important;
+  --pri: #12d879 !important;
+  --mint: #123b27 !important;
+  --mint-t: #9af2bd !important;
+  --bar: rgba(5, 15, 10, .94) !important;
 }
-:root:not([data-theme="dark"]) html,
-:root:not([data-theme="dark"]) body,
-:root:not([data-theme="dark"]) .app,
-:root:not([data-theme="dark"]) #view,
-:root:not([data-theme="dark"]) #page,
-:root:not([data-theme="dark"]) .wrap,
-:root:not([data-theme="dark"]) .pw,
-:root:not([data-theme="dark"]) #auth,
-:root:not([data-theme="dark"]) #modal-root {
-  background: #ffffff !important;
-  background-image: none !important;
-  color: #17231b !important;
+html, body, .app, #view, #page, .wrap, .pw {
+  background-color: var(--bg) !important;
+  color: var(--ink) !important;
 }
-:root:not([data-theme="dark"]) header,
-:root:not([data-theme="dark"]) nav,
-:root:not([data-theme="dark"]) .pbar,
-:root:not([data-theme="dark"]) .sheet > div,
-:root:not([data-theme="dark"]) .modal,
-:root:not([data-theme="dark"]) .dialog,
-:root:not([data-theme="dark"]) .drawer,
-:root:not([data-theme="dark"]) .card,
-:root:not([data-theme="dark"]) .seller,
-:root:not([data-theme="dark"]) .lr,
-:root:not([data-theme="dark"]) .bilo-category-shortcut,
-:root:not([data-theme="dark"]) .bilo-service-tile,
-:root:not([data-theme="dark"]) .bilo-service-invite,
-:root:not([data-theme="dark"]) .reel-card,
-:root:not([data-theme="dark"]) .reel-upload,
-:root:not([data-theme="dark"]) .brand-ad-card {
-  background-color: #ffffff !important;
-  color: #17231b !important;
-  border-color: #e2e9e4 !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+header, nav, .card, .seller, .sheet > div, .bilo-category-shortcut,
+.bilo-service-tile, .bilo-service-invite {
+  background-color: var(--card) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
 }
-:root:not([data-theme="dark"]) input,
-:root:not([data-theme="dark"]) select,
-:root:not([data-theme="dark"]) textarea,
-:root:not([data-theme="dark"]) .f {
-  background: #ffffff !important;
-  color: #17231b !important;
-  border-color: #d7e1da !important;
-}
-:root:not([data-theme="dark"]) input::placeholder,
-:root:not([data-theme="dark"]) textarea::placeholder { color: #7b8a80 !important; opacity: 1 !important; }
-:root:not([data-theme="dark"]) #view p,
-:root:not([data-theme="dark"]) #view small,
-:root:not([data-theme="dark"]) #view label,
-:root:not([data-theme="dark"]) #view .sub,
-:root:not([data-theme="dark"]) #view .meta,
-:root:not([data-theme="dark"]) #page p,
-:root:not([data-theme="dark"]) #page small,
-:root:not([data-theme="dark"]) #page label,
-:root:not([data-theme="dark"]) #page .sub,
-:root:not([data-theme="dark"]) #page .meta {
-  color: #64746a !important;
-  opacity: 1 !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-:root:not([data-theme="dark"]) #view h1,
-:root:not([data-theme="dark"]) #view h2,
-:root:not([data-theme="dark"]) #view h3,
-:root:not([data-theme="dark"]) #view h4,
-:root:not([data-theme="dark"]) #view strong,
-:root:not([data-theme="dark"]) #page h1,
-:root:not([data-theme="dark"]) #page h2,
-:root:not([data-theme="dark"]) #page h3,
-:root:not([data-theme="dark"]) #page h4,
-:root:not([data-theme="dark"]) #page strong {
-  color: #17231b !important;
-  opacity: 1 !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-/* Settings rows: one stable flex row per action, with no overlapping text layers. */
-:root:not([data-theme="dark"]) #page .gr,
-:root:not([data-theme="dark"]) #view .gr {
-  display: block !important;
-  position: relative !important;
-  width: 100% !important;
-  margin: 18px 0 22px !important;
-  padding: 0 !important;
-  overflow: visible !important;
-}
-:root:not([data-theme="dark"]) #page .gt,
-:root:not([data-theme="dark"]) #view .gt {
-  display: block !important;
-  position: static !important;
-  margin: 0 0 7px !important;
-  padding: 0 0 8px !important;
-  color: #64746a !important;
-  line-height: 1.35 !important;
-  transform: none !important;
-}
-:root:not([data-theme="dark"]) #page button.lr,
-:root:not([data-theme="dark"]) #view button.lr,
-:root:not([data-theme="dark"]) #page .lr,
-:root:not([data-theme="dark"]) #view .lr {
-  box-sizing: border-box !important;
-  position: relative !important;
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 13px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 70px !important;
-  height: auto !important;
-  margin: 0 !important;
-  padding: 12px 4px !important;
-  border: 0 !important;
-  border-bottom: 1px solid #e5ece7 !important;
-  border-radius: 0 !important;
-  background: #ffffff !important;
-  color: #17231b !important;
-  text-align: left !important;
-  line-height: 1.4 !important;
-  white-space: normal !important;
-  transform: none !important;
-  overflow: visible !important;
-}
-:root:not([data-theme="dark"]) #page .lr::before,
-:root:not([data-theme="dark"]) #page .lr::after,
-:root:not([data-theme="dark"]) #view .lr::before,
-:root:not([data-theme="dark"]) #view .lr::after { content: none !important; display: none !important; }
-:root:not([data-theme="dark"]) #page .lr .lic,
-:root:not([data-theme="dark"]) #view .lr .lic {
-  position: static !important;
-  display: grid !important;
-  flex: 0 0 44px !important;
-  width: 44px !important;
-  height: 44px !important;
-  margin: 0 !important;
-  border-radius: 13px !important;
-  background: #f0f5f1 !important;
-  color: #087c40 !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-:root:not([data-theme="dark"]) #page .lr .lt,
-:root:not([data-theme="dark"]) #view .lr .lt {
-  position: static !important;
-  display: block !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  color: #17231b !important;
-  font: 600 15px/1.4 Inter, system-ui, sans-serif !important;
-  text-align: left !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  transform: none !important;
+#view p, #view small, #view label, #view .sub, #view .meta,
+#page p, #page small, #page label, #page .sub, #page .meta {
+  color: var(--mute) !important;
   opacity: 1 !important;
 }
-:root:not([data-theme="dark"]) #page .lr .rt,
-:root:not([data-theme="dark"]) #view .lr .rt {
-  position: static !important;
-  display: block !important;
-  flex: 0 0 auto !important;
-  margin-left: auto !important;
-  color: #7a8a80 !important;
-  transform: none !important;
+#view h1, #view h2, #view h3, #view h4, #page h1, #page h2, #page h3, #page h4,
+#view strong, #page strong {
+  color: var(--ink) !important;
 }
-:root:not([data-theme="dark"]) nav { background: rgba(255,255,255,.98) !important; border-color: #e2e9e4 !important; }
-:root:not([data-theme="dark"]) nav button { color: #526258 !important; }
-:root:not([data-theme="dark"]) nav button[aria-current="page"] { color: #079447 !important; }
-:root:not([data-theme="dark"]) button.btn,
-:root:not([data-theme="dark"]) .btn.primary,
-:root:not([data-theme="dark"]) .btn:not(.ghost):not(.out) {
-  background: #079447 !important;
-  color: #ffffff !important;
-  border-color: #079447 !important;
+input, select, textarea {
+  background: #0b1711 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
 }
-:root:not([data-theme="dark"]) #view .bilo-hero-reference,
-:root:not([data-theme="dark"]) #view .hero {
-  background: linear-gradient(115deg,#e8f7ee,#f7fcf8) !important;
-  border: 1px solid #b9e6c9 !important;
-  color: #17231b !important;
+input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 1 !important; }
+#view .bilo-hero-reference {
+  background: linear-gradient(112deg,#003b27 0%,#006b3d 48%,#031b16 100%) !important;
+  border: 1px solid #12d879 !important;
 }
-:root:not([data-theme="dark"]) #view .bilo-home-section-head .lnk { color: #07813f !important; }
-:root:not([data-theme="dark"]) #view .bilo-category-icon,
-:root:not([data-theme="dark"]) #view .bilo-service-icon {
-  background: #e5f6eb !important;
-  color: #07813f !important;
+#view .bilo-home-section-head .lnk { color: #52e99a !important; }
+#view .bilo-category-icon, #view .bilo-service-icon {
+  background: #123b27 !important;
+  color: #52e99a !important;
+}
+@media (min-width: 700px) {
+  #view.wrap { max-width: 1500px; margin-inline: auto; }
+  .bilo-category-shortcuts { grid-template-columns: repeat(8,minmax(0,1fr)); }
+  .bilo-home-categories, .bilo-home-trending, .bilo-home-services { margin-block: 22px 26px; }
 }
 @media (max-width: 699px) {
-  :root:not([data-theme="dark"]) html,
-  :root:not([data-theme="dark"]) body { background-attachment: scroll !important; }
+  #view .bilo-hero-reference { min-height: 220px !important; }
+  #view.wrap { padding-bottom: calc(150px + env(safe-area-inset-bottom,0px)); }
+}
+
+
+/* Bilocost visual identity rollout — black canvas with emerald wave artwork.
+   Applied globally; functional cards, forms and dialogs retain opaque surfaces
+   so product information and controls remain readable. */
+:root {
+  --bg: #020503 !important;
+  --card: rgba(5, 17, 10, .94) !important;
+  --panel: rgba(8, 28, 16, .94) !important;
+  --ink: #f4fff7 !important;
+  --mute: #bdd2c3 !important;
+  --line: rgba(36, 220, 105, .28) !important;
+  --pri: #16e66f !important;
+  --mint: rgba(0, 112, 48, .28) !important;
+  --mint-t: #a4ffc1 !important;
+  --bar: rgba(0, 5, 2, .94) !important;
+}
+html, body {
+  min-height: 100%;
+  background: #000 url("/assets/bilocost-neon-background.svg") center center / cover fixed no-repeat !important;
+  background-color: #000 !important;
+}
+body, .app, #view, #page, .wrap, .pw, #auth, #modal-root {
+  background-color: transparent !important;
+  color: var(--ink) !important;
+}
+header, nav, .sheet > div, .modal, .dialog, .drawer,
+.card, .seller, .bilo-category-shortcut, .bilo-service-tile,
+.bilo-service-invite, .reel-card, .reel-upload, .brand-ad-card {
+  background-color: rgba(4, 17, 9, .94) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+input, select, textarea, .f {
+  background: rgba(3, 15, 8, .96) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+input::placeholder, textarea::placeholder { color: #9dbba7 !important; opacity: 1 !important; }
+button.btn, .btn.primary, .btn:not(.ghost):not(.out) {
+  background: linear-gradient(110deg, #16d96b, #00a94f) !important;
+  color: #001b0b !important;
+  border-color: #20e878 !important;
+}
+#view .hero, #view .bilo-hero-reference, .hero {
+  background: linear-gradient(110deg, rgba(0,45,22,.96), rgba(0,104,49,.88), rgba(0,18,9,.96)) !important;
+  border: 1px solid rgba(22,230,111,.55) !important;
+}
+#view .bilo-category-icon, #view .bilo-service-icon {
+  background: rgba(0,125,53,.28) !important;
+  color: #69ffa1 !important;
+}
+nav { background: rgba(0, 7, 3, .96) !important; }
+@media (max-width: 699px) {
+  html, body { background-attachment: scroll !important; }
+  .app { background: transparent !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  header, nav, .sheet > div, .card, .seller, .reel-card, .reel-upload {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
