@@ -27,8 +27,16 @@ jobs:
           header > div:last-child { flex: 0 1 auto; min-width: 0; gap: 4px !important; }
           header .ib { width: 34px; height: 34px; flex: 0 0 34px; }
           header .commune { flex: 0 1 auto; min-width: 0; max-width: 104px; padding: 7px 8px; }
-          #view, #view * { min-width: 0; }
-          #view p, #view h1, #view h2, #view h3, #view small, #view b, #view span { overflow-wrap: anywhere; }
+          /* Do not force min-width:0 on every descendant: it collapses intrinsic
+             widths inside nested flex/grid layouts, especially on tablets. */
+          #view .grid, #view .cg, #view .card, #view .bilo-home-categories,
+          #view .bilo-home-trending, #view .bilo-home-services,
+          #view .bilo-service-invite, #view .bilo-service-tile { min-width: 0; }
+          /* Preserve normal word flow; only long unbroken strings may wrap. */
+          #view p, #view h1, #view h2, #view h3, #view small, #view b, #view span {
+            overflow-wrap: break-word;
+            word-break: normal;
+          }
           #view img { max-width: 100%; }
           @media (max-width: 390px) {
             header { padding: 10px 10px; gap: 5px; }
