@@ -1192,3 +1192,62 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     font-size:13px !important;
   }
 }
+
+
+/* Bilocost homepage restoration: deep black + emerald palette. */
+:root {
+  color-scheme: dark !important;
+  --bg: #050b08 !important;
+  --card: #0b1711 !important;
+  --panel: #102219 !important;
+  --ink: #f5fff8 !important;
+  --mute: #b7c9bd !important;
+  --line: rgba(123, 190, 151, .22) !important;
+  --pri: #12d879 !important;
+  --mint: #123b27 !important;
+  --mint-t: #9af2bd !important;
+  --bar: rgba(5, 15, 10, .94) !important;
+}
+html, body, .app, #view, #page, .wrap, .pw {
+  background-color: var(--bg) !important;
+  color: var(--ink) !important;
+}
+header, nav, .card, .seller, .sheet > div, .bilo-category-shortcut,
+.bilo-service-tile, .bilo-service-invite {
+  background-color: var(--card) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+#view p, #view small, #view label, #view .sub, #view .meta,
+#page p, #page small, #page label, #page .sub, #page .meta {
+  color: var(--mute) !important;
+  opacity: 1 !important;
+}
+#view h1, #view h2, #view h3, #view h4, #page h1, #page h2, #page h3, #page h4,
+#view strong, #page strong {
+  color: var(--ink) !important;
+}
+input, select, textarea {
+  background: #0b1711 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 1 !important; }
+#view .bilo-hero-reference {
+  background: linear-gradient(112deg,#003b27 0%,#006b3d 48%,#031b16 100%) !important;
+  border: 1px solid #12d879 !important;
+}
+#view .bilo-home-section-head .lnk { color: #52e99a !important; }
+#view .bilo-category-icon, #view .bilo-service-icon {
+  background: #123b27 !important;
+  color: #52e99a !important;
+}
+@media (min-width: 700px) {
+  #view.wrap { max-width: 1500px; margin-inline: auto; }
+  .bilo-category-shortcuts { grid-template-columns: repeat(8,minmax(0,1fr)); }
+  .bilo-home-categories, .bilo-home-trending, .bilo-home-services { margin-block: 22px 26px; }
+}
+@media (max-width: 699px) {
+  #view .bilo-hero-reference { min-height: 220px !important; }
+  #view.wrap { padding-bottom: calc(150px + env(safe-area-inset-bottom,0px)); }
+}
