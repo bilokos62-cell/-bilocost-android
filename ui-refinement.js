@@ -703,6 +703,6 @@
     }
     @media(prefers-reduced-motion:reduce){#view *,#page *{transition:none!important;animation:none!important}}
   `;
-  (document.head||document.documentElement).appendChild(lightDesignStyle);
+  /* Disabled: this legacy light-only stylesheet overrides the restored black/emerald theme. */
 
 })();
