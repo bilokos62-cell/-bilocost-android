@@ -74,7 +74,14 @@
     ".brand-ad-rail{scroll-snap-type:x mandatory;scroll-behavior:smooth}.brand-ad-card{scroll-snap-align:start}",
     "@media(max-width:420px){.bilo-category-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.bilo-category-shortcut{min-height:100px;padding:9px 3px;border-radius:14px}.bilo-category-icon{width:42px;height:42px}.bilo-category-shortcut b{font-size:10px}.bilo-category-shortcut small{font-size:9px}.bilo-home-section-head p{font-size:11px}.bilo-service-invite{flex-wrap:wrap}.bilo-service-invite .btn{width:100%}}",
     "@media(min-width:700px){.bilo-category-shortcuts{grid-template-columns:repeat(8,minmax(0,1fr));gap:13px}.bilo-category-shortcut{min-height:126px}.bilo-trending-rail>.card{flex-basis:230px;width:230px}.bilo-service-tile{flex-basis:300px}}",
-    "@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}"
+    "@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}",
+    "/* Fix tablet/mobile service invitation: reserve a real text column and place CTA on its own row. */",
+    ".bilo-service-invite{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:12px;min-width:0}",
+    ".bilo-service-invite>span{grid-column:1;grid-row:1;width:48px;height:48px;flex:none}",
+    ".bilo-service-invite>div{grid-column:2;grid-row:1;min-width:0;width:auto;flex:none}",
+    ".bilo-service-invite .btn{grid-column:1/-1;grid-row:2;width:100%;min-width:0;max-width:100%;white-space:normal}",
+    ".bilo-service-invite p,.bilo-service-invite b{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}",
+    "@media(min-width:700px){.bilo-service-invite{grid-template-columns:56px minmax(0,1fr) minmax(150px,220px)}.bilo-service-invite>span{width:56px;height:56px}.bilo-service-invite .btn{grid-column:3;grid-row:1;width:100%}}"
   ].join("\n");
   (document.head||document.documentElement).appendChild(style);
   const attachAdCarousel=()=>{
