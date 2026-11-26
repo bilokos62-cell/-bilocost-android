@@ -15,23 +15,32 @@
     }
   }
   const originalList=list;
+  const normalizeLocation=value=>String(value||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").trim().toLocaleLowerCase("fr");
   list=function(){
     const loc=getLocation();
     if(!loc.province)return originalList();
     const previous=S.commune;
-    S.commune=locationValue(loc)||"Kinshasa";
     try{
-      return originalList().filter(item=>{
-        if(item.province){
-          if(item.province!==loc.province)return false;
-          if(loc.territory&&item.territory!==loc.territory)return false;
-          if(loc.commune&&(item.locality||item.commune||item.c)!==loc.commune)return false;
-          return true;
-        }
-        // Older listings have no province metadata. Only retain them in their known Kinshasa commune.
-        if(loc.province==="Kinshasa")return !loc.commune||item.c===loc.commune;
-        return false;
+      // Load the catalogue without the legacy single-commune restriction first.
+      // The location preference must never make every public listing disappear.
+      S.commune="Kinshasa";
+      const all=originalList();
+      const province=normalizeLocation(loc.province);
+      const territory=normalizeLocation(loc.territory);
+      const commune=normalizeLocation(loc.commune||loc.territory||loc.neighborhood);
+      const local=all.filter(item=>{
+        const itemProvince=normalizeLocation(item.province);
+        const itemTerritory=normalizeLocation(item.territory);
+        const itemCommune=normalizeLocation(item.locality||item.commune||item.c);
+        if(itemProvince&&itemProvince!==province)return false;
+        if(territory&&itemTerritory&&itemTerritory!==territory)return false;
+        if(commune&&itemCommune&&itemCommune!==commune)return false;
+        // Legacy records without full geographic metadata remain visible.
+        return true;
       });
+      // If the selected locality has no exact matches, show the available
+      // catalogue instead of an empty home/search screen.
+      return local.length?local:all;
     }finally{S.commune=previous;}
   };
   const originalPublishCloud=publishCloud;
