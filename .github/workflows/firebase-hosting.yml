@@ -66,6 +66,7 @@ jobs:
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
           exchange_rates = Path("exchange-rates.js").read_text(encoding="utf-8")
+          marketplace_search = Path("marketplace-search.js").read_text(encoding="utf-8")
           home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
@@ -75,13 +76,16 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
 
       - name: Inject responsive tablet and desktop layout
         run: python3 scripts/inject-responsive-layout.py
+
+      - name: Validate marketplace search module syntax
+        run: node --check marketplace-search.js
 
       - name: Validate Bilocost source and integrations
         run: npm run build
