@@ -27,7 +27,7 @@
       '</article>'
     ).join("");
     return '<section class="bilo-home-services" aria-label="Services de proximité"><div class="bilo-home-section-head"><div><span class="bilo-section-kicker">AUTOUR DE VOUS</span><h2>Services de proximité</h2><p>Découvrez les professionnels présents sur Bilocost</p></div><button class="lnk" data-t="services">Voir tout →</button></div>'+
-      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite"><span class="bilo-service-icon">'+I("briefcase","",26)+'</span><div><b>Vous proposez un service ?</b><p>Présentez votre activité à la communauté Bilocost.</p></div><button class="btn out" data-t="services">Découvrir</button></div>')+
+      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite" style="display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:visible!important"><span class="bilo-service-icon" style="display:inline-grid!important;vertical-align:middle!important;width:48px!important;height:48px!important;margin:0 12px 12px 0!important"></span><div style="display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;white-space:normal!important;overflow:visible!important"><b style="display:block!important;width:100%!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important">Vous proposez un service ?</b><p style="display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important;margin:5px 0 0!important">Présentez votre activité à la communauté Bilocost.</p></div><button class="btn out" data-t="services" style="display:block!important;position:static!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:14px 0 0!important;white-space:normal!important">Découvrir</button></div>')+
       '</section>';
   };
   V.home=function(){
@@ -81,7 +81,12 @@
     ".bilo-service-invite>div{grid-column:2;grid-row:1;min-width:0;width:auto;flex:none}",
     ".bilo-service-invite .btn{grid-column:1/-1;grid-row:2;width:100%;min-width:0;max-width:100%;white-space:normal}",
     ".bilo-service-invite p,.bilo-service-invite b{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}",
-    "@media(min-width:700px){.bilo-service-invite{grid-template-columns:56px minmax(0,1fr) minmax(150px,220px)}.bilo-service-invite>span{width:56px;height:56px}.bilo-service-invite .btn{grid-column:3;grid-row:1;width:100%}}"
+    "@media(min-width:700px){.bilo-service-invite{grid-template-columns:56px minmax(0,1fr) minmax(150px,220px)}.bilo-service-invite>span{width:56px;height:56px}.bilo-service-invite .btn{grid-column:3;grid-row:1;width:100%}}",
+    "/* Hard override for the service empty state: prevent inherited flex/grid rules from collapsing its copy. */",
+    "#view .bilo-home-services .bilo-service-invite{display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:visible!important}",
+    "#view .bilo-home-services .bilo-service-invite>div{display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;flex:none!important;grid-column:auto!important;white-space:normal!important}",
+    "#view .bilo-home-services .bilo-service-invite>div b,#view .bilo-home-services .bilo-service-invite>div p{display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important}",
+    "#view .bilo-home-services .bilo-service-invite>.btn{display:block!important;position:static!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:14px 0 0!important;white-space:normal!important}"
   ].join("\n");
   (document.head||document.documentElement).appendChild(style);
   const attachAdCarousel=()=>{
