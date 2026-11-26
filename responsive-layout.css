@@ -1393,3 +1393,29 @@ input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 
   fill: none !important;
   opacity: 1 !important;
 }
+
+
+/* Light theme: restore strong contrast for settings icon tiles and glyphs.
+   The dark-theme override above must never leave white icons on pale tiles. */
+:root[data-theme="light"] #page .lr .lic,
+:root[data-theme="light"] #page .lic {
+  background: #eef2f7 !important;
+  background-color: #eef2f7 !important;
+  color: #334155 !important;
+  border: 1px solid #d5dee9 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+:root[data-theme="light"] #page .lr .lic svg,
+:root[data-theme="light"] #page .lr .lic i,
+:root[data-theme="light"] #page .lr .lic .i,
+:root[data-theme="light"] #page .lr .lic path,
+:root[data-theme="light"] #page .lic svg,
+:root[data-theme="light"] #page .lic i,
+:root[data-theme="light"] #page .lic .i,
+:root[data-theme="light"] #page .lic path {
+  color: #334155 !important;
+  stroke: #334155 !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
