@@ -1566,3 +1566,129 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
   #sheet { z-index: 1000 !important; }
   #sheet > #sheetBody { max-height: 88dvh; overflow-y: auto; }
 }
+
+
+/* Bilocost light-theme contrast polish: home discovery + product detail.
+   Scoped to the explicitly selected light theme; the midnight theme is untouched. */
+:root[data-theme="light"] #view .bilo-home-section-head h2,
+:root[data-theme="light"] #view .brand-ad-heading h3,
+:root[data-theme="light"] #view .brand-ad-copy b,
+:root[data-theme="light"] #view .bilo-category-shortcut b {
+  color: #17212b !important;
+  opacity: 1 !important;
+}
+:root[data-theme="light"] #view .bilo-home-section-head p,
+:root[data-theme="light"] #view .brand-ad-heading p,
+:root[data-theme="light"] #view .brand-ad-heading small,
+:root[data-theme="light"] #view .bilo-category-shortcut small,
+:root[data-theme="light"] #view .brand-ad-copy > span {
+  color: #596579 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="light"] #view .bilo-home-section-head > .lnk,
+:root[data-theme="light"] #view .brand-ad-heading > .lnk,
+:root[data-theme="light"] #view .lnk {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+  opacity: 1 !important;
+  font-weight: 800 !important;
+  text-decoration-thickness: 1.5px;
+}
+:root[data-theme="light"] #view .bilo-category-shortcut,
+:root[data-theme="light"] #view .brand-ad-card {
+  color: #17212b !important;
+  background: #ffffff !important;
+  border-color: #dce5e1 !important;
+}
+:root[data-theme="light"] #view .brand-ad-copy small,
+:root[data-theme="light"] #view .brand-ad-copy strong {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+  opacity: 1 !important;
+}
+/* The empty ad CTA must never render as a blank white pill. */
+:root[data-theme="light"] #view .brand-ad-card.brand-ad-empty .brand-ad-copy a,
+:root[data-theme="light"] #view .brand-ad-card.brand-ad-empty .brand-ad-copy button,
+:root[data-theme="light"] #view .brand-ad-card.brand-ad-empty .brand-ad-copy .btn,
+:root[data-theme="light"] #view .brand-ad-card.brand-ad-empty .brand-ad-copy [role="button"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  max-width: 100% !important;
+  padding: 10px 18px !important;
+  border: 1px solid #087a45 !important;
+  border-radius: 12px !important;
+  background: #087a45 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+}
+:root[data-theme="light"] #view .brand-ad-card.brand-ad-empty .brand-ad-copy > strong {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+  opacity: 1 !important;
+}
+
+/* Product detail: force readable foregrounds for values that were rendered
+   in near-white on white cards, including inline-styled metadata and badges. */
+:root[data-theme="light"] #page .pw,
+:root[data-theme="light"] #page .pw h1,
+:root[data-theme="light"] #page .pw h2,
+:root[data-theme="light"] #page .pw h3,
+:root[data-theme="light"] #page .pw h4,
+:root[data-theme="light"] #page .pw b,
+:root[data-theme="light"] #page .pw strong {
+  color: #17212b !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: currentColor;
+}
+:root[data-theme="light"] #page .pw p,
+:root[data-theme="light"] #page .pw small,
+:root[data-theme="light"] #page .pw label,
+:root[data-theme="light"] #page .pw .sub,
+:root[data-theme="light"] #page .pw .meta,
+:root[data-theme="light"] #page .pw .muted,
+:root[data-theme="light"] #page .pw .hint,
+:root[data-theme="light"] #page .pw .usd {
+  color: #596579 !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: currentColor;
+}
+:root[data-theme="light"] #page .pw [style*="color:#fff"],
+:root[data-theme="light"] #page .pw [style*="color: #fff"],
+:root[data-theme="light"] #page .pw [style*="color:white"],
+:root[data-theme="light"] #page .pw [style*="color: white"] {
+  color: #263445 !important;
+  -webkit-text-fill-color: #263445 !important;
+}
+:root[data-theme="light"] #page .pw .tag,
+:root[data-theme="light"] #page .pw .badge,
+:root[data-theme="light"] #page .pw .chip {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="light"] #page .pw .safe,
+:root[data-theme="light"] #page .pw .warn,
+:root[data-theme="light"] #page .pw .seller,
+:root[data-theme="light"] #page .pw .card,
+:root[data-theme="light"] #page .pw .box {
+  border-color: #e2e8f0 !important;
+}
+:root[data-theme="light"] #page .pw .cdf,
+:root[data-theme="light"] #page .pw .price,
+:root[data-theme="light"] #page .pw .amount {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+  opacity: 1 !important;
+}
+/* Keep the final product actions reachable on shorter tablet viewports. */
+:root[data-theme="light"] #page .pw {
+  padding-bottom: max(36px, calc(36px + env(safe-area-inset-bottom, 0px))) !important;
+}
+:root[data-theme="light"] #sheetBody {
+  padding-bottom: max(32px, calc(32px + env(safe-area-inset-bottom, 0px))) !important;
+}
