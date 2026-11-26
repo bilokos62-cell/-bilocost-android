@@ -26,9 +26,11 @@
         '<div class="bilo-service-info"><b>'+esc(item.title||"Service professionnel")+'</b><small>'+esc(item.category||"Service")+' · '+esc(item.commune||"RDC")+'</small><span>'+(item.price?esc(item.price)+" "+esc(item.currency||"CDF"):"Prix à convenir")+'</span></div>'+
       '</article>'
     ).join("");
+    // No active provider: show only the section heading. Avoid rendering an empty-state
+    // card whose inherited layout rules can collapse its text on narrow/tablet viewports.
+    if(!cards)return '';
     return '<section class="bilo-home-services" aria-label="Services de proximité"><div class="bilo-home-section-head"><div><span class="bilo-section-kicker">AUTOUR DE VOUS</span><h2>Services de proximité</h2><p>Découvrez les professionnels présents sur Bilocost</p></div><button class="lnk" data-t="services">Voir tout →</button></div>'+
-      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite bilo-service-empty"><button type="button" class="btn out" data-t="services" aria-label="Découvrir les services de proximité">Découvrir les services</button></div>')+
-      '</section>';
+      '<div class="bilo-services-rail">'+cards+'</div></section>';
   };
   V.home=function(){
     let html=originalHome();
