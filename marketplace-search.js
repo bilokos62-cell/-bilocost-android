@@ -1,48 +1,25 @@
-/* Bilocost — global catalogue search for products and active professional services. */
+/* Bilocost — unified search across products and active professional services. */
 (function(){
   "use strict";
-  if(window.__biloGlobalSearchInstalled)return;
+  if(window.__biloGlobalSearchInstalled||typeof V==="undefined"||typeof V.search!=="function")return;
   window.__biloGlobalSearchInstalled=true;
-  if(typeof V==="undefined"||typeof V.search!=="function")return;
   S.marketMode=S.marketMode||"all";
   const originalSearch=V.search;
-  const norm=v=>String(v||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("fr").trim();
-  const serviceMatches=()=>{
-    const q=norm(S.q),list=(S.services||[]).filter(x=>x.status==="ACTIVE");
-    return list.filter(x=>!q||norm([x.title,x.description,x.category,x.commune,x.providerName].join(" ")).includes(q));
-  };
-  const serviceResults=()=>{
-    const rows=serviceMatches();
+  const norm=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("fr").trim();
+  const tabs=()=>'<div class="bilo-market-tabs" role="group" aria-label="Type de résultats"><button type="button" data-market-mode="all" aria-pressed="'+(S.marketMode==="all")+'">Tout</button><button type="button" data-market-mode="products" aria-pressed="'+(S.marketMode==="products")+'">Produits</button><button type="button" data-market-mode="services" aria-pressed="'+(S.marketMode==="services")+'">Services</button></div>';
+  const services=()=>{
+    const q=norm(S.q);
+    const rows=(S.services||[]).filter(x=>x.status==="ACTIVE"&&(!q||norm([x.title,x.description,x.category,x.commune,x.providerName].join(" ")).includes(q)));
     if(!rows.length)return '<div class="empty">Aucun service correspondant pour le moment.</div>';
     return '<div class="bilo-global-services">'+rows.map(x=>'<article class="seller bilo-global-service"><div class="lic">'+I("briefcase","",22)+'</div><div class="bilo-global-service-copy"><b>'+esc(x.title||"Service professionnel")+'</b><div class="sub">'+esc(x.category||"Service")+' · '+esc(x.commune||"RDC")+'</div><p class="sub">'+esc(x.description||"")+'</p><b>'+(x.price?esc(x.price)+" "+esc(x.currency||"CDF"):"Prix à convenir")+'</b><div class="sub">'+esc(x.providerName||"Prestataire Bilocost")+'</div>'+(x.phone?'<a class="btn out" href="https://wa.me/'+String(x.phone).replace(/[^0-9]/g,"")+'" target="_blank" rel="noopener">Contacter</a>':"")+'</div>'+(x.photo?'<img src="'+esc(x.photo)+'" alt="" loading="lazy">':"")+'</article>').join("")+'</div>';
   };
   V.search=function(){
-    const mode=S.marketMode||"all";
-    if(mode==="products")return originalSearch();
-    if(mode==="services")return '<h2 style="margin-bottom:12px">Services professionnels</h2><div class="search"><input id="q" type="search" placeholder="Rechercher un produit, un service…" value="'+esc(S.q)+'" aria-label="Rechercher"></div>'+tabs()+serviceResults();
+    if(S.marketMode==="services")return '<h2 style="margin-bottom:12px">Services professionnels</h2><div class="search"><input id="q" type="search" placeholder="Rechercher un produit, un service…" value="'+esc(S.q)+'" aria-label="Rechercher"></div>'+tabs()+services();
     let html=originalSearch();
-    const anchor='</div>';
-    const pos=html.indexOf(anchor,html.indexOf('<div class="search">'));
-    if(pos>=0)html=html.slice(0,pos+anchor.length)+tabs()+html.slice(pos+anchor.length);
-    const insert=html.lastIndexOf('`');
-    const section='<section class="bilo-global-service-section"><div class="row"><h3>Services correspondants</h3><button class="lnk" data-market-mode="services">Voir tout</button></div>'+serviceResults()+'</section>';
-    const end=html.lastIndexOf('}');
-    return html;
-  };
-  function tabs(){return '<div class="bilo-market-tabs" role="group" aria-label="Type de résultats"><button type="button" data-market-mode="all" aria-pressed="'+(S.marketMode==="all")+'">Tout</button><button type="button" data-market-mode="products" aria-pressed="'+(S.marketMode==="products")+'">Produits</button><button type="button" data-market-mode="services" aria-pressed="'+(S.marketMode==="services")+'">Services</button></div>'}
-  const base=V.search;
-  V.search=function(){
-    const mode=S.marketMode||"all";
-    if(mode==="services")return base();
-    let html=base();
-    const marker='</div>';
-    const p=html.indexOf(marker,html.indexOf('<div class="search">'));
-    if(p>=0)html=html.slice(0,p+marker.length)+tabs()+html.slice(p+marker.length);
-    if(mode==="all"&&S.q){
-      const section='<section class="bilo-global-service-section"><div class="row"><h3>Services correspondants</h3><button class="lnk" data-market-mode="services">Voir tout</button></div>'+serviceResults()+'</section>';
-      const end=html.lastIndexOf('</div>');
-      if(end>=0)html=html.slice(0,end)+section+html.slice(end);
-    }
+    const start=html.indexOf('<div class="search">');
+    const close=start<0?-1:html.indexOf('</div>',start);
+    if(close>=0)html=html.slice(0,close+6)+tabs()+html.slice(close+6);
+    if(S.marketMode==="all"&&S.q)html+='<section class="bilo-global-service-section"><div class="row"><h3>Services correspondants</h3><button class="lnk" data-market-mode="services">Voir tout</button></div>'+services()+'</section>';
     return html;
   };
   document.addEventListener("click",e=>{
