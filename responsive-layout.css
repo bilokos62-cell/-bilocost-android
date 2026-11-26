@@ -1194,53 +1194,62 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 }
 
 
-/* Bilocost homepage restoration: deep black + emerald palette. */
-:root {
+/* Bilocost original midnight-blue identity.
+   The dark theme uses navy surfaces; Bilocost green is reserved for accents
+   and the original green campaign hero. Explicit light theme remains untouched. */
+:root:not([data-theme="light"]) {
   color-scheme: dark !important;
-  --bg: #050b08 !important;
-  --card: #0b1711 !important;
-  --panel: #102219 !important;
-  --ink: #f5fff8 !important;
-  --mute: #b7c9bd !important;
-  --line: rgba(123, 190, 151, .22) !important;
-  --pri: #12d879 !important;
-  --mint: #123b27 !important;
-  --mint-t: #9af2bd !important;
-  --bar: rgba(5, 15, 10, .94) !important;
+  --bg: #0b1220 !important;
+  --card: #111a2e !important;
+  --panel: #18223a !important;
+  --ink: #f1f5f9 !important;
+  --mute: #94a3b8 !important;
+  --line: #25314d !important;
+  --pri: #009a49 !important;
+  --pri-d: #006b30 !important;
+  --mint: #0d3326 !important;
+  --mint-t: #6ee7b7 !important;
+  --bar: rgba(11,18,32,.94) !important;
 }
-html, body, .app, #view, #page, .wrap, .pw {
-  background-color: var(--bg) !important;
-  color: var(--ink) !important;
+:root:not([data-theme="light"]) html,
+:root:not([data-theme="light"]) body,
+:root:not([data-theme="light"]) .app,
+:root:not([data-theme="light"]) #view,
+:root:not([data-theme="light"]) #page,
+:root:not([data-theme="light"]) .wrap,
+:root:not([data-theme="light"]) .pw {
+  background-color: #0b1220 !important;
+  color: #f1f5f9 !important;
 }
-header, nav, .card, .seller, .sheet > div, .bilo-category-shortcut,
-.bilo-service-tile, .bilo-service-invite {
-  background-color: var(--card) !important;
-  color: var(--ink) !important;
-  border-color: var(--line) !important;
+:root:not([data-theme="light"]) header,
+:root:not([data-theme="light"]) nav,
+:root:not([data-theme="light"]) .card,
+:root:not([data-theme="light"]) .seller,
+:root:not([data-theme="light"]) .sheet > div,
+:root:not([data-theme="light"]) .bilo-category-shortcut,
+:root:not([data-theme="light"]) .bilo-service-tile,
+:root:not([data-theme="light"]) .bilo-service-invite {
+  background-color: #111a2e !important;
+  color: #f1f5f9 !important;
+  border-color: #25314d !important;
 }
-#view p, #view small, #view label, #view .sub, #view .meta,
-#page p, #page small, #page label, #page .sub, #page .meta {
-  color: var(--mute) !important;
-  opacity: 1 !important;
+:root:not([data-theme="light"]) input,
+:root:not([data-theme="light"]) select,
+:root:not([data-theme="light"]) textarea {
+  background: #18223a !important;
+  color: #f1f5f9 !important;
+  border-color: #25314d !important;
 }
-#view h1, #view h2, #view h3, #view h4, #page h1, #page h2, #page h3, #page h4,
-#view strong, #page strong {
-  color: var(--ink) !important;
-}
-input, select, textarea {
-  background: #0b1711 !important;
-  color: var(--ink) !important;
-  border-color: var(--line) !important;
-}
-input::placeholder, textarea::placeholder { color: #91a99a !important; opacity: 1 !important; }
+:root:not([data-theme="light"]) input::placeholder,
+:root:not([data-theme="light"]) textarea::placeholder { color: #94a3b8 !important; opacity: 1 !important; }
 #view .bilo-hero-reference {
-  background: linear-gradient(112deg,#003b27 0%,#006b3d 48%,#031b16 100%) !important;
-  border: 1px solid #12d879 !important;
+  background: linear-gradient(112deg,#005b39 0%,#008d50 48%,#003b38 100%) !important;
+  border-color: #009a49 !important;
 }
-#view .bilo-home-section-head .lnk { color: #52e99a !important; }
+#view .bilo-home-section-head .lnk { color: #6ee7b7 !important; }
 #view .bilo-category-icon, #view .bilo-service-icon {
-  background: #123b27 !important;
-  color: #52e99a !important;
+  background: #0d3326 !important;
+  color: #6ee7b7 !important;
 }
 @media (min-width: 700px) {
   #view.wrap { max-width: 1500px; margin-inline: auto; }
