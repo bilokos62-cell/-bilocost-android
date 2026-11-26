@@ -12,7 +12,7 @@ html = html_path.read_text(encoding="utf-8")
 html = re.sub(r"(<body\b[^>]*>\s*)\\n", r"\1", html, count=1, flags=re.IGNORECASE)
 
 # Use a fresh URL so clients and the service worker fetch the current dark stylesheet.
-version = "20261126-dark-restore-03"
+version = "20261126-navy-restore-04"
 link = f'<link rel="stylesheet" href="responsive-layout.css?v={version}">'
 html = re.sub(r'<link rel="stylesheet" href="responsive-layout\.css(?:\?[^"]*)?">', link, html, count=1)
 if link not in html:
