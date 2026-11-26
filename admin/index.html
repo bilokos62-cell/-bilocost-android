@@ -38,6 +38,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflo
 <label for="password">Mot de passe</label><input id="password" type="password" autocomplete="current-password">
 <button id="loginBtn" style="width:100%;margin-top:18px">Se connecter</button><p id="loginError" class="error" role="alert"></p>
 </section>
+<section id="bootstrap" class="panel login hidden"><h2>Activer l’accès administrateur</h2><p class="muted">Ce compte correspond à l’adresse propriétaire configurée. L’adresse doit être vérifiée dans Firebase Authentication.</p><button id="bootstrapBtn" style="width:100%">Activer mon accès propriétaire</button><p id="bootstrapError" class="error" role="alert"></p></section>
 <section id="dashboard" class="hidden">
 <div class="notice" id="welcome">Vérification des autorisations…</div>
 <div class="tabs" id="tabs">
@@ -52,7 +53,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflo
 </main>
 <script>
 (function(){
- const $=id=>document.getElementById(id), login=$("login"), dashboard=$("dashboard");
+ const $=id=>document.getElementById(id), login=$("login"), dashboard=$("dashboard"), bootstrap=$("bootstrap");
  if(!window.firebase||!firebase.apps||!firebase.apps.length){$("loginError").textContent="Firebase n’est pas initialisé sur cet hébergement."; $("loginBtn").disabled=true;return;}
  const auth=firebase.auth(), db=firebase.firestore();
  let currentTab="identity", currentUser=null, allowed=false;
@@ -66,10 +67,10 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflo
  function message(t){$("welcome").textContent=t;}
  async function check(user){
   currentUser=user;
-  if(!user){allowed=false;login.classList.remove("hidden");dashboard.classList.add("hidden");$("logout").classList.add("hidden");$("who").textContent="";return;}
+  if(!user){allowed=false;login.classList.remove("hidden");dashboard.classList.add("hidden");bootstrap.classList.add("hidden");$("logout").classList.add("hidden");$("who").textContent="";return;}
   $("who").textContent=user.email||user.uid;$("logout").classList.remove("hidden");
   try{const token=await user.getIdTokenResult(true);allowed=token.claims.admin===true;
-   if(!allowed){await auth.signOut();$("loginError").textContent="Ce compte ne possède pas le rôle administrateur.";return;}
+   if(!allowed){dashboard.classList.add("hidden");if((user.email||"").toLowerCase()==="josephkanku007@gmail.com"&&user.emailVerified){login.classList.add("hidden");bootstrap.classList.remove("hidden");}else{bootstrap.classList.add("hidden");await auth.signOut();$("loginError").textContent="Ce compte ne possède pas le rôle administrateur.";}return;} bootstrap.classList.add("hidden");
    login.classList.add("hidden");dashboard.classList.remove("hidden");message("Accès administrateur confirmé.");await load();
   }catch(e){message("Impossible de vérifier les droits : "+e.message);}
  }
@@ -105,6 +106,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs{display:flex;gap:8px;overflo
    await ref.update(patch);await load();
   }catch(e){window.alert("Action non effectuée : "+e.message);}
  }
+ $("bootstrapBtn").addEventListener("click",async()=>{const b=$("bootstrapBtn");b.disabled=true;$("bootstrapError").textContent="";try{const fn=firebase.app().functions("europe-west1").httpsCallable("provisionDeveloperAdmin");await fn({});await currentUser.getIdToken(true);await check(currentUser);}catch(e){$("bootstrapError").textContent="Activation impossible : "+e.message;}finally{b.disabled=false;}});
  $("loginBtn").addEventListener("click",async()=>{ $("loginError").textContent="";$("loginBtn").disabled=true;try{await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value);}catch(e){$("loginError").textContent="Connexion impossible : "+e.message;}finally{$("loginBtn").disabled=false;}});
  $("logout").addEventListener("click",()=>auth.signOut());$("refresh").addEventListener("click",load);
  $("tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;currentTab=b.dataset.tab;document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("active",x===b));load();});
