@@ -137,7 +137,7 @@
 
   /* Approved full-width campaign artwork; preserve the existing search action. */
   style.textContent += `
-    #view .bilo-hero-reference{position:relative!important;display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:1536/444!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:24px!important;background:#006b43!important;box-shadow:0 10px 28px rgba(0,35,25,.22)!important}
+    #view .bilo-hero-reference{position:relative!important;display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:1536/513!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:24px!important;background:#006b43!important;box-shadow:0 10px 28px rgba(0,35,25,.22)!important}
     #view .bilo-hero-reference:before,#view .bilo-hero-reference:after{display:none!important}
     #view .bilo-hero-reference>*:not(.bilo-hero-art):not(.bilo-hero-click){display:none!important}
     #view .bilo-hero-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;opacity:1!important}
