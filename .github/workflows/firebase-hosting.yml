@@ -1,5 +1,4 @@
 name: Deploy Bilocost Website to Firebase
-# Re-deploy restored pre-white-theme storefront from main.
 
 on:
   workflow_dispatch:
