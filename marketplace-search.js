@@ -1,0 +1,58 @@
+/* Bilocost — global catalogue search for products and active professional services. */
+(function(){
+  "use strict";
+  if(window.__biloGlobalSearchInstalled)return;
+  window.__biloGlobalSearchInstalled=true;
+  if(typeof V==="undefined"||typeof V.search!=="function")return;
+  S.marketMode=S.marketMode||"all";
+  const originalSearch=V.search;
+  const norm=v=>String(v||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("fr").trim();
+  const serviceMatches=()=>{
+    const q=norm(S.q),list=(S.services||[]).filter(x=>x.status==="ACTIVE");
+    return list.filter(x=>!q||norm([x.title,x.description,x.category,x.commune,x.providerName].join(" ")).includes(q));
+  };
+  const serviceResults=()=>{
+    const rows=serviceMatches();
+    if(!rows.length)return '<div class="empty">Aucun service correspondant pour le moment.</div>';
+    return '<div class="bilo-global-services">'+rows.map(x=>'<article class="seller bilo-global-service"><div class="lic">'+I("briefcase","",22)+'</div><div class="bilo-global-service-copy"><b>'+esc(x.title||"Service professionnel")+'</b><div class="sub">'+esc(x.category||"Service")+' · '+esc(x.commune||"RDC")+'</div><p class="sub">'+esc(x.description||"")+'</p><b>'+(x.price?esc(x.price)+" "+esc(x.currency||"CDF"):"Prix à convenir")+'</b><div class="sub">'+esc(x.providerName||"Prestataire Bilocost")+'</div>'+(x.phone?'<a class="btn out" href="https://wa.me/'+String(x.phone).replace(/[^0-9]/g,"")+'" target="_blank" rel="noopener">Contacter</a>':"")+'</div>'+(x.photo?'<img src="'+esc(x.photo)+'" alt="" loading="lazy">':"")+'</article>').join("")+'</div>';
+  };
+  V.search=function(){
+    const mode=S.marketMode||"all";
+    if(mode==="products")return originalSearch();
+    if(mode==="services")return '<h2 style="margin-bottom:12px">Services professionnels</h2><div class="search"><input id="q" type="search" placeholder="Rechercher un produit, un service…" value="'+esc(S.q)+'" aria-label="Rechercher"></div>'+tabs()+serviceResults();
+    let html=originalSearch();
+    const anchor='</div>';
+    const pos=html.indexOf(anchor,html.indexOf('<div class="search">'));
+    if(pos>=0)html=html.slice(0,pos+anchor.length)+tabs()+html.slice(pos+anchor.length);
+    const insert=html.lastIndexOf('`');
+    const section='<section class="bilo-global-service-section"><div class="row"><h3>Services correspondants</h3><button class="lnk" data-market-mode="services">Voir tout</button></div>'+serviceResults()+'</section>';
+    const end=html.lastIndexOf('}');
+    return html;
+  };
+  function tabs(){return '<div class="bilo-market-tabs" role="group" aria-label="Type de résultats"><button type="button" data-market-mode="all" aria-pressed="'+(S.marketMode==="all")+'">Tout</button><button type="button" data-market-mode="products" aria-pressed="'+(S.marketMode==="products")+'">Produits</button><button type="button" data-market-mode="services" aria-pressed="'+(S.marketMode==="services")+'">Services</button></div>'}
+  const base=V.search;
+  V.search=function(){
+    const mode=S.marketMode||"all";
+    if(mode==="services")return base();
+    let html=base();
+    const marker='</div>';
+    const p=html.indexOf(marker,html.indexOf('<div class="search">'));
+    if(p>=0)html=html.slice(0,p+marker.length)+tabs()+html.slice(p+marker.length);
+    if(mode==="all"&&S.q){
+      const section='<section class="bilo-global-service-section"><div class="row"><h3>Services correspondants</h3><button class="lnk" data-market-mode="services">Voir tout</button></div>'+serviceResults()+'</section>';
+      const end=html.lastIndexOf('</div>');
+      if(end>=0)html=html.slice(0,end)+section+html.slice(end);
+    }
+    return html;
+  };
+  document.addEventListener("click",e=>{
+    const b=e.target.closest("[data-market-mode]");
+    if(!b)return;
+    S.marketMode=b.dataset.marketMode||"all";
+    if(S.tab==="search")render();
+  });
+  const style=document.createElement("style");
+  style.id="bilo-global-search-style";
+  style.textContent=".bilo-market-tabs{display:flex;gap:8px;margin:0 0 14px}.bilo-market-tabs button{padding:9px 15px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);font:600 13px Inter}.bilo-market-tabs button[aria-pressed=true]{background:var(--pri);border-color:var(--pri);color:#fff}.bilo-global-service-section{margin:20px 0}.bilo-global-services{display:grid;gap:10px}.bilo-global-service{min-width:0}.bilo-global-service-copy{flex:1;min-width:0}.bilo-global-service>img{width:64px;height:64px;object-fit:cover;border-radius:12px}";
+  document.head.appendChild(style);
+})();
