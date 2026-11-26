@@ -11,8 +11,8 @@ html = html_path.read_text(encoding="utf-8")
 # Remove a literal backslash-n immediately after BODY, including whitespace.
 html = re.sub(r"(<body\b[^>]*>\s*)\\n", r"\1", html, count=1, flags=re.IGNORECASE)
 
-# Use a fresh URL so clients and the service worker fetch the current dark stylesheet.
-version = "20261126-dark-restore-03"
+# Use a fresh URL so clients and the service worker fetch the current light stylesheet.
+version = "20261126-white-settings-fix-01"
 link = f'<link rel="stylesheet" href="responsive-layout.css?v={version}">'
 html = re.sub(r'<link rel="stylesheet" href="responsive-layout\.css(?:\?[^"]*)?">', link, html, count=1)
 if link not in html:
