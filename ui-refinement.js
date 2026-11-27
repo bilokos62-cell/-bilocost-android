@@ -28,6 +28,22 @@
     if(intro&&(action==="signup"||action==="skip"||action==="close"))markIntroSeen();
   },true);
 
+  /* Skip the promotional welcome screen and open identification directly. */
+  const bypassWelcomeIntro=()=>{
+    const auth=document.getElementById("auth");
+    if(!auth||!auth.innerHTML.trim()||!/Achetez facilement/i.test(auth.textContent||""))return;
+    const skip=auth.querySelector('[data-auth="skip"]');
+    if(skip){
+      markIntroSeen();
+      skip.click();
+    }
+  };
+  bypassWelcomeIntro();
+  if(window.MutationObserver){
+    const introObserver=new MutationObserver(bypassWelcomeIntro);
+    introObserver.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+  }
+
   const style=document.createElement("style");
   style.id="bilocost-ui-refinement";
   style.textContent=`
