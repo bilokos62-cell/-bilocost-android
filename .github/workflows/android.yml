@@ -153,11 +153,11 @@ jobs:
           source = activity.read_text(encoding="utf-8")
           if "setDecorFitsSystemWindows" not in source:
               if activity.suffix == ".java":
-                  imports = "import androidx.core.view.WindowCompat;\\nimport android.os.Bundle;\\n"
+                  imports = "import androidx.core.view.WindowCompat;\nimport android.os.Bundle;\n"
                   package_end = source.find(";")
                   if package_end < 0:
                       raise SystemExit("MainActivity Java package declaration not found")
-                  source = source[:package_end+1] + "\\n" + imports + source[package_end+1:]
+                  source = source[:package_end+1] + "\n" + imports + source[package_end+1:]
                   class_open = source.find("{", source.find("class MainActivity"))
                   class_close = source.rfind("}")
                   if class_open < 0 or class_close <= class_open:
@@ -165,14 +165,14 @@ jobs:
                   method = """
               @Override
               protected void onCreate(Bundle savedInstanceState) {
-                  WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
                   super.onCreate(savedInstanceState);
+                  WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
               }
           """
                   source = source[:class_close] + method + source[class_close:]
               else:
-                  import_line = "import androidx.core.view.WindowCompat\\n"
-                  first_newline = source.find("\\n")
+                  import_line = "import androidx.core.view.WindowCompat\n"
+                  first_newline = source.find("\n")
                   if first_newline < 0:
                       raise SystemExit("MainActivity Kotlin package line not found")
                   source = source[:first_newline+1] + import_line + source[first_newline+1:]
@@ -182,8 +182,8 @@ jobs:
                       raise SystemExit("MainActivity class body not found")
                   method = """
               override fun onCreate(savedInstanceState: android.os.Bundle?) {
-                  WindowCompat.setDecorFitsSystemWindows(window, true)
                   super.onCreate(savedInstanceState)
+                  WindowCompat.setDecorFitsSystemWindows(window, true)
               }
           """
                   source = source[:class_close] + method + source[class_close:]
