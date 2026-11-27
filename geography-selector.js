@@ -179,5 +179,5 @@
   document.head.appendChild(css);
   setLabel();
   new MutationObserver(setLabel).observe(document.documentElement,{childList:true,subtree:true});
-  window.bilocostGetLocation=()=>({...saved});
+  window.bilocostSetCoordinates=(latitude,longitude,address)=>{\n    const lat=Number(latitude),lng=Number(longitude);\n    if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return false;\n    saved.latitude=lat;saved.longitude=lng;saved.locationSource="map";\n    if(address)saved.mapAddress=String(address).slice(0,240);\n    localStorage.setItem(STORE,JSON.stringify(saved));\n    window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));\n    return true;\n  };\n  window.bilocostGetLocation=()=>({...saved});
 })();
