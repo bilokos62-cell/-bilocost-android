@@ -125,6 +125,66 @@ jobs:
           # Add the brand mark to the Android-only WebView bundle.
           cp resources/bilocost-app-icon.jpg www/bilocost-loader-logo.jpg
           test -s www/bilocost-loader-logo.jpg
+          # Keep the fixed Bilocost header above every scrolling layer.
+          # Use the app surface itself (not an added overlay/band) as an opaque header.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("www/index.html")
+          html = p.read_text(encoding="utf-8")
+          marker = "/* Bilocost Android fixed-header scroll boundary */"
+          css = """
+          /* Bilocost Android fixed-header scroll boundary */
+          header {
+            position: sticky !important;
+            top: env(safe-area-inset-top, 0px) !important;
+            z-index: 300 !important;
+            background: var(--card, #0b1220) !important;
+            background-color: var(--card, #0b1220) !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+          }
+          /* Keep the home Acheter/Louer selector fixed directly under the logo bar. */
+          #view > .tabs {
+            position: sticky !important;
+            top: calc(env(safe-area-inset-top, 0px) + 68px) !important;
+            z-index: 290 !important;
+            margin-top: 0 !important;
+            padding-top: 14px !important;
+            background: var(--bg, #0b1220) !important;
+            border-bottom: 1px solid var(--line, #25314d) !important;
+          }
+          :root[data-theme="light"] header {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+          }
+          :root[data-theme="light"] #view > .tabs {
+            background: #ffffff !important;
+          }
+          /* Settings is a separate full-screen layer: it must cover the home header. */
+          #page {
+            z-index: 400 !important;
+          }
+          /* Keep the bottom app navigation above the Android scrolling viewport. */
+          body > .app > nav,
+          .app > nav {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 500 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+          }
+          """
+          if marker not in html:
+              if "</style>" not in html:
+                  raise SystemExit("Stylesheet closing tag not found")
+              html = html.replace("</style>", css + "\\n</style>", 1)
+          p.write_text(html, encoding="utf-8")
+          print("Android fixed-header stacking and opaque surface applied.")
+          PY
           # Replace the legacy green/video splash with the new white native animation.
           python3 scripts/inject-android-splash.py
 
