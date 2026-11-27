@@ -154,27 +154,27 @@ jobs:
           source = activity.read_text(encoding="utf-8")
           if "setDecorFitsSystemWindows" not in source:
               if activity.suffix == ".java":
-                  import_line = "import androidx.core.view.WindowCompat;\\n"
+                  import_line = "import androidx.core.view.WindowCompat;\n"
                   if import_line not in source:
                       package_end = source.find(";")
                       if package_end < 0:
                           raise SystemExit("MainActivity Java package declaration not found")
-                      source = source[:package_end+1] + "\\n" + import_line + source[package_end+1:]
-                  call = "        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);\\n"
-                  match = re.search(r"(super\\.onCreate\\([^;]*;\\s*)", source)
+                      source = source[:package_end+1] + "\n" + import_line + source[package_end+1:]
+                  call = "        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);\n"
+                  match = re.search(r"(super\.onCreate\([^;]*;\s*)", source)
                   if not match:
                       raise SystemExit("MainActivity onCreate call not found")
-                  source = source[:match.end()] + "\\n" + call + source[match.end():]
+                  source = source[:match.end()] + "\n" + call + source[match.end():]
               else:
-                  import_line = "import androidx.core.view.WindowCompat\\n"
+                  import_line = "import androidx.core.view.WindowCompat\n"
                   if import_line not in source:
                       source = source.replace("package ", "package ", 1)
-                      first_newline = source.find("\\n")
+                      first_newline = source.find("\n")
                       source = source[:first_newline+1] + import_line + source[first_newline+1:]
-                  match = re.search(r"(super\\.onCreate\\([^)]*\\)\\s*)", source)
+                  match = re.search(r"(super\.onCreate\([^)]*\)\s*)", source)
                   if not match:
                       raise SystemExit("MainActivity onCreate call not found")
-                  source = source[:match.end()] + "\\n        WindowCompat.setDecorFitsSystemWindows(window, true)\\n" + source[match.end():]
+                  source = source[:match.end()] + "\n        WindowCompat.setDecorFitsSystemWindows(window, true)\n" + source[match.end():]
               activity.write_text(source, encoding="utf-8")
           if "setDecorFitsSystemWindows" not in activity.read_text(encoding="utf-8"):
               raise SystemExit("Android system-bar inset patch was not applied")
@@ -380,7 +380,7 @@ jobs:
                    if not line.startswith("distributionUrl=")
                    and not line.startswith("networkTimeout=")]
           lines += [
-              "distributionUrl=https\\://mirrors.aliyun.com/gradle/distributions/v8.11.1/gradle-8.11.1-bin.zip",
+              "distributionUrl=https\://mirrors.aliyun.com/gradle/distributions/v8.11.1/gradle-8.11.1-bin.zip",
               "networkTimeout=120000",
           ]
           p.write_text("\n".join(lines) + "\n")
