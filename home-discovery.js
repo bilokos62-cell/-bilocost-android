@@ -66,15 +66,15 @@
     ".bilo-service-info b{font-size:13px;line-height:1.3;overflow-wrap:anywhere}",
     ".bilo-service-info small{font-size:11px;color:var(--mute)}",
     ".bilo-service-info>span{font-size:12px;color:var(--pri);font-weight:800}",
-    ".bilo-service-invite{display:flex!important;flex-direction:row!important;align-items:center!important;gap:13px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important}",
-    ".bilo-service-invite>.bilo-service-icon{display:grid!important;flex:0 0 48px!important;width:48px!important;min-width:48px!important;height:48px!important;writing-mode:horizontal-tb!important}",
-    ".bilo-service-invite>div{display:block!important;flex:1 1 0%!important;width:0!important;min-width:0!important;max-width:none!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;white-space:normal!important}",
+    ".bilo-service-invite{display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;align-items:center!important;gap:13px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important}",
+    ".bilo-service-invite>.bilo-service-icon{display:grid!important;grid-column:1!important;grid-row:1!important;width:48px!important;min-width:48px!important;height:48px!important}",
+    ".bilo-service-invite>div{display:block!important;grid-column:2!important;grid-row:1!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;white-space:normal!important}",
     ".bilo-service-invite>div>b,.bilo-service-invite>div>p{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;white-space:normal!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;word-break:normal!important;overflow-wrap:break-word!important;line-height:1.45!important}",
-    ".bilo-service-invite>.btn{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:max-content!important;max-width:100%!important;white-space:nowrap!important;writing-mode:horizontal-tb!important}",
-    ".bilo-service-invite>.bilo-service-icon{width:48px;height:48px;min-width:48px;flex:none}",
-    ".bilo-service-invite>div{display:block!important;flex:none!important;width:100%!important;min-width:0!important;max-width:100%!important;writing-mode:horizontal-tb!important}",
-    ".bilo-service-invite>div>b,.bilo-service-invite>div>p{display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;writing-mode:horizontal-tb!important;word-break:normal!important;overflow-wrap:break-word!important;line-height:1.45!important}",
-    ".bilo-service-invite .btn{justify-self:end;align-self:center;flex:none!important;white-space:nowrap;max-width:100%}",
+    ".bilo-service-invite>.btn{display:inline-flex!important;grid-column:3!important;grid-row:1!important;justify-self:end!important;align-self:center!important;width:auto!important;min-width:max-content!important;max-width:100%!important;white-space:nowrap!important}",
+undefined
+undefined
+undefined
+undefined
     ".bilo-service-invite>div{flex:1;min-width:0}",
     ".bilo-service-invite b{font-size:13px}",
     ".bilo-service-invite p{margin:4px 0 0;color:var(--mute);font-size:12px}",
