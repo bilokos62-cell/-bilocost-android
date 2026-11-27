@@ -122,7 +122,7 @@ jobs:
           if marker not in html:
               if "</style>" not in html:
                   raise SystemExit("Stylesheet closing tag not found")
-              html = html.replace("</style>", css + "\\n</style>", 1)
+              html = html.replace("</style>", css + "\n</style>", 1)
           p.write_text(html, encoding="utf-8")
           print("Android status-bar overlap guard injected.")
           PY
