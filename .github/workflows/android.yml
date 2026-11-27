@@ -160,6 +160,19 @@ jobs:
           :root[data-theme="light"] #view > .tabs {
             background: #ffffff !important;
           }
+          /* Keep the bottom app navigation above the Android scrolling viewport. */
+          body > .app > nav,
+          .app > nav {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 500 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+          }
           """
           if marker not in html:
               if "</style>" not in html:
