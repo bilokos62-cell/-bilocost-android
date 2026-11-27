@@ -175,8 +175,7 @@
     "#biloLocationOverlay [data-pick][style*=mint]{background:#d9f2e2!important;border-color:#27834b!important;color:#124d2b!important}",
     "#biloLocationOverlay [data-loc-save]{color:#fff!important;background:#176b3a!important;border-color:#176b3a!important}",
     "#biloLocationOverlay [data-loc-save]:disabled{color:#f3f6f4!important;background:#718078!important;opacity:1!important}"
-  ].join("
-")
+  ].join("\n")
   document.head.appendChild(css);
   setLabel();
   new MutationObserver(setLabel).observe(document.documentElement,{childList:true,subtree:true});
