@@ -222,34 +222,6 @@ jobs:
               app.write_text(text, encoding="utf-8")
           PY
 
-      - name: Configure reliable Android dependency mirrors
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("android/settings.gradle")
-          if not p.is_file():
-              raise SystemExit("Generated Android settings.gradle is missing")
-          text = p.read_text(encoding="utf-8")
-          mirrors = [
-              'maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }',
-              'maven { url = uri("https://maven.aliyun.com/repository/central") }',
-              'maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }',
-          ]
-          for block in ("pluginManagement", "dependencyResolutionManagement"):
-              start = text.find(block + " {")
-              if start < 0:
-                  raise SystemExit(f"{block} block missing from settings.gradle")
-              repo = text.find("repositories {", start)
-              if repo < 0:
-                  raise SystemExit(f"{block} repositories block missing")
-              insert = repo + len("repositories {")
-              additions = "\n" + "\n".join("        " + m for m in mirrors)
-              if mirrors[0] not in text[repo:text.find("}", repo)]:
-                  text = text[:insert] + additions + text[insert:]
-          p.write_text(text, encoding="utf-8")
-          print("Configured Google-hosted Maven Central, Aliyun and Huawei mirrors for plugins and dependencies.")
-          PY
-
       - name: Install Bilocost launcher icon
         run: |
           python3 -m pip install --quiet Pillow
@@ -383,10 +355,22 @@ jobs:
           # from the default Maven Central -> GitHub artifact redirect.
           mkdir -p "$HOME/.gradle/init.d"
           cat > "$HOME/.gradle/init.d/bilocost-maven-mirrors.gradle" <<'GRADLE'
+          def mirrorUrls = [
+              "https://maven-central.storage-download.googleapis.com/maven2/",
+              "https://maven.aliyun.com/repository/central",
+              "https://repo.huaweicloud.com/repository/maven/"
+          ]
+          settingsEvaluated { settings ->
+              mirrorUrls.each { mirror ->
+                  settings.pluginManagement.repositories.maven { url = uri(mirror) }
+                  settings.dependencyResolutionManagement.repositories.maven { url = uri(mirror) }
+              }
+          }
           allprojects {
               repositories {
                   maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
                   maven { url = uri("https://maven.aliyun.com/repository/central") }
+                  maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
               }
           }
           GRADLE
