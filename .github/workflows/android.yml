@@ -86,7 +86,8 @@ jobs:
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + html[script_end:]
+          home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -95,7 +96,9 @@ jobs:
         run: python3 scripts/inject-responsive-layout.py
 
       - name: Validate Bilocost source and integrations
-        run: npm run build
+        run: |
+          npm run build
+          node --check home-discovery.js
       - name: Prepare web files
         run: |
           mkdir -p www/icons www/resources
