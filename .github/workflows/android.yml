@@ -160,6 +160,10 @@ jobs:
           :root[data-theme="light"] #view > .tabs {
             background: #ffffff !important;
           }
+          /* Settings is a separate full-screen layer: it must cover the home header. */
+          #page {
+            z-index: 400 !important;
+          }
           /* Keep the bottom app navigation above the Android scrolling viewport. */
           body > .app > nav,
           .app > nav {
