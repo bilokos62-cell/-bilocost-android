@@ -27,7 +27,7 @@
       '</article>'
     ).join("");
     return '<section class="bilo-home-services" aria-label="Services de proximité"><div class="bilo-home-section-head"><div><span class="bilo-section-kicker">AUTOUR DE VOUS</span><h2>Services de proximité</h2><p>Découvrez les professionnels présents sur Bilocost</p></div><button class="lnk" data-t="services">Voir tout →</button></div>'+
-      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite"><span class="bilo-service-icon">'+I("briefcase","",26)+'</span><div><b>Vous proposez un service ?</b><p>Présentez votre activité à la communauté Bilocost.</p></div><button class="btn out" data-t="services">Découvrir</button></div>')+
+      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite"><span class="bilo-service-icon">'+"<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2\"/></svg>"+'</span><div><b>Vous proposez un service ?</b><p>Présentez votre activité à la communauté Bilocost.</p></div><button class="btn out" data-t="services">Découvrir</button></div>')+
       '</section>';
   };
   V.home=function(){
