@@ -243,7 +243,7 @@ jobs:
               if repo < 0:
                   raise SystemExit(f"{block} repositories block missing")
               insert = repo + len("repositories {")
-              additions = "\\n" + "\\n".join("        " + m for m in mirrors)
+              additions = "\n" + "\n".join("        " + m for m in mirrors)
               if mirrors[0] not in text[repo:text.find("}", repo)]:
                   text = text[:insert] + additions + text[insert:]
           p.write_text(text, encoding="utf-8")
