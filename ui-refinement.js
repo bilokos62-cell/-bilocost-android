@@ -446,13 +446,48 @@
       line-height:1.35;
     }
     #auth .fld input {
+      box-sizing:border-box;
+      display:block;
+      width:100%;
       min-width:0;
       height:25px;
+      padding:0;
+      margin:0;
+      border:0!important;
+      border-radius:0!important;
+      outline:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
       color:var(--ink,#0f172a)!important;
       -webkit-text-fill-color:var(--ink,#0f172a)!important;
-      font-size:15px;
-      font-weight:600;
+      font:600 15px/1.4 Inter,system-ui,sans-serif;
+      appearance:none;
+      -webkit-appearance:none;
     }
+    #auth .fld input:focus,
+    #auth .fld input:focus-visible {
+      border:0!important;
+      outline:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+    #auth .fld input:-webkit-autofill,
+    #auth .fld input:-webkit-autofill:hover,
+    #auth .fld input:-webkit-autofill:focus {
+      -webkit-box-shadow:0 0 0 1000px var(--card,#fff) inset!important;
+      -webkit-text-fill-color:var(--ink,#0f172a)!important;
+      caret-color:var(--ink,#0f172a);
+      border:0!important;
+    }
+    #auth .fld {
+      display:flex;
+      align-items:center;
+      min-width:0;
+      box-sizing:border-box;
+    }
+    #auth .fld > input,
+    #auth .fld > div,
+    #auth .fld > label {min-width:0;flex:1 1 auto}
     #auth .fld input::placeholder {
       color:var(--mute,#64748b)!important;
       -webkit-text-fill-color:var(--mute,#64748b)!important;
