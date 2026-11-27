@@ -175,9 +175,19 @@
     "#biloLocationOverlay [data-pick][style*=mint]{background:#d9f2e2!important;border-color:#27834b!important;color:#124d2b!important}",
     "#biloLocationOverlay [data-loc-save]{color:#fff!important;background:#176b3a!important;border-color:#176b3a!important}",
     "#biloLocationOverlay [data-loc-save]:disabled{color:#f3f6f4!important;background:#718078!important;opacity:1!important}"
-  ].join("\n")
+  ].join("
+")
   document.head.appendChild(css);
   setLabel();
   new MutationObserver(setLabel).observe(document.documentElement,{childList:true,subtree:true});
-  window.bilocostSetCoordinates=(latitude,longitude,address)=>{\n    const lat=Number(latitude),lng=Number(longitude);\n    if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return false;\n    saved.latitude=lat;saved.longitude=lng;saved.locationSource="map";\n    if(address)saved.mapAddress=String(address).slice(0,240);\n    localStorage.setItem(STORE,JSON.stringify(saved));\n    window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));\n    return true;\n  };\n  window.bilocostGetLocation=()=>({...saved});
+  window.bilocostSetCoordinates=(latitude,longitude,address)=>{
+    const lat=Number(latitude),lng=Number(longitude);
+    if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return false;
+    saved.latitude=lat;saved.longitude=lng;saved.locationSource="map";
+    if(address)saved.mapAddress=String(address).slice(0,240);
+    localStorage.setItem(STORE,JSON.stringify(saved));
+    window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));
+    return true;
+  };
+  window.bilocostGetLocation=()=>({...saved});
 })();
