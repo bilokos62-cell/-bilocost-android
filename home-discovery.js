@@ -27,7 +27,7 @@
       '</article>'
     ).join("");
     return '<section class="bilo-home-services" aria-label="Services de proximité"><div class="bilo-home-section-head"><div><span class="bilo-section-kicker">AUTOUR DE VOUS</span><h2>Services de proximité</h2><p>Découvrez les professionnels présents sur Bilocost</p></div><button class="lnk" data-t="services">Voir tout →</button></div>'+
-      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite"><span class="bilo-service-icon">'+I("briefcase","",26)+'</span><div><b>Vous proposez un service ?</b><p>Présentez votre activité à la communauté Bilocost.</p></div><button class="btn out" data-t="services">Découvrir</button></div>')+
+      (cards?'<div class="bilo-services-rail">'+cards+'</div>':'<div class="bilo-service-invite"><span class="bilo-service-icon">'+"<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2\"/></svg>"+'</span><div><b>Vous proposez un service ?</b><p>Présentez votre activité à la communauté Bilocost.</p></div><button class="btn out" data-t="services">Découvrir</button></div>')+
       '</section>';
   };
   V.home=function(){
@@ -54,6 +54,8 @@
     ".bilo-category-shortcut{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;min-height:112px;padding:12px 6px;border:1px solid var(--line);border-radius:17px;background:var(--card);color:var(--ink);text-align:center;box-shadow:0 4px 15px rgba(15,23,42,.045)}",
     ".bilo-category-shortcut:active{transform:scale(.98)}",
     ".bilo-category-icon,.bilo-service-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:var(--mint);color:var(--pri)}",
+    ".bilo-service-invite>.bilo-service-icon{font-size:0!important;position:relative!important;display:grid!important;place-items:center!important}",
+    ".bilo-service-invite>.bilo-service-icon svg{display:block!important;visibility:visible!important;opacity:1!important;width:27px!important;height:27px!important;color:var(--pri)!important;stroke:currentColor!important}",
     ".bilo-category-shortcut b{font-size:12px;line-height:1.25;overflow-wrap:anywhere}",
     ".bilo-category-shortcut small{font-size:10px;color:var(--mute)}",
     ".bilo-trending-rail,.bilo-services-rail{display:flex;gap:13px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 12px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}",
@@ -66,15 +68,26 @@
     ".bilo-service-info b{font-size:13px;line-height:1.3;overflow-wrap:anywhere}",
     ".bilo-service-info small{font-size:11px;color:var(--mute)}",
     ".bilo-service-info>span{font-size:12px;color:var(--pri);font-weight:800}",
-    ".bilo-service-invite{display:flex;align-items:center;gap:13px;padding:15px;border:1px dashed var(--line);border-radius:18px;background:var(--panel)}",
+    ".bilo-service-invite{display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;align-items:center!important;gap:13px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important}",
+    ".bilo-service-invite>.bilo-service-icon{display:grid!important;grid-column:1!important;grid-row:1!important;width:48px!important;min-width:48px!important;height:48px!important}",
+    ".bilo-service-invite>div{display:block!important;grid-column:2!important;grid-row:1!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;white-space:normal!important}",
+    ".bilo-service-invite>div>b,.bilo-service-invite>div>p{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;white-space:normal!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;word-break:normal!important;overflow-wrap:break-word!important;line-height:1.45!important}",
+    ".bilo-service-invite>.btn{display:inline-flex!important;grid-column:3!important;grid-row:1!important;justify-self:end!important;align-self:center!important;width:auto!important;min-width:max-content!important;max-width:100%!important;white-space:nowrap!important}",
     ".bilo-service-invite>div{flex:1;min-width:0}",
-    ".bilo-service-invite b{font-size:13px}",
-    ".bilo-service-invite p{margin:4px 0 0;color:var(--mute);font-size:12px}",
+    ".bilo-service-invite>div>b{display:block!important;margin:0!important;font-family:inherit!important;font-size:14px!important;font-weight:750!important;line-height:1.3!important;letter-spacing:-.02em!important;color:var(--ink)!important}",
+    ".bilo-service-invite>div>p{display:block!important;margin:5px 0 0!important;font-family:inherit!important;font-size:13px!important;font-weight:400!important;line-height:1.45!important;letter-spacing:0!important;color:var(--mute)!important}",
     ".bilo-service-invite .btn{flex:0 0 auto;min-width:0}",
     ".brand-ad-rail{scroll-snap-type:x mandatory;scroll-behavior:smooth}.brand-ad-card{scroll-snap-align:start}",
     "@media(max-width:420px){.bilo-category-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.bilo-category-shortcut{min-height:100px;padding:9px 3px;border-radius:14px}.bilo-category-icon{width:42px;height:42px}.bilo-category-shortcut b{font-size:10px}.bilo-category-shortcut small{font-size:9px}.bilo-home-section-head p{font-size:11px}.bilo-service-invite{flex-wrap:wrap}.bilo-service-invite .btn{width:100%}}",
     "@media(min-width:700px){.bilo-category-shortcuts{grid-template-columns:repeat(8,minmax(0,1fr));gap:13px}.bilo-category-shortcut{min-height:126px}.bilo-trending-rail>.card{flex-basis:230px;width:230px}.bilo-service-tile{flex-basis:300px}}",
-    "@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}"
+    "@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}",
+    "/* Final tablet/mobile correction for the service invitation card */",
+    ".bilo-service-invite{display:grid!important;grid-template-columns:48px minmax(0,1fr) 132px!important;grid-template-rows:auto!important;align-items:center!important;column-gap:12px!important;row-gap:10px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important}",
+    ".bilo-service-invite>.bilo-service-icon{grid-column:1!important;grid-row:1!important;width:48px!important;height:48px!important;min-width:48px!important}",
+    ".bilo-service-invite>div{grid-column:2!important;grid-row:1!important;display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}",
+    ".bilo-service-invite>div>b,.bilo-service-invite>div>p{display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important}",
+    ".bilo-service-invite>.btn{grid-column:3!important;grid-row:1!important;display:inline-flex!important;justify-content:center!important;align-items:center!important;width:132px!important;min-width:132px!important;max-width:132px!important;box-sizing:border-box!important;white-space:nowrap!important}",
+    "@media(max-width:520px){.bilo-service-invite{grid-template-columns:42px minmax(0,1fr)!important}.bilo-service-invite>.bilo-service-icon{grid-column:1!important;grid-row:1!important;width:42px!important;height:42px!important;min-width:42px!important}.bilo-service-invite>div{grid-column:2!important;grid-row:1!important}.bilo-service-invite>.btn{grid-column:1/-1!important;grid-row:2!important;width:100%!important;min-width:0!important;max-width:100%!important}}",
   ].join("\n");
   (document.head||document.documentElement).appendChild(style);
   const attachAdCarousel=()=>{

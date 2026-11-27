@@ -55,6 +55,11 @@
     form.locality=loc.commune||loc.territory||loc.neighborhood||"";
     form.locationLabel=loc.location||[loc.province,loc.territory,loc.commune].filter(Boolean).join(" · ");
     form.neighborhood=loc.neighborhood||"";
+    const latitude=Number(loc.latitude),longitude=Number(loc.longitude);
+    if(Number.isFinite(latitude)&&Math.abs(latitude)<=90&&Number.isFinite(longitude)&&Math.abs(longitude)<=180){
+      form.latitude=latitude;form.longitude=longitude;form.locationSource=loc.locationSource||"map";
+    }
+    if(loc.mapAddress)form.mapAddress=String(loc.mapAddress).slice(0,240);
     return originalPublishCloud(form);
   };
   const originalRender=render;

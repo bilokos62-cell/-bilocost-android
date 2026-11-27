@@ -189,16 +189,33 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.title.size() > 0
         && request.resource.data.description is string
-        && request.resource.data.phone is string;
+        && request.resource.data.phone is string
+        && (!("province" in request.resource.data) || (request.resource.data.province is string && request.resource.data.province.size() <= 80))
+        && (!("territory" in request.resource.data) || (request.resource.data.territory is string && request.resource.data.territory.size() <= 100))
+        && (!("commune" in request.resource.data) || (request.resource.data.commune is string && request.resource.data.commune.size() <= 100))
+        && (!("neighborhood" in request.resource.data) || (request.resource.data.neighborhood is string && request.resource.data.neighborhood.size() <= 120))
+        && (!("locationLabel" in request.resource.data) || (request.resource.data.locationLabel is string && request.resource.data.locationLabel.size() <= 260))
+        && (!("latitude" in request.resource.data) || (request.resource.data.latitude is number && request.resource.data.latitude >= -90 && request.resource.data.latitude <= 90))
+        && (!("longitude" in request.resource.data) || (request.resource.data.longitude is number && request.resource.data.longitude >= -180 && request.resource.data.longitude <= 180))
+        && (!("locationSource" in request.resource.data) || (request.resource.data.locationSource is string && request.resource.data.locationSource.size() <= 20))
+        && (!("mapAddress" in request.resource.data) || (request.resource.data.mapAddress is string && request.resource.data.mapAddress.size() <= 240));
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.ownerId == request.auth.uid
         && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.status == resource.data.status
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          "title", "description", "category", "commune", "phone",
-          "price", "currency", "photo", "updatedAt"
+          "title", "description", "category", "commune", "province", "territory",
+          "neighborhood", "locationLabel", "latitude", "longitude", "locationSource", "mapAddress", "phone", "price", "currency", "photo", "updatedAt"
         ])
+        && (!("province" in request.resource.data) || request.resource.data.province is string)
+        && (!("territory" in request.resource.data) || request.resource.data.territory is string)
+        && (!("neighborhood" in request.resource.data) || request.resource.data.neighborhood is string)
+        && (!("locationLabel" in request.resource.data) || request.resource.data.locationLabel is string)
+        && (!("latitude" in request.resource.data) || (request.resource.data.latitude is number && request.resource.data.latitude >= -90 && request.resource.data.latitude <= 90))
+        && (!("longitude" in request.resource.data) || (request.resource.data.longitude is number && request.resource.data.longitude >= -180 && request.resource.data.longitude <= 180))
+        && (!("locationSource" in request.resource.data) || request.resource.data.locationSource is string)
+        && (!("mapAddress" in request.resource.data) || request.resource.data.mapAddress is string)
       );
       allow delete: if isAdmin() || (signedIn() && resource.data.ownerId == request.auth.uid);
     }

@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - fix/auth-forms-stable-v2
 
 jobs:
   deploy:
@@ -87,6 +88,7 @@ jobs:
           services = Path("service-design.js").read_text(encoding="utf-8")
           delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
+          leaflet_map = Path("leaflet-location-map.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
           exchange_rates = Path("exchange-rates.js").read_text(encoding="utf-8")
@@ -94,6 +96,7 @@ jobs:
           order_ui = Path("order-ui-fix.js").read_text(encoding="utf-8")
           startup_screen = Path("startup-screen.js").read_text(encoding="utf-8")
           home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
+          service_location_filter = Path("service-location-filter.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
@@ -102,7 +105,7 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + order_ui + "\n" + startup_screen + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + leaflet_map + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + order_ui + "\n" + startup_screen + "\n" + service_location_filter + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
@@ -115,9 +118,11 @@ jobs:
           node --check marketplace-search.js
           node --check order-ui-fix.js
           node --check startup-screen.js
+          node --check service-location-filter.js
+          node --check leaflet-location-map.js
 
-      - name: Validate Bilocost source and integrations
-        run: npm run build
+      - name: Validate auth refinement syntax for preview
+        run: node --check ui-refinement.js
 
       - name: Prepare website
         run: |
@@ -169,10 +174,10 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy isolated preview channel
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
           # Publish the website independently; Storage IAM permissions must not block Hosting.
-          firebase deploy --only hosting --project bilocost-a8136
+          firebase hosting:channel:deploy auth-preview-115 --project bilocost-a8136 --expires 7d

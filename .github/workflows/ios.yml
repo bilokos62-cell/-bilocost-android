@@ -58,8 +58,11 @@ jobs:
               "service-design.js",
               "delivery-otp.js",
               "geography-selector.js",
+              "leaflet-location-map.js",
+              "leaflet-location-map.js",
               "listing-location.js",
               "ui-refinement.js",
+              "service-location-filter.js",
           ]
           additions = []
           for name in modules:

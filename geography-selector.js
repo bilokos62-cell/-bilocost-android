@@ -179,5 +179,14 @@
   document.head.appendChild(css);
   setLabel();
   new MutationObserver(setLabel).observe(document.documentElement,{childList:true,subtree:true});
+  window.bilocostSetCoordinates=(latitude,longitude,address)=>{
+    const lat=Number(latitude),lng=Number(longitude);
+    if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return false;
+    saved.latitude=lat;saved.longitude=lng;saved.locationSource="map";
+    if(address)saved.mapAddress=String(address).slice(0,240);
+    localStorage.setItem(STORE,JSON.stringify(saved));
+    window.dispatchEvent(new CustomEvent("bilocost:locationChanged",{detail:{...saved}}));
+    return true;
+  };
   window.bilocostGetLocation=()=>({...saved});
 })();

@@ -84,9 +84,12 @@ jobs:
           services = Path("service-design.js").read_text(encoding="utf-8")
           delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
+          leaflet_map = Path("leaflet-location-map.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + html[script_end:]
+          home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
+          service_location_filter = Path("service-location-filter.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + leaflet_map + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + service_location_filter + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -95,7 +98,11 @@ jobs:
         run: python3 scripts/inject-responsive-layout.py
 
       - name: Validate Bilocost source and integrations
-        run: npm run build
+        run: |
+          npm run build
+          node --check home-discovery.js
+          node --check service-location-filter.js
+          node --check leaflet-location-map.js
       - name: Prepare web files
         run: |
           mkdir -p www/icons www/resources
@@ -352,10 +359,22 @@ jobs:
           # from the default Maven Central -> GitHub artifact redirect.
           mkdir -p "$HOME/.gradle/init.d"
           cat > "$HOME/.gradle/init.d/bilocost-maven-mirrors.gradle" <<'GRADLE'
+          def mirrorUrls = [
+              "https://maven-central.storage-download.googleapis.com/maven2/",
+              "https://maven.aliyun.com/repository/central",
+              "https://repo.huaweicloud.com/repository/maven/"
+          ]
+          settingsEvaluated { settings ->
+              mirrorUrls.each { mirror ->
+                  settings.pluginManagement.repositories.maven { url = uri(mirror) }
+                  settings.dependencyResolutionManagement.repositories.maven { url = uri(mirror) }
+              }
+          }
           allprojects {
               repositories {
                   maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
                   maven { url = uri("https://maven.aliyun.com/repository/central") }
+                  maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
               }
           }
           GRADLE
