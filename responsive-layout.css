@@ -1809,8 +1809,7 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     overscroll-behavior: none !important;
   }
 
-  .app > header,
-  header {
+  .app > header {
     position: relative !important;
     inset: auto !important;
     top: auto !important;
