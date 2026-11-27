@@ -189,16 +189,25 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.title.size() > 0
         && request.resource.data.description is string
-        && request.resource.data.phone is string;
+        && request.resource.data.phone is string
+        && (!("province" in request.resource.data) || (request.resource.data.province is string && request.resource.data.province.size() <= 80))
+        && (!("territory" in request.resource.data) || (request.resource.data.territory is string && request.resource.data.territory.size() <= 100))
+        && (!("commune" in request.resource.data) || (request.resource.data.commune is string && request.resource.data.commune.size() <= 100))
+        && (!("neighborhood" in request.resource.data) || (request.resource.data.neighborhood is string && request.resource.data.neighborhood.size() <= 120))
+        && (!("locationLabel" in request.resource.data) || (request.resource.data.locationLabel is string && request.resource.data.locationLabel.size() <= 260));
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.ownerId == request.auth.uid
         && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.status == resource.data.status
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          "title", "description", "category", "commune", "phone",
-          "price", "currency", "photo", "updatedAt"
+          "title", "description", "category", "commune", "province", "territory",
+          "neighborhood", "locationLabel", "phone", "price", "currency", "photo", "updatedAt"
         ])
+        && (!("province" in request.resource.data) || request.resource.data.province is string)
+        && (!("territory" in request.resource.data) || request.resource.data.territory is string)
+        && (!("neighborhood" in request.resource.data) || request.resource.data.neighborhood is string)
+        && (!("locationLabel" in request.resource.data) || request.resource.data.locationLabel is string)
       );
       allow delete: if isAdmin() || (signedIn() && resource.data.ownerId == request.auth.uid);
     }
