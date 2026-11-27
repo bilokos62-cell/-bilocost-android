@@ -14,6 +14,7 @@ const serviceDesign = readFileSync("service-design.js", "utf8");
 const uiRefinement = readFileSync("ui-refinement.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
+const mapLocationPatch = readFileSync("map-location.js", "utf8");
 const exchangeRatesPatch = readFileSync("exchange-rates.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
@@ -79,12 +80,15 @@ try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (
 try { new vm.Script(serviceDesign, { filename: "service-design.js" }); } catch (error) { fail("Service design syntax error: " + error.message); }
 try { new vm.Script(uiRefinement, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement syntax error: " + error.message); }
 try { new vm.Script(listingLocationPatch, { filename: "listing-location.js" }); } catch (error) { fail("Listing location patch syntax error: " + error.message); }
+try { new vm.Script(mapLocationPatch, { filename: "map-location.js" }); } catch (error) { fail("OpenStreetMap/Leaflet module syntax error: " + error.message); }
+if (!mapLocationPatch.includes("tile.openstreetmap.org") || !mapLocationPatch.includes("nominatim.openstreetmap.org/reverse") || !mapLocationPatch.includes("navigator.geolocation.getCurrentPosition")) fail("OpenStreetMap tiles, reverse geocoding, or explicit GPS action is missing");
 if (!listingLocationPatch.includes("form.province=loc.province") || !listingLocationPatch.includes("form.locality=loc.commune") || !listingLocationPatch.includes("Choisissez votre province et votre localité avant de publier")) fail("Listing publication no longer enforces province and locality");
 for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
   if (!workflow.includes("listing-location.js")) fail(platform + " build does not inject the mandatory listing location module");
 }
 if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||loc.neighborhood||")) fail("Listing publication must preserve a valid fallback locality");
 if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
+if (!hostingWorkflow.includes("map-location.js") || !androidWorkflow.includes("map-location.js") || !iosWorkflow.includes("map-location.js")) fail("OpenStreetMap/Leaflet module is not injected on all platforms");
 if (!hostingWorkflow.includes("firebase deploy --only hosting --project bilocost-a8136")) fail("Firebase Hosting must deploy independently of Storage and Firestore IAM");
 if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules --project bilocost-a8136")) fail("Cloud Functions and exchange-rate rules deployment workflow is incomplete");
 if (!functionsSource.includes("exports.syncBccExchangeRate = onSchedule") || !functionsSource.includes("exports.refreshBccExchangeRate = onCall")) fail("Automatic BCC exchange-rate synchronization is missing");
