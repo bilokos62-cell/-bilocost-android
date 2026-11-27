@@ -220,6 +220,8 @@ jobs:
               "android:navigationBarColor": "#073F30",
               "android:windowLightStatusBar": "false",
               "android:windowLightNavigationBar": "false",
+              # Android 15/API 35 edge-to-edge opt-out for this WebView window.
+              "android:windowOptOutEdgeToEdgeEnforcement": "true",
           }
           # Capacitor switches from the launch theme to AppTheme.NoActionBar
           # as soon as the WebView starts. Apply the same system-bar colors to
