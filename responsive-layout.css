@@ -1897,3 +1897,101 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     overscroll-behavior: contain !important;
   }
 }
+
+
+/* ============================================================
+   PRODUCT DETAIL CONTRAST — BOTH LIGHT AND DARK THEMES
+   Apply the same readability guarantee even when data-theme is
+   absent (legacy pages). Preserve each theme's existing surfaces.
+   ============================================================ */
+:root:not([data-theme="dark"]) #page .pw,
+:root:not([data-theme="dark"]) #page .pw h1,
+:root:not([data-theme="dark"]) #page .pw h2,
+:root:not([data-theme="dark"]) #page .pw h3,
+:root:not([data-theme="dark"]) #page .pw h4,
+:root:not([data-theme="dark"]) #page .pw b,
+:root:not([data-theme="dark"]) #page .pw strong {
+  color: #17212b !important;
+  -webkit-text-fill-color: #17212b !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw p,
+:root:not([data-theme="dark"]) #page .pw small,
+:root:not([data-theme="dark"]) #page .pw label,
+:root:not([data-theme="dark"]) #page .pw .sub,
+:root:not([data-theme="dark"]) #page .pw .meta,
+:root:not([data-theme="dark"]) #page .pw .muted,
+:root:not([data-theme="dark"]) #page .pw .hint,
+:root:not([data-theme="dark"]) #page .pw .usd {
+  color: #596579 !important;
+  -webkit-text-fill-color: #596579 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw [style*="color:#fff"],
+:root:not([data-theme="dark"]) #page .pw [style*="color: #fff"],
+:root:not([data-theme="dark"]) #page .pw [style*="color:white"],
+:root:not([data-theme="dark"]) #page .pw [style*="color: white"] {
+  color: #263445 !important;
+  -webkit-text-fill-color: #263445 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw .tag,
+:root:not([data-theme="dark"]) #page .pw .badge,
+:root:not([data-theme="dark"]) #page .pw .chip {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw .cdf,
+:root:not([data-theme="dark"]) #page .pw .price,
+:root:not([data-theme="dark"]) #page .pw .amount {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+  opacity: 1 !important;
+}
+
+:root[data-theme="dark"] #page .pw,
+:root[data-theme="dark"] #page .pw h1,
+:root[data-theme="dark"] #page .pw h2,
+:root[data-theme="dark"] #page .pw h3,
+:root[data-theme="dark"] #page .pw h4,
+:root[data-theme="dark"] #page .pw b,
+:root[data-theme="dark"] #page .pw strong {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw p,
+:root[data-theme="dark"] #page .pw small,
+:root[data-theme="dark"] #page .pw label,
+:root[data-theme="dark"] #page .pw .sub,
+:root[data-theme="dark"] #page .pw .meta,
+:root[data-theme="dark"] #page .pw .muted,
+:root[data-theme="dark"] #page .pw .hint,
+:root[data-theme="dark"] #page .pw .usd {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw [style*="color:#fff"],
+:root[data-theme="dark"] #page .pw [style*="color: #fff"],
+:root[data-theme="dark"] #page .pw [style*="color:white"],
+:root[data-theme="dark"] #page .pw [style*="color: white"] {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw .tag,
+:root[data-theme="dark"] #page .pw .badge,
+:root[data-theme="dark"] #page .pw .chip {
+  color: #e2e8f0 !important;
+  -webkit-text-fill-color: #e2e8f0 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw .cdf,
+:root[data-theme="dark"] #page .pw .price,
+:root[data-theme="dark"] #page .pw .amount {
+  color: #34d399 !important;
+  -webkit-text-fill-color: #34d399 !important;
+  opacity: 1 !important;
+}
