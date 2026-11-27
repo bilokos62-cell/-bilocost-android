@@ -87,7 +87,7 @@
         status.textContent=error.code===1?"Autorisez la localisation dans les paramètres du navigateur puis réessayez.":"Position GPS indisponible. Vérifiez le GPS et réessayez.";
       },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
     };
-    save.onclick=()=>{
+    save.onclick=async ()=>{
       if(!selected||!Number.isFinite(Number(selected.latitude))||!Number.isFinite(Number(selected.longitude)))return;
       const current=read(),updated={...current,latitude:Number(selected.latitude),longitude:Number(selected.longitude),coordinatesSource:"user-selected",coordinatesUpdatedAt:Date.now()};
       save.disabled=true;status.textContent="Enregistrement de la position…";
