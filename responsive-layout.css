@@ -1746,3 +1746,31 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   }
 }
+
+
+/* Navigation stability: prevent scroll anchoring and competing smooth-scroll
+   behavior from shifting page content when the bottom of a screen is reached.
+   Keep one vertical scroll owner for stacked mobile pages (#page). */
+@media (max-width: 699px) {
+  html, body {
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+  }
+  #page {
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+    overscroll-behavior-y: none !important;
+    scroll-snap-type: none !important;
+  }
+  #page .pw {
+    min-height: max-content !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-anchor: none !important;
+    scroll-margin-top: 0 !important;
+  }
+  #page .pw > * {
+    overflow-anchor: none;
+  }
+}
