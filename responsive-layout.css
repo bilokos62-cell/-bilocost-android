@@ -1692,3 +1692,86 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 :root[data-theme="light"] #sheetBody {
   padding-bottom: max(32px, calc(32px + env(safe-area-inset-bottom, 0px))) !important;
 }
+
+
+/* Bilocost service invitation: authoritative tablet and desktop layout */
+#view .bilo-service-invite {
+  display: grid !important;
+  grid-template-columns: 48px minmax(0, 1fr) 132px !important;
+  grid-template-rows: auto !important;
+  align-items: center !important;
+  column-gap: 12px !important;
+  row-gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  writing-mode: horizontal-tb !important;
+}
+#view .bilo-service-invite > .bilo-service-icon {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: grid !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+}
+#view .bilo-service-invite > div {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  writing-mode: horizontal-tb !important;
+  white-space: normal !important;
+}
+#view .bilo-service-invite > div > b,
+#view .bilo-service-invite > div > p {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+#view .bilo-service-invite > button.btn {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 132px !important;
+  min-width: 132px !important;
+  max-width: 132px !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 520px) {
+  #view .bilo-service-invite {
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+  }
+  #view .bilo-service-invite > .bilo-service-icon {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+  }
+  #view .bilo-service-invite > div {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+  #view .bilo-service-invite > button.btn {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
