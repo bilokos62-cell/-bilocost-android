@@ -632,4 +632,84 @@
   `;
   (document.head||document.documentElement).appendChild(authResponsiveStyle);
 
+
+  /* Final auth viewport adaptation: preserve the approved visual design while
+     sizing the same cards for narrow phones, tablets and wide desktop screens. */
+  const authViewportStyle=document.createElement("style");
+  authViewportStyle.id="bilocost-auth-viewport-adaptation";
+  authViewportStyle.textContent=`
+    #auth {
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:flex-start !important;
+      box-sizing:border-box !important;
+      min-height:100dvh !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px)) !important;
+    }
+    #auth .au {
+      flex:0 0 auto !important;
+      width:min(100%,520px) !important;
+      max-width:520px !important;
+      min-width:0 !important;
+      margin:0 auto !important;
+    }
+    #auth .au > * { min-width:0; max-width:100%; }
+    #auth .au .fld,
+    #auth .au .card,
+    #auth .au .btn,
+    #auth .au .soc { width:100%; box-sizing:border-box; }
+    #auth .au .fld input { min-width:0; max-width:100%; }
+    #auth .au .card label { min-width:0; overflow-wrap:anywhere; }
+    @media (min-width:640px) {
+      #auth { padding:24px 24px 32px !important; }
+      #auth .au {
+        width:min(100%,640px) !important;
+        max-width:640px !important;
+        padding:24px 28px 28px !important;
+        margin-block:auto !important;
+      }
+      #auth .au:not(:has(#an)) { max-width:560px !important; }
+    }
+    @media (min-width:760px) {
+      #auth .au:has(#an) {
+        display:grid !important;
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        column-gap:18px !important;
+        align-content:start !important;
+        width:min(100%,820px) !important;
+        max-width:820px !important;
+      }
+      #auth .au:has(#an) > div:nth-child(2),
+      #auth .au:has(#an) > p:first-of-type,
+      #auth .au:has(#an) > .card,
+      #auth .au:has(#an) > .btn,
+      #auth .au:has(#an) > .soc,
+      #auth .au:has(#an) > p,
+      #auth .au:has(#an) > .sub { grid-column:1 / -1 !important; }
+      #auth .au:has(#an) > .fld { margin-bottom:4px !important; }
+      #auth .au:has(#an) > .fld:last-of-type { grid-column:1 / -1 !important; }
+    }
+    @media (min-width:1100px) {
+      #auth { justify-content:center !important; padding:32px 40px !important; }
+      #auth .au:has(#an) {
+        width:min(100%,860px) !important;
+        max-width:860px !important;
+        padding:30px 36px 32px !important;
+      }
+      #auth .au:not(:has(#an)) {
+        width:min(100%,560px) !important;
+        max-width:560px !important;
+        padding:32px 38px !important;
+      }
+    }
+    @media (max-height:720px) {
+      #auth { justify-content:flex-start !important; }
+      #auth .au { margin-top:0 !important; margin-bottom:0 !important; }
+    }
+  `;
+  (document.head||document.documentElement).appendChild(authViewportStyle);
+
 })();
