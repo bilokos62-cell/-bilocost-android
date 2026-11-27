@@ -82,6 +82,8 @@ try { new vm.Script(uiRefinement, { filename: "ui-refinement.js" }); } catch (er
 try { new vm.Script(listingLocationPatch, { filename: "listing-location.js" }); } catch (error) { fail("Listing location patch syntax error: " + error.message); }
 try { new vm.Script(mapLocationPatch, { filename: "map-location.js" }); } catch (error) { fail("OpenStreetMap/Leaflet module syntax error: " + error.message); }
 if (!mapLocationPatch.includes("tile.openstreetmap.org") || !mapLocationPatch.includes("nominatim.openstreetmap.org/reverse") || !mapLocationPatch.includes("navigator.geolocation.getCurrentPosition")) fail("OpenStreetMap tiles, reverse geocoding, or explicit GPS action is missing");
+if (!androidWorkflow.includes("android.permission.ACCESS_FINE_LOCATION") || !androidWorkflow.includes("android.permission.ACCESS_COARSE_LOCATION")) fail("Android foreground location permissions are missing");
+if (!iosWorkflow.includes("NSLocationWhenInUseUsageDescription") || iosWorkflow.includes("NSLocationAlwaysAndWhenInUseUsageDescription")) fail("iOS foreground-only location privacy description is missing");
 if (!listingLocationPatch.includes("form.province=loc.province") || !listingLocationPatch.includes("form.locality=loc.commune") || !listingLocationPatch.includes("Choisissez votre province et votre localité avant de publier")) fail("Listing publication no longer enforces province and locality");
 for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
   if (!workflow.includes("listing-location.js")) fail(platform + " build does not inject the mandatory listing location module");
