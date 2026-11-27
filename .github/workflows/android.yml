@@ -146,7 +146,6 @@ jobs:
           # scrolling page content underneath the status bar.
           python3 - <<'PY'
           from pathlib import Path
-          import re
           roots = list(Path("android/app/src/main").rglob("MainActivity.java")) + list(Path("android/app/src/main").rglob("MainActivity.kt"))
           if len(roots) != 1:
               raise SystemExit(f"Expected one generated MainActivity source, found {len(roots)}")
@@ -154,27 +153,40 @@ jobs:
           source = activity.read_text(encoding="utf-8")
           if "setDecorFitsSystemWindows" not in source:
               if activity.suffix == ".java":
-                  import_line = "import androidx.core.view.WindowCompat;\n"
-                  if import_line not in source:
-                      package_end = source.find(";")
-                      if package_end < 0:
-                          raise SystemExit("MainActivity Java package declaration not found")
-                      source = source[:package_end+1] + "\n" + import_line + source[package_end+1:]
-                  call = "        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);\n"
-                  match = re.search(r"(super\.onCreate\([^;]*;\s*)", source)
-                  if not match:
-                      raise SystemExit("MainActivity onCreate call not found")
-                  source = source[:match.end()] + "\n" + call + source[match.end():]
+                  imports = "import androidx.core.view.WindowCompat;\\nimport android.os.Bundle;\\n"
+                  package_end = source.find(";")
+                  if package_end < 0:
+                      raise SystemExit("MainActivity Java package declaration not found")
+                  source = source[:package_end+1] + "\\n" + imports + source[package_end+1:]
+                  class_open = source.find("{", source.find("class MainActivity"))
+                  class_close = source.rfind("}")
+                  if class_open < 0 or class_close <= class_open:
+                      raise SystemExit("MainActivity class body not found")
+                  method = """
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+                  super.onCreate(savedInstanceState);
+              }
+          """
+                  source = source[:class_close] + method + source[class_close:]
               else:
-                  import_line = "import androidx.core.view.WindowCompat\n"
-                  if import_line not in source:
-                      source = source.replace("package ", "package ", 1)
-                      first_newline = source.find("\n")
-                      source = source[:first_newline+1] + import_line + source[first_newline+1:]
-                  match = re.search(r"(super\.onCreate\([^)]*\)\s*)", source)
-                  if not match:
-                      raise SystemExit("MainActivity onCreate call not found")
-                  source = source[:match.end()] + "\n        WindowCompat.setDecorFitsSystemWindows(window, true)\n" + source[match.end():]
+                  import_line = "import androidx.core.view.WindowCompat\\n"
+                  first_newline = source.find("\\n")
+                  if first_newline < 0:
+                      raise SystemExit("MainActivity Kotlin package line not found")
+                  source = source[:first_newline+1] + import_line + source[first_newline+1:]
+                  class_open = source.find("{", source.find("class MainActivity"))
+                  class_close = source.rfind("}")
+                  if class_open < 0 or class_close <= class_open:
+                      raise SystemExit("MainActivity class body not found")
+                  method = """
+              override fun onCreate(savedInstanceState: android.os.Bundle?) {
+                  WindowCompat.setDecorFitsSystemWindows(window, true)
+                  super.onCreate(savedInstanceState)
+              }
+          """
+                  source = source[:class_close] + method + source[class_close:]
               activity.write_text(source, encoding="utf-8")
           if "setDecorFitsSystemWindows" not in activity.read_text(encoding="utf-8"):
               raise SystemExit("Android system-bar inset patch was not applied")
