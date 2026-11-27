@@ -87,7 +87,8 @@ jobs:
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
           home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + html[script_end:]
+          service_location_filter = Path("service-location-filter.js").read_text(encoding="utf-8")
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + service_location_filter + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -99,6 +100,7 @@ jobs:
         run: |
           npm run build
           node --check home-discovery.js
+          node --check service-location-filter.js
       - name: Prepare web files
         run: |
           mkdir -p www/icons www/resources
