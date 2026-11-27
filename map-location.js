@@ -67,9 +67,7 @@
       else marker=window.L.marker([lat,lon],{draggable:true}).addTo(map);
       marker.off("dragend").on("dragend",e=>{const p=e.target.getLatLng();setPoint(p.lat,p.lng,map.getZoom());});
       save.disabled=false;status.textContent="Position sélectionnée : "+Number(lat).toFixed(5)+", "+Number(lon).toFixed(5)+" · Recherche de l’adresse…";
-      const place=await reverse(lat,lon);
-      selected.reverseLabel=place.label;selected.neighborhood=place.neighborhood||selected.neighborhood||"";
-      status.textContent=place.label||("Coordonnées : "+Number(lat).toFixed(5)+", "+Number(lon).toFixed(5));
+      status.textContent="Coordonnées : "+Number(lat).toFixed(5)+", "+Number(lon).toFixed(5);
       if(zoom)map.setView([lat,lon],zoom);
     };
     const close=()=>{modal.remove();map=null;marker=null;};
@@ -92,8 +90,10 @@
     save.onclick=()=>{
       if(!selected||!Number.isFinite(Number(selected.latitude))||!Number.isFinite(Number(selected.longitude)))return;
       const current=read(),updated={...current,latitude:Number(selected.latitude),longitude:Number(selected.longitude),coordinatesSource:"user-selected",coordinatesUpdatedAt:Date.now()};
-      if(selected.reverseLabel)updated.mapAddress=selected.reverseLabel;
-      if(selected.neighborhood)updated.neighborhood=selected.neighborhood;
+      save.disabled=true;status.textContent="Enregistrement de la position…";
+      const place=await reverse(updated.latitude,updated.longitude);
+      if(place.label)updated.mapAddress=place.label;
+      if(place.neighborhood)updated.neighborhood=place.neighborhood;
       localStorage.setItem(STORE,JSON.stringify(updated));
       window.dispatchEvent(new CustomEvent("bilocost:coordinatesChanged",{detail:{latitude:updated.latitude,longitude:updated.longitude,mapAddress:updated.mapAddress||""}}));
       close();
