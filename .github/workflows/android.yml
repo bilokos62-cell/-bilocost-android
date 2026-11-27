@@ -137,15 +137,28 @@ jobs:
           header {
             position: sticky !important;
             top: env(safe-area-inset-top, 0px) !important;
-            z-index: 200 !important;
+            z-index: 300 !important;
             background: var(--card, #0b1220) !important;
             background-color: var(--card, #0b1220) !important;
             -webkit-backdrop-filter: none !important;
             backdrop-filter: none !important;
           }
+          /* Keep the home Acheter/Louer selector fixed directly under the logo bar. */
+          #view > .tabs {
+            position: sticky !important;
+            top: calc(env(safe-area-inset-top, 0px) + 68px) !important;
+            z-index: 290 !important;
+            margin-top: 0 !important;
+            padding-top: 14px !important;
+            background: var(--bg, #0b1220) !important;
+            border-bottom: 1px solid var(--line, #25314d) !important;
+          }
           :root[data-theme="light"] header {
             background: #ffffff !important;
             background-color: #ffffff !important;
+          }
+          :root[data-theme="light"] #view > .tabs {
+            background: #ffffff !important;
           }
           """
           if marker not in html:
