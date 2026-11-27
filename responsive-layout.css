@@ -1774,3 +1774,127 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
     overflow-anchor: none;
   }
 }
+
+/* ============================================================
+   BILOCOST MOBILE NAVIGATION — SINGLE SCROLL OWNER
+   The previous mobile overrides let html/body, #view and #page
+   compete for vertical scrolling. Lock the app viewport and let
+   only the currently visible screen container scroll.
+   ============================================================ */
+@media (max-width: 699px) {
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+  }
+
+  .app {
+    position: fixed !important;
+    inset: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: env(safe-area-inset-top, 0px) 0 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
+  .app > header,
+  header {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    z-index: 180 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  /* Main screen: the only scrollable area while #page is closed. */
+  #view.wrap {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Secondary screen: an independent viewport, active only when shown. */
+  #page {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+    z-index: 150 !important;
+  }
+
+  #page .pw {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    overflow-anchor: none !important;
+    scroll-margin: 0 !important;
+    padding-top: max(16px, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #page .pw > * {
+    overflow-anchor: none !important;
+  }
+
+  /* Fixed controls do not participate in the content's scroll movement. */
+  nav {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 220 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    transform: none !important;
+  }
+
+  #sheet,
+  #auth,
+  #biloLocationOverlay {
+    overscroll-behavior: contain !important;
+  }
+}
