@@ -164,9 +164,6 @@ jobs:
           ET.register_namespace("android", android)
           tree = ET.parse(styles)
           root = tree.getroot()
-          launch = next((node for node in root.findall("style") if node.get("name") == "AppTheme.NoActionBarLaunch"), None)
-          if launch is None:
-              raise SystemExit("Native launch theme AppTheme.NoActionBarLaunch was not found")
           settings = {
               "android:windowBackground": "#073F30",
               "android:statusBarColor": "#073F30",
@@ -174,11 +171,23 @@ jobs:
               "android:windowLightStatusBar": "false",
               "android:windowLightNavigationBar": "false",
           }
-          for name, value in settings.items():
-              item = next((x for x in launch.findall("item") if x.get("name") == name), None)
-              if item is None:
-                  item = ET.SubElement(launch, "item", {"name": name})
-              item.text = value
+          # Capacitor switches from the launch theme to AppTheme.NoActionBar
+          # as soon as the WebView starts. Apply the same system-bar colors to
+          # BOTH themes; changing only the launch theme causes the bar to revert.
+          theme_names = ("AppTheme.NoActionBarLaunch", "AppTheme.NoActionBar")
+          found = set()
+          for theme_name in theme_names:
+              theme = next((node for node in root.findall("style") if node.get("name") == theme_name), None)
+              if theme is None:
+                  raise SystemExit(f"Native Android theme {theme_name} was not found")
+              found.add(theme_name)
+              for name, value in settings.items():
+                  item = next((x for x in theme.findall("item") if x.get("name") == name), None)
+                  if item is None:
+                      item = ET.SubElement(theme, "item", {"name": name})
+                  item.text = value
+          if found != set(theme_names):
+              raise SystemExit("Launch and runtime Android themes were not both configured")
           tree.write(styles, encoding="utf-8", xml_declaration=True)
           ET.parse(styles)
           PY
