@@ -100,6 +100,32 @@ jobs:
         run: |
           mkdir -p www/icons www/resources
           cp index.html www/index.html
+          # Mask the transparent Android edge-to-edge status-bar area so scrolling cards never show above the fixed brand header.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("www/index.html")
+          html = p.read_text(encoding="utf-8")
+          marker = "/* Bilocost Android status-bar content guard */"
+          css = """\n          /* Bilocost Android status-bar content guard */
+          body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background: #073F30;
+            z-index: 9999;
+            pointer-events: none;
+          }
+          """
+          if marker not in html:
+              if "</style>" not in html:
+                  raise SystemExit("Stylesheet closing tag not found")
+              html = html.replace("</style>", css + "\n</style>", 1)
+          p.write_text(html, encoding="utf-8")
+          print("Android status-bar overlap guard injected.")
+          PY
           python3 - <<'PY'
           from pathlib import Path
           p = Path("www/index.html")
