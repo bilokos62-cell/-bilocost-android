@@ -104,7 +104,7 @@ jobs:
           script_end = html.find("</script>", pos)
           if script_start < 0 or script_end < 0:
               raise SystemExit("Application script boundaries not found")
-          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + order_ui + "\n" + startup_screen + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + patch + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + home_discovery + "\n" + exchange_rates + "\n" + marketplace_search + "\n" + order_ui + "\n" + startup_screen + "\n" + service_location_filter + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected into the application script.")
           PY
