@@ -56,7 +56,7 @@
     ".bilo-category-icon,.bilo-service-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:var(--mint);color:var(--pri)}",
     ".bilo-service-invite>.bilo-service-icon{font-size:0!important;position:relative!important;display:grid!important;place-items:center!important}",
     ".bilo-service-invite>.bilo-service-icon:before{content:\"💼\"!important;display:block!important;font-family:system-ui,sans-serif!important;font-size:27px!important;line-height:1!important;font-style:normal!important;opacity:1!important}",
-    ".bilo-service-invite>.bilo-service-icon svg{display:none!important}",
+    ".bilo-service-invite>.bilo-service-icon svg{display:block!important;visibility:visible!important;opacity:1!important;width:28px!important;height:28px!important;color:#6ee7b7!important;stroke:#6ee7b7!important}",
     ".bilo-category-shortcut b{font-size:12px;line-height:1.25;overflow-wrap:anywhere}",
     ".bilo-category-shortcut small{font-size:10px;color:var(--mute)}",
     ".bilo-trending-rail,.bilo-services-rail{display:flex;gap:13px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 12px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}",
