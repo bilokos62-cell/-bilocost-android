@@ -445,13 +445,52 @@
       font-size:13px;
       line-height:1.35;
     }
+    /* Keep the field shell as the only visible control; remove nested browser input boxes. */
+    #auth .fld > span:nth-child(2) {
+      display:flex;
+      flex:1 1 auto;
+      flex-direction:column;
+      justify-content:center;
+      min-width:0;
+    }
     #auth .fld input {
+      display:block;
+      box-sizing:border-box;
+      width:100%;
       min-width:0;
       height:25px;
+      margin:0;
+      padding:0;
+      border:0!important;
+      border-radius:0!important;
+      outline:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
       color:var(--ink,#0f172a)!important;
       -webkit-text-fill-color:var(--ink,#0f172a)!important;
-      font-size:15px;
-      font-weight:600;
+      font:600 15px/1.4 Inter,system-ui,sans-serif;
+      appearance:none;
+      -webkit-appearance:none;
+    }
+    #auth .fld input:focus,
+    #auth .fld input:focus-visible {
+      border:0!important;
+      outline:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+    #auth .fld input:-webkit-autofill,
+    #auth .fld input:-webkit-autofill:hover,
+    #auth .fld input:-webkit-autofill:focus {
+      -webkit-box-shadow:0 0 0 1000px var(--card,#fff) inset!important;
+      -webkit-text-fill-color:var(--ink,#0f172a)!important;
+      caret-color:var(--ink,#0f172a);
+      border:0!important;
+    }
+    /* Let login and signup scroll naturally when the mobile keyboard opens. */
+    #auth .au:not(.c) {
+      min-height:0!important;
+      justify-content:flex-start!important;
     }
     #auth .fld input::placeholder {
       color:var(--mute,#64748b)!important;
