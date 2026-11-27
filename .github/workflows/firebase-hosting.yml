@@ -1,4 +1,5 @@
 name: Deploy Bilocost Website to Firebase
+# Shared web bundle also runs Android/iOS PR checks when common injected modules change.
 
 on:
   workflow_dispatch:
