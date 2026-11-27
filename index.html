@@ -651,12 +651,24 @@ function reelScreen(){
 }
 async function reelLoad(){
  const root=document.querySelector("#reelFeed");if(!root)return;
- if(!CLOUD||!FB||!FB.F){root.innerHTML='<div class="reel-empty">Connectez-vous à Internet pour consulter les Réels.</div>';return}
+ if(root.dataset.loading==="1")return;
+ if(!CLOUD||!FB||!FB.F){root.innerHTML='<div class="reel-empty">Connexion Firebase indisponible. Vérifiez votre connexion puis réessayez.<br><button class="btn out sm" type="button" onclick="reelLoad()">Réessayer</button></div>';return}
+ root.dataset.loading="1";
+ root.innerHTML='<div class="reel-empty" role="status">Chargement des Réels…</div>';
+ let timeoutId;
  try{
-  const q=await FB.F.getDocs(FB.F.query(FB.F.collection(FB.db,"reels"),FB.F.where("status","==","ACTIVE"),FB.F.orderBy("createdAt","desc"),FB.F.limit(30)));
+  const query=FB.F.getDocs(FB.F.query(FB.F.collection(FB.db,"reels"),FB.F.where("status","==","ACTIVE"),FB.F.orderBy("createdAt","desc"),FB.F.limit(30)));
+  const q=await Promise.race([query,new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error("Délai dépassé : le serveur ne répond pas.")),15000)})]);
+  if(!root.isConnected)return;
   if(!q.docs.length){root.innerHTML='<div class="reel-empty">Aucun Réel pour le moment. Soyez parmi les premiers à présenter un produit !</div>';return}
   root.innerHTML=q.docs.map(d=>{const x=d.data();return '<article class="reel-card"><video class="reel-video" controls playsinline preload="metadata" src="'+esc(x.videoUrl)+'"></video><div class="reel-meta"><b>'+esc(x.productTitle||"Produit Bilocost")+'</b><div class="sub">'+esc(x.ownerName||"Vendeur vérifié")+'</div><div style="margin-top:8px">'+esc(x.caption||"")+'</div><button class="btn out sm" style="margin-top:10px" data-act="reel-boost" data-v="'+esc(d.id)+'">Booster ce Réel</button></div></article>'}).join("");
- }catch(e){console.error("Reels load",e);root.innerHTML='<div class="reel-empty">Impossible de charger les Réels. Vérifiez la connexion Firebase et les index Firestore.</div>'}
+ }catch(e){
+  console.error("Reels load",e);
+  if(root.isConnected)root.innerHTML='<div class="reel-empty" role="alert"><b>Les Réels ne sont pas disponibles pour le moment.</b><p class="sub">'+esc(e&&e.message?e.message:"Vérifiez la connexion Firebase et les index Firestore.")+'</p><button class="btn out sm" type="button" onclick="reelLoad()">Réessayer</button></div>';
+ }finally{
+  if(timeoutId)clearTimeout(timeoutId);
+  if(root.isConnected)delete root.dataset.loading;
+ }
 }
 function reelNewSheet(){
  if(!S.user)return needUser();
