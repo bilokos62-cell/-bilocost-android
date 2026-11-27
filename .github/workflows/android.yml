@@ -142,6 +142,44 @@ jobs:
           }
           EOF
           npx cap add android
+          # Keep the Android WebView inside the system bars instead of drawing
+          # scrolling page content underneath the status bar.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          roots = list(Path("android/app/src/main").rglob("MainActivity.java")) + list(Path("android/app/src/main").rglob("MainActivity.kt"))
+          if len(roots) != 1:
+              raise SystemExit(f"Expected one generated MainActivity source, found {len(roots)}")
+          activity = roots[0]
+          source = activity.read_text(encoding="utf-8")
+          if "setDecorFitsSystemWindows" not in source:
+              if activity.suffix == ".java":
+                  import_line = "import androidx.core.view.WindowCompat;\\n"
+                  if import_line not in source:
+                      package_end = source.find(";")
+                      if package_end < 0:
+                          raise SystemExit("MainActivity Java package declaration not found")
+                      source = source[:package_end+1] + "\\n" + import_line + source[package_end+1:]
+                  call = "        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);\\n"
+                  match = re.search(r"(super\\.onCreate\\([^;]*;\\s*)", source)
+                  if not match:
+                      raise SystemExit("MainActivity onCreate call not found")
+                  source = source[:match.end()] + "\\n" + call + source[match.end():]
+              else:
+                  import_line = "import androidx.core.view.WindowCompat\\n"
+                  if import_line not in source:
+                      source = source.replace("package ", "package ", 1)
+                      first_newline = source.find("\\n")
+                      source = source[:first_newline+1] + import_line + source[first_newline+1:]
+                  match = re.search(r"(super\\.onCreate\\([^)]*\\)\\s*)", source)
+                  if not match:
+                      raise SystemExit("MainActivity onCreate call not found")
+                  source = source[:match.end()] + "\\n        WindowCompat.setDecorFitsSystemWindows(window, true)\\n" + source[match.end():]
+              activity.write_text(source, encoding="utf-8")
+          if "setDecorFitsSystemWindows" not in activity.read_text(encoding="utf-8"):
+              raise SystemExit("Android system-bar inset patch was not applied")
+          print(f"Applied non-overlay system-bar insets to {activity}")
+          PY
           # Match the native launch window to the Bilocost reference green before the WebView appears.
           python3 - <<'PY'
           from pathlib import Path
