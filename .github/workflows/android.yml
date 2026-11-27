@@ -142,6 +142,56 @@ jobs:
           }
           EOF
           npx cap add android
+          # Keep the Android WebView inside the system bars instead of drawing
+          # scrolling page content underneath the status bar.
+          python3 - <<'PY'
+          from pathlib import Path
+          roots = list(Path("android/app/src/main").rglob("MainActivity.java")) + list(Path("android/app/src/main").rglob("MainActivity.kt"))
+          if len(roots) != 1:
+              raise SystemExit(f"Expected one generated MainActivity source, found {len(roots)}")
+          activity = roots[0]
+          source = activity.read_text(encoding="utf-8")
+          if "setDecorFitsSystemWindows" not in source:
+              if activity.suffix == ".java":
+                  imports = "import androidx.core.view.WindowCompat;\nimport android.os.Bundle;\n"
+                  package_end = source.find(";")
+                  if package_end < 0:
+                      raise SystemExit("MainActivity Java package declaration not found")
+                  source = source[:package_end+1] + "\n" + imports + source[package_end+1:]
+                  class_open = source.find("{", source.find("class MainActivity"))
+                  class_close = source.rfind("}")
+                  if class_open < 0 or class_close <= class_open:
+                      raise SystemExit("MainActivity class body not found")
+                  method = """
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+              }
+          """
+                  source = source[:class_close] + method + source[class_close:]
+              else:
+                  import_line = "import androidx.core.view.WindowCompat\n"
+                  first_newline = source.find("\n")
+                  if first_newline < 0:
+                      raise SystemExit("MainActivity Kotlin package line not found")
+                  source = source[:first_newline+1] + import_line + source[first_newline+1:]
+                  class_open = source.find("{", source.find("class MainActivity"))
+                  class_close = source.rfind("}")
+                  if class_open < 0 or class_close <= class_open:
+                      raise SystemExit("MainActivity class body not found")
+                  method = """
+              override fun onCreate(savedInstanceState: android.os.Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  WindowCompat.setDecorFitsSystemWindows(window, true)
+              }
+          """
+                  source = source[:class_close] + method + source[class_close:]
+              activity.write_text(source, encoding="utf-8")
+          if "setDecorFitsSystemWindows" not in activity.read_text(encoding="utf-8"):
+              raise SystemExit("Android system-bar inset patch was not applied")
+          print(f"Applied non-overlay system-bar insets to {activity}")
+          PY
           # Match the native launch window to the Bilocost reference green before the WebView appears.
           python3 - <<'PY'
           from pathlib import Path
@@ -170,6 +220,8 @@ jobs:
               "android:navigationBarColor": "#073F30",
               "android:windowLightStatusBar": "false",
               "android:windowLightNavigationBar": "false",
+              # Android 15/API 35 edge-to-edge opt-out for this WebView window.
+              "android:windowOptOutEdgeToEdgeEnforcement": "true",
           }
           # Capacitor switches from the launch theme to AppTheme.NoActionBar
           # as soon as the WebView starts. Apply the same system-bar colors to
@@ -342,7 +394,7 @@ jobs:
                    if not line.startswith("distributionUrl=")
                    and not line.startswith("networkTimeout=")]
           lines += [
-              "distributionUrl=https\\://mirrors.aliyun.com/gradle/distributions/v8.11.1/gradle-8.11.1-bin.zip",
+              "distributionUrl=https\://mirrors.aliyun.com/gradle/distributions/v8.11.1/gradle-8.11.1-bin.zip",
               "networkTimeout=120000",
           ]
           p.write_text("\n".join(lines) + "\n")
