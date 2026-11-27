@@ -82,7 +82,14 @@ undefined
     ".brand-ad-rail{scroll-snap-type:x mandatory;scroll-behavior:smooth}.brand-ad-card{scroll-snap-align:start}",
     "@media(max-width:420px){.bilo-category-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.bilo-category-shortcut{min-height:100px;padding:9px 3px;border-radius:14px}.bilo-category-icon{width:42px;height:42px}.bilo-category-shortcut b{font-size:10px}.bilo-category-shortcut small{font-size:9px}.bilo-home-section-head p{font-size:11px}.bilo-service-invite{flex-wrap:wrap}.bilo-service-invite .btn{width:100%}}",
     "@media(min-width:700px){.bilo-category-shortcuts{grid-template-columns:repeat(8,minmax(0,1fr));gap:13px}.bilo-category-shortcut{min-height:126px}.bilo-trending-rail>.card{flex-basis:230px;width:230px}.bilo-service-tile{flex-basis:300px}}",
-    "@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}"
+    "@media(prefers-reduced-motion:reduce){.brand-ad-rail{scroll-behavior:auto}}",
+    "/* Final tablet/mobile correction for the service invitation card */",
+    ".bilo-service-invite{display:grid!important;grid-template-columns:48px minmax(0,1fr) 132px!important;grid-template-rows:auto!important;align-items:center!important;column-gap:12px!important;row-gap:10px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important}",
+    ".bilo-service-invite>.bilo-service-icon{grid-column:1!important;grid-row:1!important;width:48px!important;height:48px!important;min-width:48px!important}",
+    ".bilo-service-invite>div{grid-column:2!important;grid-row:1!important;display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}",
+    ".bilo-service-invite>div>b,.bilo-service-invite>div>p{display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important}",
+    ".bilo-service-invite>.btn{grid-column:3!important;grid-row:1!important;display:inline-flex!important;justify-content:center!important;align-items:center!important;width:132px!important;min-width:132px!important;max-width:132px!important;box-sizing:border-box!important;white-space:nowrap!important}",
+    "@media(max-width:520px){.bilo-service-invite{grid-template-columns:42px minmax(0,1fr)!important}.bilo-service-invite>.bilo-service-icon{grid-column:1!important;grid-row:1!important;width:42px!important;height:42px!important;min-width:42px!important}.bilo-service-invite>div{grid-column:2!important;grid-row:1!important}.bilo-service-invite>.btn{grid-column:1/-1!important;grid-row:2!important;width:100%!important;min-width:0!important;max-width:100%!important}}",
   ].join("\n");
   (document.head||document.documentElement).appendChild(style);
   const attachAdCarousel=()=>{
