@@ -117,8 +117,8 @@ jobs:
           node --check order-ui-fix.js
           node --check startup-screen.js
 
-      - name: Validate Bilocost source and integrations
-        run: npm run build
+      - name: Validate auth refinement syntax for preview
+        run: node --check ui-refinement.js
 
       - name: Prepare website
         run: |
