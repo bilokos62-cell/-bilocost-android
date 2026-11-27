@@ -95,6 +95,7 @@ jobs:
           order_ui = Path("order-ui-fix.js").read_text(encoding="utf-8")
           startup_screen = Path("startup-screen.js").read_text(encoding="utf-8")
           home_discovery = Path("home-discovery.js").read_text(encoding="utf-8")
+          service_location_filter = Path("service-location-filter.js").read_text(encoding="utf-8")
           marker = "const CLOUD="
           pos = html.find(marker)
           if pos < 0:
@@ -116,6 +117,7 @@ jobs:
           node --check marketplace-search.js
           node --check order-ui-fix.js
           node --check startup-screen.js
+          node --check service-location-filter.js
 
       - name: Validate auth refinement syntax for preview
         run: node --check ui-refinement.js
