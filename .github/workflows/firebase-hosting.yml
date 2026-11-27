@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - fix/auth-forms-stable-v2
 
 jobs:
   deploy:
@@ -169,10 +170,10 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy isolated preview channel
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
           # Publish the website independently; Storage IAM permissions must not block Hosting.
-          firebase deploy --only hosting --project bilocost-a8136
+          firebase hosting:channel:deploy auth-preview-115 --only hosting --project bilocost-a8136 --expires 7d
