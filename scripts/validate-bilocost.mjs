@@ -15,6 +15,7 @@ const uiRefinement = readFileSync("ui-refinement.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
 const exchangeRatesPatch = readFileSync("exchange-rates.js", "utf8");
+const advertisingPatch = readFileSync("advertising-space.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
 const iosWorkflow = readFileSync(".github/workflows/ios.yml", "utf8");
@@ -90,6 +91,12 @@ if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includ
 if (!functionsSource.includes("exports.syncBccExchangeRate = onSchedule") || !functionsSource.includes("exports.refreshBccExchangeRate = onCall")) fail("Automatic BCC exchange-rate synchronization is missing");
 if (!functionsWorkflow.includes("FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136")) fail("Cloud Functions deployment credentials are not configured");
 try { new vm.Script(exchangeRatesPatch, { filename: "exchange-rates.js" }); } catch (error) { fail("Exchange-rate widget syntax error: " + error.message); }
+try { new vm.Script(advertisingPatch, { filename: "advertising-space.js" }); } catch (error) { fail("Advertiser space syntax error: " + error.message); }
+if (!hostingWorkflow.includes('Path("advertising-space.js").read_text') || !hostingWorkflow.includes("startup_screen + \"\\n\" + advertising")) fail("Advertiser campaign module is not injected into the website build");
+if (!advertisingPatch.includes('"slot1":{7:12,15:25,30:50}') || !advertisingPatch.includes('"slot2":{7:7,15:15,30:30}')) fail("Fixed advertising price grid is incomplete");
+if (!advertisingPatch.includes('paymentStatus:"AWAITING_VERIFICATION"') || !advertisingPatch.includes('status:"PENDING_REVIEW"')) fail("Advertiser payment-before-approval workflow is incomplete");
+if (!functionsSource.includes("exports.expireAdvertisingCampaigns = onSchedule")) fail("Automatic advertising expiry function is missing");
+if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "ads" && index.fields.some(field => field.fieldPath === "status") && index.fields.some(field => field.fieldPath === "endsAt"))) fail("Advertising expiry composite index is missing");
 if (!exchangeRatesPatch.includes("exchange_rates/current") || !exchangeRatesPatch.includes("onSnapshot")) fail("Exchange-rate widget must listen to the live Firestore rate document");
 if (!geographyPatch.includes('state.province=provinces.find(x=>getId(x)===id)||null;state.territory=null;state.local=null;state.manual=""')) fail("Changing province must clear the previous locality");
 
