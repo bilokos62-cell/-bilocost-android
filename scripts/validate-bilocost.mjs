@@ -93,6 +93,9 @@ if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.
 if (!hostingWorkflow.includes("map-location.js") || !androidWorkflow.includes("map-location.js") || !iosWorkflow.includes("map-location.js")) fail("OpenStreetMap/Leaflet module is not injected on all platforms");
 if (!hostingWorkflow.includes("firebase deploy --only hosting --project bilocost-a8136")) fail("Firebase Hosting must deploy independently of Storage and Firestore IAM");
 if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules,storage:rules --project bilocost-a8136") || !functionsWorkflow.includes("'firestore.rules'") || !functionsWorkflow.includes("'storage.rules'")) fail("Cloud Functions, Firestore, and Storage deployment workflow is incomplete");
+if (/function reelNewSheet\\(\\)[\\s\\S]*?S\\.user\\.verificationStatus\\s*!==\\s*["']verified["']/.test(html)) fail("Reel creation UI still requires identity certification");
+if (/function reelPublish\\(\\)[\\s\\S]*?S\\.user\\.verificationStatus\\s*!==\\s*["']verified["']/.test(html)) fail("Reel publishing UI still requires identity certification");
+if (!html.includes('if(!S.user)return needUser();')) fail("Reel publishing must still require authentication");
 const reelRules = firestoreRules.match(/match \/reels\/\{reelId\} \{[\s\S]*?\n    \}/)?.[0] || "";
 const rentalRules = firestoreRules.match(/match \/rentalListings\/\{listingId\} \{[\s\S]*?\n    \}/)?.[0] || "";
 const reelStorageRules = storageRules.match(/match \/reels\/\{uid\}\/\{fileName\} \{[\s\S]*?\n    \}/)?.[0] || "";
