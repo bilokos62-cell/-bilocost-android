@@ -224,8 +224,8 @@ service cloud.firestore {
       allow read: if resource.data.status == "ACTIVE"
         || (signedIn() && resource.data.ownerId == request.auth.uid)
         || isAdmin();
+      // Any authenticated user may publish a Reel; identity certification is not required.
       allow create: if signedIn()
-        && hasVerifiedIdentity(request.auth.uid)
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.productTitle is string
         && request.resource.data.productTitle.size() > 0
