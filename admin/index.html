@@ -128,7 +128,7 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    if(currentTab==="adsPayment"){patch.status=approve?"PENDING_REVIEW":"REJECTED";patch.paymentStatus=approve?"VERIFIED":"REJECTED";if(approve&&!((await ref.get()).data()||{}).paymentReference)throw new Error("Ajoutez d’abord une référence de paiement dans le dossier.");}
    if(currentTab==="ads"){
     patch.status=approve?"APPROVED":"REJECTED";
-    if(approve){const data=(await ref.get()).data();const duration=Math.max(1,Math.min(30,Number(data.durationDays)||7));const endsAt=firebase.firestore.Timestamp.fromDate(new Date(Date.now()+duration*86400000));await db.collection("ads").add({title:data.title||"Publicité",description:data.description||"",url:data.url,slot:data.slot||"slot1",image:data.image||"",status:"ACTIVE",endsAt,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+    if(approve){const data=(await ref.get()).data();const duration=Math.max(1,Math.min(30,Number(data.durationDays)||7));const endsAt=firebase.firestore.Timestamp.fromDate(new Date(Date.now()+duration*86400000));const slots=data.slot==="both"?["slot1","slot2"]:[data.slot||"slot1"];for(const slot of slots){await db.collection("ads").add({ownerId:data.ownerId||"",businessName:data.businessName||"",title:data.title||"Publicité",description:data.description||"",url:data.url,image:data.image||"",slot,status:"ACTIVE",endsAt,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}}
    }
    await ref.update(patch);await load();
   }catch(e){window.alert("Action non effectuée : "+e.message);}
