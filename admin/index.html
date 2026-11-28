@@ -106,7 +106,7 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    if(snap.empty){$("list").textContent="Aucun dossier en attente.";return;}
    $("list").innerHTML=snap.docs.map(doc=>{
     const d=doc.data(), title=d.title||d.name||d.fullName||d.ownerName||"Dossier "+doc.id;
-    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
+    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.slot&&("Emplacement : "+d.slot),d.durationDays&&("Durée : "+d.durationDays+" jours"),d.priceUSD!=null&&("Prix : "+d.priceUSD+" USD"),d.paymentVerified===true?"Paiement : vérifié":"Paiement : à vérifier",d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
     return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">Approuver</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
    }).join("");
   }catch(e){$("list").innerHTML='<p class="error">Lecture refusée ou indisponible : '+esc(e.message)+'</p>';}
@@ -124,8 +124,23 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    if(currentTab==="services"){patch.status=approve?"ACTIVE":"REJECTED";if(approve)patch.expiresAt=firebase.firestore.Timestamp.fromDate(new Date(Date.now()+30*86400000));}
    if(currentTab==="rentals")patch.status=approve?"BOOKABLE":"REJECTED";
    if(currentTab==="ads"){
-    patch.status=approve?"APPROVED":"REJECTED";
-    if(approve){const data=(await ref.get()).data();const slot=window.prompt("Emplacement publicitaire : slot1 ou slot2","slot1");if(!["slot1","slot2"].includes(slot))throw new Error("Emplacement invalide; opération annulée.");await db.collection("ads").add({title:data.title||"Publicité",description:data.description||"",url:data.url,slot,image:data.image||"",status:"ACTIVE",createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+    if(!approve){patch.status="REJECTED";await ref.update(patch);await load();return;}
+    const snap=await ref.get(), data=snap.data()||{};
+    if(!data.ownerId)throw new Error("Demande sans propriétaire identifié.");
+    const slot=window.prompt("Emplacement : 1 (prioritaire, en haut) ou 2 (secondaire, plus bas)","1");
+    if(!["1","2"].includes(slot))throw new Error("Emplacement invalide; opération annulée.");
+    const duration=window.prompt("Durée de la campagne : 7, 15 ou 30 jours","30");
+    if(!["7","15","30"].includes(duration))throw new Error("Durée invalide; opération annulée.");
+    const days=Number(duration), slotKey=slot==="1"?"slot1":"slot2";
+    const prices={"slot1":{7:12,15:25,30:50},"slot2":{7:7,15:15,30:30}};
+    const amountUSD=prices[slotKey][days], cdfRate=2286.25;
+    const amountCDF=Math.round((amountUSD*cdfRate)/1000)*1000;
+    if(data.paymentVerified!==true)throw new Error("Paiement non marqué comme vérifié. Vérifiez le paiement avant l’activation.");
+    const now=new Date(), end=new Date(now.getTime()+days*86400000);
+    const batch=db.batch(), adRef=db.collection("ads").doc();
+    batch.set(adRef,{ownerId:data.ownerId,title:data.title||"Publicité",description:data.description||"",url:data.url,slot:slotKey,image:data.image||"",durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,currency:"USD",exchangeRateCDF:cdfRate,status:"ACTIVE",startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end),createdAt:firebase.firestore.FieldValue.serverTimestamp(),campaignRequestId:id});
+    batch.update(ref,{...patch,status:"APPROVED",approvedAdId:adRef.id,slot:slotKey,durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end)});
+    await batch.commit();await load();return;
    }
    await ref.update(patch);await load();
   }catch(e){window.alert("Action non effectuée : "+e.message);}
