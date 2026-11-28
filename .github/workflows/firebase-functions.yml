@@ -1,4 +1,4 @@
-name: Deploy Bilocost Cloud Functions
+name: Deploy Bilocost Cloud Functions and Security Rules
 
 on:
   workflow_dispatch:
@@ -8,6 +8,8 @@ on:
     paths:
       - 'functions/**'
       - 'firebase.json'
+      - 'firestore.rules'
+      - 'storage.rules'
       - '.github/workflows/firebase-functions.yml'
 
 permissions:
@@ -32,7 +34,7 @@ jobs:
         working-directory: functions
         run: npm install --omit=dev
 
-      - name: Deploy Cloud Functions
+      - name: Deploy Cloud Functions and Firestore/Storage rules
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136 }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
@@ -42,4 +44,4 @@ jobs:
             exit 1
           fi
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
-          firebase deploy --only functions,firestore:rules --project bilocost-a8136
+          firebase deploy --only functions,firestore:rules,storage:rules --project bilocost-a8136
