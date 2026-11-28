@@ -101,6 +101,7 @@ if (!reelUi.includes("if(!S.user)return needUser();")) fail("Reel publishing mus
 const adRules = firestoreRules.match(/match \/adCampaignRequests\/\{requestId\} \{[\s\S]*?\n    \}/)?.[0] || "";
 if (!html.includes('id="adduration"') || !html.includes('id="adprice"') || !html.includes('paymentReference:g("#adpaymentref")')) fail("Fixed advertising price and payment reference flow is incomplete");
 if (!html.includes('id="adimage"') || !html.includes('folder","bilocost/advertising"') || !html.includes('x.slot==="slot1"') || !html.includes('x.slot==="slot2"')) fail("Advertising image upload or separated homepage placements are missing");
+if (!html.includes('data-act="admine"') || !html.includes("async function loadMyAdCampaigns()") || !html.includes("adCampaignStatusLabel")) fail("Advertiser campaign history and status tracking are missing");
 if (!html.includes('function adCampaignPrice(') || !html.includes('prices.slot1[duration]+prices.slot2[duration]')) fail("Advertising price calculator is missing");
 if (!adRules.includes('request.resource.data.status == "AWAITING_PAYMENT"') || !adRules.includes('request.resource.data.paymentStatus == "AWAITING_PAYMENT"') || !adRules.includes('request.resource.data.priceUSD == 90')) fail("Advertising requests must be priced and remain pending payment until admin verification");
 if (!html.includes('if(!g("#adpaymentref"))')) fail("Advertising request must require payment transaction reference");
