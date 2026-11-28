@@ -60,6 +60,7 @@ jobs:
               "geography-selector.js",
               "listing-location.js",
               "ui-refinement.js",
+              "advertising-space.js",
           ]
           additions = []
           for name in modules:
