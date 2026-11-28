@@ -97,7 +97,8 @@ const reelRules = firestoreRules.match(/match \/reels\/\{reelId\} \{[\s\S]*?\n  
 const rentalRules = firestoreRules.match(/match \/rentalListings\/\{listingId\} \{[\s\S]*?\n    \}/)?.[0] || "";
 const reelStorageRules = storageRules.match(/match \/reels\/\{uid\}\/\{fileName\} \{[\s\S]*?\n    \}/)?.[0] || "";
 if (!reelRules.includes("allow create: if signedIn()") || reelRules.includes("hasVerifiedIdentity")) fail("Reel publishing must not require identity certification");
-if (!rentalRules.includes("hasVerifiedIdentity(request.auth.uid)")) fail("Rental publication identity verification must remain enforced");
+if (!rentalRules.includes('request.resource.data.status in ["DRAFT", "PENDING_REVIEW"]') || rentalRules.includes("hasVerifiedIdentity") || rentalRules.includes("ownerKycStatus") || !rentalRules.includes("request.resource.data.rulesAccepted == true")) fail("Rental submissions must not require identity certification and must retain terms acceptance");
+if (firestoreRules.includes("function hasVerifiedIdentity(")) fail("Identity certification helper remains in Firestore rules despite no publication gate");
 if (!reelStorageRules.includes("allow create: if isOwner(uid)") || reelStorageRules.includes("identity_verifications") || !reelStorageRules.includes("30 * 1024 * 1024")) fail("Reel uploads must remain owner-only, size-limited, and independent of identity certification");
 if (!functionsSource.includes("exports.syncBccExchangeRate = onSchedule") || !functionsSource.includes("exports.refreshBccExchangeRate = onCall")) fail("Automatic BCC exchange-rate synchronization is missing");
 if (!functionsWorkflow.includes("FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136")) fail("Cloud Functions deployment credentials are not configured");
