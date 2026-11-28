@@ -106,7 +106,7 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    if(snap.empty){$("list").textContent="Aucun dossier en attente.";return;}
    $("list").innerHTML=snap.docs.map(doc=>{
     const d=doc.data(), title=d.title||d.name||d.fullName||d.ownerName||"Dossier "+doc.id;
-    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.slot&&("Emplacement : "+d.slot),d.durationDays&&("Durée : "+d.durationDays+" jours"),d.priceUSD!=null&&("Prix : "+d.priceUSD+" USD"),d.paymentVerified===true?"Paiement : vérifié":"Paiement : à vérifier",d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
+    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.slot&&("Emplacement : "+(d.slot==="slot1"?"1 — prioritaire":"2 — secondaire")),d.durationDays&&("Durée : "+d.durationDays+" jours"),d.priceUSD!=null&&("Prix : "+d.priceUSD+" USD"),d.priceCDF!=null&&("Équivalent : "+new Intl.NumberFormat("fr-FR").format(d.priceCDF)+" CDF"),d.paymentReference&&("Référence paiement : "+d.paymentReference),d.paymentVerified===true?"Paiement : vérifié":"Paiement : à vérifier",d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
     return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">Approuver</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
    }).join("");
   }catch(e){$("list").innerHTML='<p class="error">Lecture refusée ou indisponible : '+esc(e.message)+'</p>';}
@@ -127,14 +127,14 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
     if(!approve){patch.status="REJECTED";await ref.update(patch);await load();return;}
     const snap=await ref.get(), data=snap.data()||{};
     if(!data.ownerId)throw new Error("Demande sans propriétaire identifié.");
-    const slot=window.prompt("Emplacement : 1 (prioritaire, en haut) ou 2 (secondaire, plus bas)","1");
-    if(!["1","2"].includes(slot))throw new Error("Emplacement invalide; opération annulée.");
-    const duration=window.prompt("Durée de la campagne : 7, 15 ou 30 jours","30");
-    if(!["7","15","30"].includes(duration))throw new Error("Durée invalide; opération annulée.");
-    const days=Number(duration), slotKey=slot==="1"?"slot1":"slot2";
+    const slotKey=data.slot, days=Number(data.durationDays);
     const prices={"slot1":{7:12,15:25,30:50},"slot2":{7:7,15:15,30:30}};
-    const amountUSD=prices[slotKey][days], cdfRate=2286.25;
-    const amountCDF=Math.round((amountUSD*cdfRate)/1000)*1000;
+    if(!prices[slotKey]||!prices[slotKey][days])throw new Error("Emplacement ou durée de campagne invalide.");
+    if(!data.paymentReference||String(data.paymentReference).trim().length<3)throw new Error("Référence de paiement manquante. Demandez-la à l’annonceur avant validation.");
+    const amountUSD=prices[slotKey][days], cdfRate=Number(data.exchangeRateCDF);
+    if(!(cdfRate>0))throw new Error("Taux de change enregistré invalide; vérifiez le montant avant activation.");
+    const amountCDF=Math.round(amountUSD*cdfRate/1000)*1000;
+    if(Number(data.priceUSD)!==amountUSD||Number(data.priceCDF)!==amountCDF)throw new Error("Le montant enregistré ne correspond pas à la grille tarifaire. Demande à corriger.");
     const now=new Date(), end=new Date(now.getTime()+days*86400000);
     const batch=db.batch(), adRef=db.collection("ads").doc();
     batch.set(adRef,{ownerId:data.ownerId,title:data.title||"Publicité",description:data.description||"",url:data.url,slot:slotKey,image:data.image||"",durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,currency:"USD",exchangeRateCDF:cdfRate,status:"ACTIVE",paymentVerified:true,startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end),createdAt:firebase.firestore.FieldValue.serverTimestamp(),campaignRequestId:id});
