@@ -92,7 +92,13 @@ if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||lo
 if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
 if (!hostingWorkflow.includes("map-location.js") || !androidWorkflow.includes("map-location.js") || !iosWorkflow.includes("map-location.js")) fail("OpenStreetMap/Leaflet module is not injected on all platforms");
 if (!hostingWorkflow.includes("firebase deploy --only hosting --project bilocost-a8136")) fail("Firebase Hosting must deploy independently of Storage and Firestore IAM");
-if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules --project bilocost-a8136")) fail("Cloud Functions and exchange-rate rules deployment workflow is incomplete");
+if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules,storage:rules --project bilocost-a8136") || !functionsWorkflow.includes("'firestore.rules'") || !functionsWorkflow.includes("'storage.rules'")) fail("Cloud Functions, Firestore, and Storage deployment workflow is incomplete");
+const reelRules = firestoreRules.match(/match \/reels\/\{reelId\} \{[\s\S]*?\n    \}/)?.[0] || "";
+const rentalRules = firestoreRules.match(/match \/rentalListings\/\{listingId\} \{[\s\S]*?\n    \}/)?.[0] || "";
+const reelStorageRules = storageRules.match(/match \/reels\/\{uid\}\/\{fileName\} \{[\s\S]*?\n    \}/)?.[0] || "";
+if (!reelRules.includes("allow create: if signedIn()") || reelRules.includes("hasVerifiedIdentity")) fail("Reel publishing must not require identity certification");
+if (!rentalRules.includes("hasVerifiedIdentity(request.auth.uid)")) fail("Rental publication identity verification must remain enforced");
+if (!reelStorageRules.includes("allow create: if isOwner(uid)") || reelStorageRules.includes("identity_verifications") || !reelStorageRules.includes("30 * 1024 * 1024")) fail("Reel uploads must remain owner-only, size-limited, and independent of identity certification");
 if (!functionsSource.includes("exports.syncBccExchangeRate = onSchedule") || !functionsSource.includes("exports.refreshBccExchangeRate = onCall")) fail("Automatic BCC exchange-rate synchronization is missing");
 if (!functionsWorkflow.includes("FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136")) fail("Cloud Functions deployment credentials are not configured");
 try { new vm.Script(exchangeRatesPatch, { filename: "exchange-rates.js" }); } catch (error) { fail("Exchange-rate widget syntax error: " + error.message); }
