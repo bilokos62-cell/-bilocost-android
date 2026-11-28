@@ -43,7 +43,7 @@ service firebase.storage {
       allow delete: if isOwner(uid) || isAdmin();
     }
 
-    // Public Reels video files; upload is restricted to owners with approved identity.
+    // Public Reels video files; uploads are restricted to the authenticated owner.
     match /reels/{uid}/{fileName} {
       allow read: if true;
       // Any authenticated owner may upload a Reel; keep file size and video type limits.
