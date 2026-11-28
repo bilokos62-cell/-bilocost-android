@@ -10,11 +10,6 @@ service cloud.firestore {
     function isAdmin() {
       return signedIn() && request.auth.token.admin == true;
     }
-    function hasVerifiedIdentity(uid) {
-      return exists(/databases/$(database)/documents/identity_verifications/$(uid))
-        && get(/databases/$(database)/documents/identity_verifications/$(uid)).data.status == "verified";
-    }
-
     // Public marketplace listings. Sensitive user profile fields remain private.
     match /items/{itemId} {
       allow read: if true;
@@ -152,7 +147,8 @@ service cloud.firestore {
       allow delete: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
     }
 
-    // Rentals: publication requires an identity actually approved by an administrator.
+    // Rentals: any authenticated owner may submit a listing without identity certification.
+    // Terms acceptance remains mandatory; publication/moderation status is not client-approved.
     match /rentalListings/{listingId} {
       allow read: if resource.data.status == "BOOKABLE"
         || (signedIn() && resource.data.ownerId == request.auth.uid)
@@ -163,16 +159,9 @@ service cloud.firestore {
         && request.resource.data.title.size() > 0
         && request.resource.data.photos is list
         && request.resource.data.photos.size() <= 8
-        && (
-          request.resource.data.status == "DRAFT"
-          || (
-            request.resource.data.status == "PENDING_REVIEW"
-            && hasVerifiedIdentity(request.auth.uid)
-            && request.resource.data.ownerKycStatus == "VERIFIED"
-            && request.resource.data.authorized == true
-            && request.resource.data.rulesAccepted == true
-          )
-        );
+        && request.resource.data.status in ["DRAFT", "PENDING_REVIEW"]
+        && (request.resource.data.status != "PENDING_REVIEW"
+          || request.resource.data.rulesAccepted == true);
       allow update: if isAdmin();
       allow delete: if signedIn() && resource.data.ownerId == request.auth.uid
         && resource.data.status in ["DRAFT", "PENDING_REVIEW"];
