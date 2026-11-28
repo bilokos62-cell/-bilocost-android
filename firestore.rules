@@ -206,7 +206,24 @@ service cloud.firestore {
         && request.resource.data.slot in ["slot1", "slot2", "both"]
         && request.resource.data.durationDays in [7, 15, 30]
         && request.resource.data.priceUSD is number
-        && request.resource.data.priceUSD > 0;
+        && request.resource.data.priceUSD > 0
+        && (
+          (request.resource.data.slot == "slot1" && (
+            (request.resource.data.durationDays == 7 && request.resource.data.priceUSD == 20)
+            || (request.resource.data.durationDays == 15 && request.resource.data.priceUSD == 35)
+            || (request.resource.data.durationDays == 30 && request.resource.data.priceUSD == 60)
+          ))
+          || (request.resource.data.slot == "slot2" && (
+            (request.resource.data.durationDays == 7 && request.resource.data.priceUSD == 10)
+            || (request.resource.data.durationDays == 15 && request.resource.data.priceUSD == 18)
+            || (request.resource.data.durationDays == 30 && request.resource.data.priceUSD == 30)
+          ))
+          || (request.resource.data.slot == "both" && (
+            (request.resource.data.durationDays == 7 && request.resource.data.priceUSD == 30)
+            || (request.resource.data.durationDays == 15 && request.resource.data.priceUSD == 53)
+            || (request.resource.data.durationDays == 30 && request.resource.data.priceUSD == 90)
+          ))
+        );
       allow read: if (signedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
       allow update, delete: if isAdmin();
     }
