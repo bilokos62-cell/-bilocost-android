@@ -195,11 +195,19 @@ service cloud.firestore {
     match /adCampaignRequests/{requestId} {
       allow create: if signedIn()
         && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.status == "PENDING_REVIEW"
+        && request.resource.data.status == "AWAITING_PAYMENT"
+        && request.resource.data.paymentStatus == "AWAITING_PAYMENT"
+        && request.resource.data.businessName is string
+        && request.resource.data.businessName.size() > 0
         && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
         && request.resource.data.url is string
-        && request.resource.data.url.matches("^https://.*");
-      allow read: if signedIn() && resource.data.ownerId == request.auth.uid || isAdmin();
+        && request.resource.data.url.matches("^https://.*")
+        && request.resource.data.slot in ["slot1", "slot2", "both"]
+        && request.resource.data.durationDays in [7, 15, 30]
+        && request.resource.data.priceUSD is number
+        && request.resource.data.priceUSD > 0;
+      allow read: if (signedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
       allow update, delete: if isAdmin();
     }
 
