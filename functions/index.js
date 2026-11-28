@@ -307,6 +307,34 @@ exports.refreshBccExchangeRate = onCall(async request => {
   return await syncOfficialExchangeRate();
 });
 
+/* Expire paid advertising campaigns automatically after their purchased period. */
+exports.expireAdvertisingCampaigns = onSchedule({
+  schedule: "every 15 minutes",
+  timeZone: "Africa/Kinshasa",
+  timeoutSeconds: 120,
+  memory: "256MiB"
+}, async () => {
+  const now = Timestamp.now();
+  let expired = 0;
+  while (true) {
+    const page = await db.collection("ads")
+      .where("status", "==", "ACTIVE")
+      .where("endsAt", "<=", now)
+      .limit(400)
+      .get();
+    if (page.empty) break;
+    const batch = db.batch();
+    for (const doc of page.docs) {
+      batch.update(doc.ref, { status: "EXPIRED", expiredAt: FieldValue.serverTimestamp() });
+      expired++;
+    }
+    await batch.commit();
+    if (page.size < 400) break;
+  }
+  console.log("Bilocost advertising campaigns expired:", expired);
+  return { expired };
+});
+
 
 /*
  * One-time developer bootstrap.
