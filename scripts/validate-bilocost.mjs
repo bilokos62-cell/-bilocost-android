@@ -94,7 +94,7 @@ try { new vm.Script(exchangeRatesPatch, { filename: "exchange-rates.js" }); } ca
 try { new vm.Script(advertisingPatch, { filename: "advertising-space.js" }); } catch (error) { fail("Advertiser space syntax error: " + error.message); }
 if (!hostingWorkflow.includes('Path("advertising-space.js").read_text') || !hostingWorkflow.includes("startup_screen + \"\\n\" + advertising")) fail("Advertiser campaign module is not injected into the website build");
 if (!androidWorkflow.includes('Path("advertising-space.js").read_text') || !iosWorkflow.includes('"advertising-space.js"')) fail("Advertiser campaign module is not injected into Android and iOS builds");
-if (!advertisingPatch.includes('"slot1":{7:12,15:25,30:50}') || !advertisingPatch.includes('"slot2":{7:7,15:15,30:30}')) fail("Fixed advertising price grid is incomplete");
+if (!advertisingPatch.includes("slot1:{7:12,15:25,30:50}") || !advertisingPatch.includes("slot2:{7:7,15:15,30:30}")) fail("Fixed advertising price grid is incomplete");
 if (!advertisingPatch.includes('paymentStatus:"AWAITING_VERIFICATION"') || !advertisingPatch.includes('status:"PENDING_REVIEW"')) fail("Advertiser payment-before-approval workflow is incomplete");
 if (!functionsSource.includes("exports.expireAdvertisingCampaigns = onSchedule")) fail("Automatic advertising expiry function is missing");
 if (!firestoreIndexes.indexes.some(index => index.collectionGroup === "ads" && index.fields.some(field => field.fieldPath === "status") && index.fields.some(field => field.fieldPath === "endsAt"))) fail("Advertising expiry composite index is missing");
