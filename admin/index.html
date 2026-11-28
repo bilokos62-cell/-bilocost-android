@@ -109,7 +109,7 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    $("list").innerHTML=snap.docs.map(doc=>{
     const d=doc.data(), title=d.title||d.name||d.fullName||d.ownerName||"Dossier "+doc.id;
     const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.priceUSD&&("Montant : "+d.priceUSD+" USD"),d.durationDays&&("Durée : "+d.durationDays+" jours"),d.paymentReference&&("Référence paiement : "+d.paymentReference),d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
-    return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">Approuver</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
+    return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">'+(currentTab==="adsPayment"?"Confirmer le paiement":"Approuver")+'</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
    }).join("");
   }catch(e){$("list").innerHTML='<p class="error">Lecture refusée ou indisponible : '+esc(e.message)+'</p>';}
  }
