@@ -1995,3 +1995,81 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
   -webkit-text-fill-color: #34d399 !important;
   opacity: 1 !important;
 }
+
+
+/* PRODUCT DETAIL SHEET — actual runtime container (#sheetBody).
+   The product view is rendered in the sheet, not always in #page .pw.
+   Override faded/inline white text on light surfaces, while preserving
+   the dark theme palette. Scope strictly to product sheet content. */
+:root:not([data-theme="dark"]) #sheetBody,
+:root:not([data-theme="dark"]) #sheetBody * {
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #sheetBody {
+  color: #17212b !important;
+  -webkit-text-fill-color: #17212b !important;
+}
+:root:not([data-theme="dark"]) #sheetBody h1,
+:root:not([data-theme="dark"]) #sheetBody h2,
+:root:not([data-theme="dark"]) #sheetBody h3,
+:root:not([data-theme="dark"]) #sheetBody h4,
+:root:not([data-theme="dark"]) #sheetBody b,
+:root:not([data-theme="dark"]) #sheetBody strong,
+:root:not([data-theme="dark"]) #sheetBody [style*="color:#fff"],
+:root:not([data-theme="dark"]) #sheetBody [style*="color: #fff"],
+:root:not([data-theme="dark"]) #sheetBody [style*="color:white"],
+:root:not([data-theme="dark"]) #sheetBody [style*="color: white"] {
+  color: #17212b !important;
+  -webkit-text-fill-color: #17212b !important;
+}
+:root:not([data-theme="dark"]) #sheetBody p,
+:root:not([data-theme="dark"]) #sheetBody small,
+:root:not([data-theme="dark"]) #sheetBody label,
+:root:not([data-theme="dark"]) #sheetBody .sub,
+:root:not([data-theme="dark"]) #sheetBody .meta,
+:root:not([data-theme="dark"]) #sheetBody .muted,
+:root:not([data-theme="dark"]) #sheetBody .hint,
+:root:not([data-theme="dark"]) #sheetBody .usd {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+:root:not([data-theme="dark"]) #sheetBody .cdf,
+:root:not([data-theme="dark"]) #sheetBody .price,
+:root:not([data-theme="dark"]) #sheetBody .amount {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+}
+:root[data-theme="dark"] #sheetBody,
+:root[data-theme="dark"] #sheetBody * {
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #sheetBody {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
+:root[data-theme="dark"] #sheetBody h1,
+:root[data-theme="dark"] #sheetBody h2,
+:root[data-theme="dark"] #sheetBody h3,
+:root[data-theme="dark"] #sheetBody h4,
+:root[data-theme="dark"] #sheetBody b,
+:root[data-theme="dark"] #sheetBody strong {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
+:root[data-theme="dark"] #sheetBody p,
+:root[data-theme="dark"] #sheetBody small,
+:root[data-theme="dark"] #sheetBody label,
+:root[data-theme="dark"] #sheetBody .sub,
+:root[data-theme="dark"] #sheetBody .meta,
+:root[data-theme="dark"] #sheetBody .muted,
+:root[data-theme="dark"] #sheetBody .hint,
+:root[data-theme="dark"] #sheetBody .usd {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+}
+:root[data-theme="dark"] #sheetBody .cdf,
+:root[data-theme="dark"] #sheetBody .price,
+:root[data-theme="dark"] #sheetBody .amount {
+  color: #34d399 !important;
+  -webkit-text-fill-color: #34d399 !important;
+}
