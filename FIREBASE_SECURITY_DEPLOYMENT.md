@@ -40,10 +40,11 @@ Les règles sensibles utilisent le custom claim Firebase Authentication `admin: 
 Ce claim ne doit être défini que depuis un environnement serveur de confiance avec le SDK Admin.
 Ne jamais ajouter un bouton ou un champ dans l'application qui permet à un utilisateur de s'accorder ce rôle.
 
-Pour approuver un dossier d'identité, un administrateur autorisé met le document
-`identity_verifications/{uid}` à `status: "verified"`.
-La publication d'une location en `PENDING_REVIEW` exige cette validation côté Firestore,
-et non une simple valeur envoyée par le navigateur.
+Les dossiers `identity_verifications/{uid}` restent disponibles pour les parcours
+qui en ont réellement besoin, mais la certification d'identité n'est plus une condition
+de publication des articles, Reels ou locations. Tout utilisateur authentifié peut soumettre
+sa location en `PENDING_REVIEW`, à condition d'accepter les règles. La modération et les
+contrôles de propriété restent actifs.
 
 ## Limites métier non activées
 

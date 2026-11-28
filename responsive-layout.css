@@ -1692,3 +1692,384 @@ p, small, label, .sub, .meta, .muted, .hint, .description, .caption,
 :root[data-theme="light"] #sheetBody {
   padding-bottom: max(32px, calc(32px + env(safe-area-inset-bottom, 0px))) !important;
 }
+
+
+/* Mobile home layout repair — preserve Bilocost's current visual design.
+   Keep the header in the document's sticky flow, apply the safe area once,
+   size the two home action buttons as equal flexible columns, and reserve
+   scroll room above the fixed bottom tabs. */
+:root {
+  padding-top: 0 !important;
+}
+@media (max-width: 699px) {
+  .app {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: calc(180px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  header {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: env(safe-area-inset-top, 0px) !important;
+    z-index: 150 !important;
+    width: 100%;
+    min-width: 0;
+  }
+  #view.wrap {
+    padding-bottom: calc(190px + env(safe-area-inset-bottom, 0px)) !important;
+    min-width: 0;
+  }
+  #view .hero + .two {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100%;
+    min-width: 0;
+  }
+  #view .hero + .two > button {
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 54px;
+    height: auto !important;
+    padding: 10px 8px !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  nav {
+    bottom: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+}
+
+
+/* Navigation stability: prevent scroll anchoring and competing smooth-scroll
+   behavior from shifting page content when the bottom of a screen is reached.
+   Keep one vertical scroll owner for stacked mobile pages (#page). */
+@media (max-width: 699px) {
+  html, body {
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+  }
+  #page {
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+    overscroll-behavior-y: none !important;
+    scroll-snap-type: none !important;
+  }
+  #page .pw {
+    min-height: max-content !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-anchor: none !important;
+    scroll-margin-top: 0 !important;
+  }
+  #page .pw > * {
+    overflow-anchor: none;
+  }
+}
+
+/* ============================================================
+   BILOCOST MOBILE NAVIGATION — SINGLE SCROLL OWNER
+   The previous mobile overrides let html/body, #view and #page
+   compete for vertical scrolling. Lock the app viewport and let
+   only the currently visible screen container scroll.
+   ============================================================ */
+@media (max-width: 699px) {
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+  }
+
+  .app {
+    position: fixed !important;
+    inset: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: env(safe-area-inset-top, 0px) 0 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
+  .app > header {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    z-index: 180 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  /* Main screen: the only scrollable area while #page is closed. */
+  #view.wrap {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Secondary screen: an independent viewport, active only when shown. */
+  #page {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+    z-index: 150 !important;
+  }
+
+  #page .pw {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    overflow-anchor: none !important;
+    scroll-margin: 0 !important;
+    padding-top: max(16px, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #page .pw > * {
+    overflow-anchor: none !important;
+  }
+
+  /* Fixed controls do not participate in the content's scroll movement. */
+  nav {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 220 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    transform: none !important;
+  }
+
+  #sheet,
+  #auth,
+  #biloLocationOverlay {
+    overscroll-behavior: contain !important;
+  }
+}
+
+
+/* ============================================================
+   PRODUCT DETAIL CONTRAST — BOTH LIGHT AND DARK THEMES
+   Apply the same readability guarantee even when data-theme is
+   absent (legacy pages). Preserve each theme's existing surfaces.
+   ============================================================ */
+:root:not([data-theme="dark"]) #page .pw,
+:root:not([data-theme="dark"]) #page .pw h1,
+:root:not([data-theme="dark"]) #page .pw h2,
+:root:not([data-theme="dark"]) #page .pw h3,
+:root:not([data-theme="dark"]) #page .pw h4,
+:root:not([data-theme="dark"]) #page .pw b,
+:root:not([data-theme="dark"]) #page .pw strong {
+  color: #17212b !important;
+  -webkit-text-fill-color: #17212b !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw p,
+:root:not([data-theme="dark"]) #page .pw small,
+:root:not([data-theme="dark"]) #page .pw label,
+:root:not([data-theme="dark"]) #page .pw .sub,
+:root:not([data-theme="dark"]) #page .pw .meta,
+:root:not([data-theme="dark"]) #page .pw .muted,
+:root:not([data-theme="dark"]) #page .pw .hint,
+:root:not([data-theme="dark"]) #page .pw .usd {
+  color: #596579 !important;
+  -webkit-text-fill-color: #596579 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw [style*="color:#fff"],
+:root:not([data-theme="dark"]) #page .pw [style*="color: #fff"],
+:root:not([data-theme="dark"]) #page .pw [style*="color:white"],
+:root:not([data-theme="dark"]) #page .pw [style*="color: white"] {
+  color: #263445 !important;
+  -webkit-text-fill-color: #263445 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw .tag,
+:root:not([data-theme="dark"]) #page .pw .badge,
+:root:not([data-theme="dark"]) #page .pw .chip {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #page .pw .cdf,
+:root:not([data-theme="dark"]) #page .pw .price,
+:root:not([data-theme="dark"]) #page .pw .amount {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+  opacity: 1 !important;
+}
+
+:root[data-theme="dark"] #page .pw,
+:root[data-theme="dark"] #page .pw h1,
+:root[data-theme="dark"] #page .pw h2,
+:root[data-theme="dark"] #page .pw h3,
+:root[data-theme="dark"] #page .pw h4,
+:root[data-theme="dark"] #page .pw b,
+:root[data-theme="dark"] #page .pw strong {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw p,
+:root[data-theme="dark"] #page .pw small,
+:root[data-theme="dark"] #page .pw label,
+:root[data-theme="dark"] #page .pw .sub,
+:root[data-theme="dark"] #page .pw .meta,
+:root[data-theme="dark"] #page .pw .muted,
+:root[data-theme="dark"] #page .pw .hint,
+:root[data-theme="dark"] #page .pw .usd {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw [style*="color:#fff"],
+:root[data-theme="dark"] #page .pw [style*="color: #fff"],
+:root[data-theme="dark"] #page .pw [style*="color:white"],
+:root[data-theme="dark"] #page .pw [style*="color: white"] {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw .tag,
+:root[data-theme="dark"] #page .pw .badge,
+:root[data-theme="dark"] #page .pw .chip {
+  color: #e2e8f0 !important;
+  -webkit-text-fill-color: #e2e8f0 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #page .pw .cdf,
+:root[data-theme="dark"] #page .pw .price,
+:root[data-theme="dark"] #page .pw .amount {
+  color: #34d399 !important;
+  -webkit-text-fill-color: #34d399 !important;
+  opacity: 1 !important;
+}
+
+
+/* PRODUCT DETAIL SHEET — actual runtime container (#sheetBody).
+   The product view is rendered in the sheet, not always in #page .pw.
+   Override faded/inline white text on light surfaces, while preserving
+   the dark theme palette. Scope strictly to product sheet content. */
+:root:not([data-theme="dark"]) #sheetBody,
+:root:not([data-theme="dark"]) #sheetBody * {
+  opacity: 1 !important;
+}
+:root:not([data-theme="dark"]) #sheetBody {
+  color: #17212b !important;
+  -webkit-text-fill-color: #17212b !important;
+}
+:root:not([data-theme="dark"]) #sheetBody h1,
+:root:not([data-theme="dark"]) #sheetBody h2,
+:root:not([data-theme="dark"]) #sheetBody h3,
+:root:not([data-theme="dark"]) #sheetBody h4,
+:root:not([data-theme="dark"]) #sheetBody b,
+:root:not([data-theme="dark"]) #sheetBody strong,
+:root:not([data-theme="dark"]) #sheetBody [style*="color:#fff"],
+:root:not([data-theme="dark"]) #sheetBody [style*="color: #fff"],
+:root:not([data-theme="dark"]) #sheetBody [style*="color:white"],
+:root:not([data-theme="dark"]) #sheetBody [style*="color: white"] {
+  color: #17212b !important;
+  -webkit-text-fill-color: #17212b !important;
+}
+:root:not([data-theme="dark"]) #sheetBody p,
+:root:not([data-theme="dark"]) #sheetBody small,
+:root:not([data-theme="dark"]) #sheetBody label,
+:root:not([data-theme="dark"]) #sheetBody .sub,
+:root:not([data-theme="dark"]) #sheetBody .meta,
+:root:not([data-theme="dark"]) #sheetBody .muted,
+:root:not([data-theme="dark"]) #sheetBody .hint,
+:root:not([data-theme="dark"]) #sheetBody .usd {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+:root:not([data-theme="dark"]) #sheetBody .cdf,
+:root:not([data-theme="dark"]) #sheetBody .price,
+:root:not([data-theme="dark"]) #sheetBody .amount {
+  color: #087a45 !important;
+  -webkit-text-fill-color: #087a45 !important;
+}
+:root[data-theme="dark"] #sheetBody,
+:root[data-theme="dark"] #sheetBody * {
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] #sheetBody {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
+:root[data-theme="dark"] #sheetBody h1,
+:root[data-theme="dark"] #sheetBody h2,
+:root[data-theme="dark"] #sheetBody h3,
+:root[data-theme="dark"] #sheetBody h4,
+:root[data-theme="dark"] #sheetBody b,
+:root[data-theme="dark"] #sheetBody strong {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
+:root[data-theme="dark"] #sheetBody p,
+:root[data-theme="dark"] #sheetBody small,
+:root[data-theme="dark"] #sheetBody label,
+:root[data-theme="dark"] #sheetBody .sub,
+:root[data-theme="dark"] #sheetBody .meta,
+:root[data-theme="dark"] #sheetBody .muted,
+:root[data-theme="dark"] #sheetBody .hint,
+:root[data-theme="dark"] #sheetBody .usd {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+}
+:root[data-theme="dark"] #sheetBody .cdf,
+:root[data-theme="dark"] #sheetBody .price,
+:root[data-theme="dark"] #sheetBody .amount {
+  color: #34d399 !important;
+  -webkit-text-fill-color: #34d399 !important;
+}

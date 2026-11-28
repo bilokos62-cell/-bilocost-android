@@ -10,11 +10,6 @@ service cloud.firestore {
     function isAdmin() {
       return signedIn() && request.auth.token.admin == true;
     }
-    function hasVerifiedIdentity(uid) {
-      return exists(/databases/$(database)/documents/identity_verifications/$(uid))
-        && get(/databases/$(database)/documents/identity_verifications/$(uid)).data.status == "verified";
-    }
-
     // Public marketplace listings. Sensitive user profile fields remain private.
     match /items/{itemId} {
       allow read: if true;
@@ -152,7 +147,8 @@ service cloud.firestore {
       allow delete: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
     }
 
-    // Rentals: publication requires an identity actually approved by an administrator.
+    // Rentals: any authenticated owner may submit a listing without identity certification.
+    // Terms acceptance remains mandatory; publication/moderation status is not client-approved.
     match /rentalListings/{listingId} {
       allow read: if resource.data.status == "BOOKABLE"
         || (signedIn() && resource.data.ownerId == request.auth.uid)
@@ -163,16 +159,9 @@ service cloud.firestore {
         && request.resource.data.title.size() > 0
         && request.resource.data.photos is list
         && request.resource.data.photos.size() <= 8
-        && (
-          request.resource.data.status == "DRAFT"
-          || (
-            request.resource.data.status == "PENDING_REVIEW"
-            && hasVerifiedIdentity(request.auth.uid)
-            && request.resource.data.ownerKycStatus == "VERIFIED"
-            && request.resource.data.authorized == true
-            && request.resource.data.rulesAccepted == true
-          )
-        );
+        && request.resource.data.status in ["DRAFT", "PENDING_REVIEW"]
+        && (request.resource.data.status != "PENDING_REVIEW"
+          || request.resource.data.rulesAccepted == true);
       allow update: if isAdmin();
       allow delete: if signedIn() && resource.data.ownerId == request.auth.uid
         && resource.data.status in ["DRAFT", "PENDING_REVIEW"];
@@ -206,11 +195,36 @@ service cloud.firestore {
     match /adCampaignRequests/{requestId} {
       allow create: if signedIn()
         && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.status == "PENDING_REVIEW"
+        && request.resource.data.status == "AWAITING_PAYMENT"
+        && request.resource.data.paymentStatus == "AWAITING_PAYMENT"
+        && request.resource.data.businessName is string
+        && request.resource.data.businessName.size() > 0
         && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
         && request.resource.data.url is string
-        && request.resource.data.url.matches("^https://.*");
-      allow read: if signedIn() && resource.data.ownerId == request.auth.uid || isAdmin();
+        && request.resource.data.url.matches("^https://.*")
+        && request.resource.data.slot in ["slot1", "slot2", "both"]
+        && request.resource.data.durationDays in [7, 15, 30]
+        && request.resource.data.priceUSD is number
+        && request.resource.data.priceUSD > 0
+        && (
+          (request.resource.data.slot == "slot1" && (
+            (request.resource.data.durationDays == 7 && request.resource.data.priceUSD == 20)
+            || (request.resource.data.durationDays == 15 && request.resource.data.priceUSD == 35)
+            || (request.resource.data.durationDays == 30 && request.resource.data.priceUSD == 60)
+          ))
+          || (request.resource.data.slot == "slot2" && (
+            (request.resource.data.durationDays == 7 && request.resource.data.priceUSD == 10)
+            || (request.resource.data.durationDays == 15 && request.resource.data.priceUSD == 18)
+            || (request.resource.data.durationDays == 30 && request.resource.data.priceUSD == 30)
+          ))
+          || (request.resource.data.slot == "both" && (
+            (request.resource.data.durationDays == 7 && request.resource.data.priceUSD == 30)
+            || (request.resource.data.durationDays == 15 && request.resource.data.priceUSD == 53)
+            || (request.resource.data.durationDays == 30 && request.resource.data.priceUSD == 90)
+          ))
+        );
+      allow read: if (signedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
       allow update, delete: if isAdmin();
     }
 
@@ -219,13 +233,13 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Reels: public feed only contains active clips; publishing requires approved KYC.
+    // Reels: public feed only contains active clips; any authenticated owner may publish.
     match /reels/{reelId} {
       allow read: if resource.data.status == "ACTIVE"
         || (signedIn() && resource.data.ownerId == request.auth.uid)
         || isAdmin();
+      // Any authenticated user may publish a Reel; identity certification is not required.
       allow create: if signedIn()
-        && hasVerifiedIdentity(request.auth.uid)
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.productTitle is string
         && request.resource.data.productTitle.size() > 0

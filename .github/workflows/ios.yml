@@ -59,6 +59,7 @@ jobs:
               "delivery-otp.js",
               "geography-selector.js",
               "listing-location.js",
+              "map-location.js",
               "ui-refinement.js",
           ]
           additions = []
@@ -143,6 +144,21 @@ jobs:
           print("Clean Bilocost iOS app icon generated with antialiased contours.")
           PY
           npx cap sync ios
+          # Explain foreground location permission to iOS; no Always/background tracking.
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          path = Path("ios/App/App/Info.plist")
+          if not path.is_file():
+              raise SystemExit("iOS Info.plist was not generated")
+          with path.open("rb") as handle:
+              data = plistlib.load(handle)
+          data["NSLocationWhenInUseUsageDescription"] = "Bilocost utilise votre position uniquement lorsque vous choisissez de l’ajouter à une annonce ou à une adresse de livraison."
+          data.pop("NSLocationAlwaysUsageDescription", None)
+          data.pop("NSLocationAlwaysAndWhenInUseUsageDescription", None)
+          with path.open("wb") as handle:
+              plistlib.dump(data, handle)
+          PY
           test -d ios/App/App.xcworkspace
 
       - name: Build iOS Simulator app

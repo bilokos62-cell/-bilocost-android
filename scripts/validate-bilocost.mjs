@@ -14,6 +14,7 @@ const serviceDesign = readFileSync("service-design.js", "utf8");
 const uiRefinement = readFileSync("ui-refinement.js", "utf8");
 const geographyPatch = readFileSync("geography-selector.js", "utf8");
 const listingLocationPatch = readFileSync("listing-location.js", "utf8");
+const mapLocationPatch = readFileSync("map-location.js", "utf8");
 const exchangeRatesPatch = readFileSync("exchange-rates.js", "utf8");
 const functionsSource = readFileSync("functions/index.js", "utf8");
 const androidWorkflow = readFileSync(".github/workflows/android.yml", "utf8");
@@ -79,14 +80,38 @@ try { new vm.Script(messagingPatch, { filename: "messaging-fix.js" }); } catch (
 try { new vm.Script(serviceDesign, { filename: "service-design.js" }); } catch (error) { fail("Service design syntax error: " + error.message); }
 try { new vm.Script(uiRefinement, { filename: "ui-refinement.js" }); } catch (error) { fail("UI refinement syntax error: " + error.message); }
 try { new vm.Script(listingLocationPatch, { filename: "listing-location.js" }); } catch (error) { fail("Listing location patch syntax error: " + error.message); }
+try { new vm.Script(mapLocationPatch, { filename: "map-location.js" }); } catch (error) { fail("OpenStreetMap/Leaflet module syntax error: " + error.message); }
+if (!mapLocationPatch.includes("tile.openstreetmap.org") || !mapLocationPatch.includes("nominatim.openstreetmap.org/reverse") || !mapLocationPatch.includes("navigator.geolocation.getCurrentPosition")) fail("OpenStreetMap tiles, reverse geocoding, or explicit GPS action is missing");
+if (!androidWorkflow.includes("android.permission.ACCESS_FINE_LOCATION") || !androidWorkflow.includes("android.permission.ACCESS_COARSE_LOCATION")) fail("Android foreground location permissions are missing");
+if (!iosWorkflow.includes('data["NSLocationWhenInUseUsageDescription"]') || iosWorkflow.includes('data["NSLocationAlwaysAndWhenInUseUsageDescription"] =')) fail("iOS foreground-only location privacy description is missing");
 if (!listingLocationPatch.includes("form.province=loc.province") || !listingLocationPatch.includes("form.locality=loc.commune") || !listingLocationPatch.includes("Choisissez votre province et votre localité avant de publier")) fail("Listing publication no longer enforces province and locality");
 for (const [platform, workflow] of [["Android", androidWorkflow], ["iOS", iosWorkflow], ["Firebase Hosting", hostingWorkflow]]) {
   if (!workflow.includes("listing-location.js")) fail(platform + " build does not inject the mandatory listing location module");
 }
 if (!listingLocationPatch.includes("form.locality=loc.commune||loc.territory||loc.neighborhood||")) fail("Listing publication must preserve a valid fallback locality");
 if (!listingLocationPatch.includes("(item.locality||item.commune||item.c)!==loc.commune")) fail("Listing filters must remain compatible with older locality fields");
+if (!hostingWorkflow.includes("map-location.js") || !androidWorkflow.includes("map-location.js") || !iosWorkflow.includes("map-location.js")) fail("OpenStreetMap/Leaflet module is not injected on all platforms");
 if (!hostingWorkflow.includes("firebase deploy --only hosting --project bilocost-a8136")) fail("Firebase Hosting must deploy independently of Storage and Firestore IAM");
-if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules --project bilocost-a8136")) fail("Cloud Functions and exchange-rate rules deployment workflow is incomplete");
+if (!functionsWorkflow.includes("node-version: 22") || !functionsWorkflow.includes("firebase deploy --only functions,firestore:rules,storage:rules --project bilocost-a8136") || !functionsWorkflow.includes("'firestore.rules'") || !functionsWorkflow.includes("'storage.rules'")) fail("Cloud Functions, Firestore, and Storage deployment workflow is incomplete");
+const reelUiStart = html.indexOf("function reelNewSheet()");
+const reelUiEnd = html.indexOf("async function reelBoostRequest", reelUiStart);
+const reelUi = reelUiStart >= 0 && reelUiEnd > reelUiStart ? html.slice(reelUiStart, reelUiEnd) : "";
+if (!reelUi || reelUi.includes("verificationStatus") || reelUi.includes("reel-kyc")) fail("Reel creation and publishing UI must not require identity certification");
+if (!reelUi.includes("if(!S.user)return needUser();")) fail("Reel publishing must still require authentication");
+const adRules = firestoreRules.match(/match \/adCampaignRequests\/\{requestId\} \{[\s\S]*?\n    \}/)?.[0] || "";
+if (!html.includes('id="adduration"') || !html.includes('id="adprice"') || !html.includes('paymentReference:g("#adpaymentref")')) fail("Fixed advertising price and payment reference flow is incomplete");
+if (!html.includes('id="adimage"') || !html.includes('folder","bilocost/advertising"') || !html.includes('x.slot==="slot1"') || !html.includes('x.slot==="slot2"')) fail("Advertising image upload or separated homepage placements are missing");
+if (!html.includes('data-act="admine"') || !html.includes("async function loadMyAdCampaigns()") || !html.includes("adCampaignStatusLabel")) fail("Advertiser campaign history and status tracking are missing");
+if (!html.includes('function adCampaignPrice(') || !html.includes('prices.slot1[duration]+prices.slot2[duration]')) fail("Advertising price calculator is missing");
+if (!adRules.includes('request.resource.data.status == "AWAITING_PAYMENT"') || !adRules.includes('request.resource.data.paymentStatus == "AWAITING_PAYMENT"') || !adRules.includes('request.resource.data.priceUSD == 90')) fail("Advertising requests must be priced and remain pending payment until admin verification");
+if (!html.includes('if(!g("#adpaymentref"))')) fail("Advertising request must require payment transaction reference");
+const reelRules = firestoreRules.match(/match \/reels\/\{reelId\} \{[\s\S]*?\n    \}/)?.[0] || "";
+const rentalRules = firestoreRules.match(/match \/rentalListings\/\{listingId\} \{[\s\S]*?\n    \}/)?.[0] || "";
+const reelStorageRules = storageRules.match(/match \/reels\/\{uid\}\/\{fileName\} \{[\s\S]*?\n    \}/)?.[0] || "";
+if (!reelRules.includes("allow create: if signedIn()") || reelRules.includes("hasVerifiedIdentity")) fail("Reel publishing must not require identity certification");
+if (!rentalRules.includes('request.resource.data.status in ["DRAFT", "PENDING_REVIEW"]') || rentalRules.includes("hasVerifiedIdentity") || rentalRules.includes("ownerKycStatus") || !rentalRules.includes("request.resource.data.rulesAccepted == true")) fail("Rental submissions must not require identity certification and must retain terms acceptance");
+if (firestoreRules.includes("function hasVerifiedIdentity(")) fail("Identity certification helper remains in Firestore rules despite no publication gate");
+if (!reelStorageRules.includes("allow create: if isOwner(uid)") || reelStorageRules.includes("identity_verifications") || !reelStorageRules.includes("30 * 1024 * 1024")) fail("Reel uploads must remain owner-only, size-limited, and independent of identity certification");
 if (!functionsSource.includes("exports.syncBccExchangeRate = onSchedule") || !functionsSource.includes("exports.refreshBccExchangeRate = onCall")) fail("Automatic BCC exchange-rate synchronization is missing");
 if (!functionsWorkflow.includes("FIREBASE_SERVICE_ACCOUNT_BILOCOST_A8136")) fail("Cloud Functions deployment credentials are not configured");
 try { new vm.Script(exchangeRatesPatch, { filename: "exchange-rates.js" }); } catch (error) { fail("Exchange-rate widget syntax error: " + error.message); }

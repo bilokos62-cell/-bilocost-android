@@ -69,7 +69,8 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
 <button data-tab="identity" class="active">Identités / KYC</button>
 <button data-tab="services">Services</button>
 <button data-tab="rentals">Locations</button>
-<button data-tab="ads">Publicités</button>
+<button data-tab="adsPayment">Paiements pub.</button>
+<button data-tab="ads">Campagnes à valider</button>
 </div>
 <section class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2 id="sectionTitle" style="margin:0">Identités en attente</h2><p class="muted" id="sectionHint">Vérifier les dossiers avant toute décision.</p></div><button id="refresh" class="secondary">Actualiser</button></div><div id="list" style="margin-top:14px" class="muted">Chargement…</div></section>
 <p class="muted" style="font-size:12px;margin-top:14px">Les activations payantes exigent une vérification effective du paiement hors application. Les actions sont protégées par les droits Firebase côté serveur (custom claim admin).</p>
@@ -85,7 +86,8 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
   identity:{title:"Identités en attente",hint:"Examinez les justificatifs dans l’espace sécurisé.",collection:"identity_verifications",status:"pending"},
   services:{title:"Services à activer",hint:"Activation uniquement après vérification de l’abonnement de 6 USD.",collection:"services",status:"PENDING_SUBSCRIPTION"},
   rentals:{title:"Locations à examiner",hint:"Vérifiez le dossier et les conditions avant publication.",collection:"rentalListings",status:"PENDING_REVIEW"},
-  ads:{title:"Demandes publicitaires",hint:"Accord commercial et paiement à vérifier avant activation.",collection:"adCampaignRequests",status:"PENDING_REVIEW"}
+  adsPayment:{title:"Paiements publicitaires",hint:"Vérifiez le paiement reçu avant de transmettre la campagne à la validation.",collection:"adCampaignRequests",status:"AWAITING_PAYMENT"},
+  ads:{title:"Campagnes à valider",hint:"Les paiements confirmés attendent maintenant la validation du contenu publicitaire.",collection:"adCampaignRequests",status:"PENDING_REVIEW"}
  };
  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
  function message(t){$("welcome").textContent=t;}
@@ -106,15 +108,15 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    if(snap.empty){$("list").textContent="Aucun dossier en attente.";return;}
    $("list").innerHTML=snap.docs.map(doc=>{
     const d=doc.data(), title=d.title||d.name||d.fullName||d.ownerName||"Dossier "+doc.id;
-    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
-    return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">Approuver</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
+    const details=[d.ownerId&&("UID : "+d.ownerId),d.email,d.category,d.commune,d.phone,d.url,d.priceUSD&&("Montant : "+d.priceUSD+" USD"),d.durationDays&&("Durée : "+d.durationDays+" jours"),d.paymentReference&&("Référence paiement : "+d.paymentReference),d.submittedAt&&"Soumis : "+(d.submittedAt.toDate?d.submittedAt.toDate().toLocaleString("fr-FR"):"")].filter(Boolean).join(" • ");
+    return '<article class="item"><div><h3>'+esc(title)+'</h3><div class="meta">'+esc(details||("Référence : "+doc.id))+'</div><div class="meta" style="margin-top:6px">ID : '+esc(doc.id)+'</div></div><div class="actions"><button data-action="approve" data-id="'+esc(doc.id)+'">'+(currentTab==="adsPayment"?"Confirmer le paiement":"Approuver")+'</button><button class="reject" data-action="reject" data-id="'+esc(doc.id)+'">Refuser</button></div></article>';
    }).join("");
   }catch(e){$("list").innerHTML='<p class="error">Lecture refusée ou indisponible : '+esc(e.message)+'</p>';}
  }
  async function review(id,approve){
   if(!allowed||!currentUser)return;
   const cfg=tabs[currentTab], ref=db.collection(cfg.collection).doc(id);
-  if(currentTab==="services"||currentTab==="ads"){
+  if(currentTab==="services"||currentTab==="adsPayment"||currentTab==="ads"){
    if(approve&&!window.confirm("Confirmez-vous avoir vérifié le paiement réel et l’accord commercial correspondant ?"))return;
   }
   if(!window.confirm((approve?"Approuver":"Refuser")+" ce dossier ?"))return;
@@ -123,9 +125,10 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
    if(currentTab==="identity")patch.status=approve?"verified":"rejected";
    if(currentTab==="services"){patch.status=approve?"ACTIVE":"REJECTED";if(approve)patch.expiresAt=firebase.firestore.Timestamp.fromDate(new Date(Date.now()+30*86400000));}
    if(currentTab==="rentals")patch.status=approve?"BOOKABLE":"REJECTED";
+   if(currentTab==="adsPayment"){patch.status=approve?"PENDING_REVIEW":"REJECTED";patch.paymentStatus=approve?"VERIFIED":"REJECTED";if(approve&&!((await ref.get()).data()||{}).paymentReference)throw new Error("Ajoutez d’abord une référence de paiement dans le dossier.");}
    if(currentTab==="ads"){
     patch.status=approve?"APPROVED":"REJECTED";
-    if(approve){const data=(await ref.get()).data();const slot=window.prompt("Emplacement publicitaire : slot1 ou slot2","slot1");if(!["slot1","slot2"].includes(slot))throw new Error("Emplacement invalide; opération annulée.");await db.collection("ads").add({title:data.title||"Publicité",description:data.description||"",url:data.url,slot,image:data.image||"",status:"ACTIVE",createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+    if(approve){const data=(await ref.get()).data();const duration=Math.max(1,Math.min(30,Number(data.durationDays)||7));const endsAt=firebase.firestore.Timestamp.fromDate(new Date(Date.now()+duration*86400000));const slots=data.slot==="both"?["slot1","slot2"]:[data.slot||"slot1"];for(const slot of slots){await db.collection("ads").add({ownerId:data.ownerId||"",businessName:data.businessName||"",title:data.title||"Publicité",description:data.description||"",url:data.url,image:data.image||"",slot,status:"ACTIVE",endsAt,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}}
    }
    await ref.update(patch);await load();
   }catch(e){window.alert("Action non effectuée : "+e.message);}

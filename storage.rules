@@ -43,11 +43,12 @@ service firebase.storage {
       allow delete: if isOwner(uid) || isAdmin();
     }
 
-    // Public Reels video files; upload is restricted to owners with approved identity.
+    // Public Reels video files; uploads are restricted to the authenticated owner.
     match /reels/{uid}/{fileName} {
       allow read: if true;
+      // Any authenticated owner may upload a Reel; keep file size and video type limits.
       allow create: if isOwner(uid)
-        && firestore.get(/databases/(default)/documents/identity_verifications/$(uid)).data.status == "verified"
+        && request.resource != null
         && request.resource.size <= 30 * 1024 * 1024
         && request.resource.contentType.matches('video/(mp4|webm|quicktime)');
       allow update: if false;

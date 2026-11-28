@@ -85,8 +85,9 @@ jobs:
           delivery = Path("delivery-otp.js").read_text(encoding="utf-8")
           geography = Path("geography-selector.js").read_text(encoding="utf-8")
           listing_location = Path("listing-location.js").read_text(encoding="utf-8")
+          map_location = Path("map-location.js").read_text(encoding="utf-8")
           ui_refinement = Path("ui-refinement.js").read_text(encoding="utf-8")
-          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + ui_refinement + "\n" + html[script_end:]
+          html = html[:script_end] + "\n" + messaging + "\n" + services + "\n" + delivery + "\n" + geography + "\n" + listing_location + "\n" + map_location + "\n" + ui_refinement + "\n" + html[script_end:]
           Path("index.html").write_text(html, encoding="utf-8")
           print("Messaging, services, and secure delivery OTP modules injected for Android.")
           PY
@@ -313,6 +314,12 @@ jobs:
                   if name in blocked:
                       root.remove(node)
                       removed.append(name)
+          # Foreground-only location access: the app never requests background location.
+          for permission in ("android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"):
+              if not any(node.tag.endswith("uses-permission") and node.get(f"{{{android}}}name") == permission for node in root):
+                  node = ET.Element("uses-permission")
+                  node.set(f"{{{android}}}name", permission)
+                  root.insert(0, node)
           tree.write(manifest, encoding="utf-8", xml_declaration=True)
           ET.parse(manifest)
           remaining = []
