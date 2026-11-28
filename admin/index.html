@@ -135,11 +135,10 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none}
     const prices={"slot1":{7:12,15:25,30:50},"slot2":{7:7,15:15,30:30}};
     const amountUSD=prices[slotKey][days], cdfRate=2286.25;
     const amountCDF=Math.round((amountUSD*cdfRate)/1000)*1000;
-    if(data.paymentVerified!==true)throw new Error("Paiement non marqué comme vérifié. Vérifiez le paiement avant l’activation.");
     const now=new Date(), end=new Date(now.getTime()+days*86400000);
     const batch=db.batch(), adRef=db.collection("ads").doc();
-    batch.set(adRef,{ownerId:data.ownerId,title:data.title||"Publicité",description:data.description||"",url:data.url,slot:slotKey,image:data.image||"",durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,currency:"USD",exchangeRateCDF:cdfRate,status:"ACTIVE",startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end),createdAt:firebase.firestore.FieldValue.serverTimestamp(),campaignRequestId:id});
-    batch.update(ref,{...patch,status:"APPROVED",approvedAdId:adRef.id,slot:slotKey,durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end)});
+    batch.set(adRef,{ownerId:data.ownerId,title:data.title||"Publicité",description:data.description||"",url:data.url,slot:slotKey,image:data.image||"",durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,currency:"USD",exchangeRateCDF:cdfRate,status:"ACTIVE",paymentVerified:true,startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end),createdAt:firebase.firestore.FieldValue.serverTimestamp(),campaignRequestId:id});
+    batch.update(ref,{...patch,status:"APPROVED",paymentVerified:true,approvedAdId:adRef.id,slot:slotKey,durationDays:days,priceUSD:amountUSD,priceCDF:amountCDF,startsAt:firebase.firestore.Timestamp.fromDate(now),endsAt:firebase.firestore.Timestamp.fromDate(end)});
     await batch.commit();await load();return;
    }
    await ref.update(patch);await load();
