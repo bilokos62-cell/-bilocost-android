@@ -6,7 +6,7 @@
   const prices={slot1:{7:12,15:25,30:50},slot2:{7:7,15:15,30:30}};
   const fmt=n=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(n);
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let rate=null;
+  let rate=null, db=null, auth=null, firestore=null;
   const style=document.createElement("style");
   style.id="bilo-ads-space-style";
   style.textContent=`
@@ -24,10 +24,24 @@
   .bilo-ad-feedback{font-size:13px;line-height:1.5}
   `;
   document.head.appendChild(style);
+  async function connect(){
+    const version="11.10.0";
+    const [appSdk,authSdk,fsSdk]=await Promise.all([
+      import("https://www.gstatic.com/firebasejs/"+version+"/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/"+version+"/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/"+version+"/firebase-firestore.js")
+    ]);
+    const app=appSdk.getApps().length?appSdk.getApp():appSdk.initializeApp(window.BILO_FIREBASE);
+    auth=authSdk.getAuth(app);db=fsSdk.getFirestore(app);firestore=fsSdk;
+    const snap=await fsSdk.getDoc(fsSdk.doc(db,"exchange_rates/current"));
+    if(!snap.exists()||!(Number(snap.data().mean)>0))throw new Error("Le taux officiel CDF est momentanément indisponible. Réessayez plus tard.");
+    rate=snap.data();return rate;
+  }
   async function getRate(){
+    if(!db||!auth)await connect();
     if(rate&&Number(rate.mean)>0)return rate;
-    const snap=await firebase.firestore().doc("exchange_rates/current").get();
-    if(!snap.exists||!(Number(snap.data().mean)>0))throw new Error("Le taux officiel CDF est momentanément indisponible. Réessayez plus tard.");
+    const snap=await firestore.getDoc(firestore.doc(db,"exchange_rates/current"));
+    if(!snap.exists()||!(Number(snap.data().mean)>0))throw new Error("Le taux officiel CDF est momentanément indisponible. Réessayez plus tard.");
     rate=snap.data();return rate;
   }
   function formMarkup(){
@@ -77,26 +91,26 @@
     const feedback=form.querySelector("[data-bilo-ad-feedback]"), submit=form.querySelector('[type="submit"]');
     submit.disabled=true;feedback.textContent="Envoi de la demande…";
     try{
-      if(!window.firebase||!firebase.auth().currentUser)throw new Error("Connectez-vous à votre compte Bilocost pour réserver un emplacement publicitaire.");
-      const user=firebase.auth().currentUser, db=firebase.firestore(), liveRate=await getRate();
+      const liveRate=await getRate(), user=auth.currentUser;
+      if(!user)throw new Error("Connectez-vous à votre compte Bilocost pour réserver un emplacement publicitaire.");
       const fd=new FormData(form), slot=String(fd.get("slot")), days=Number(fd.get("durationDays")), usd=prices[slot]&&prices[slot][days];
       if(!usd)throw new Error("Choisissez un emplacement et une durée valides.");
       const url=String(fd.get("url")||"").trim(), image=String(fd.get("image")||"").trim();
       if(!/^https:\/\//i.test(url)|| (image&&!/^https:\/\//i.test(image)))throw new Error("Les liens doivent commencer par https://.");
       const amountCDF=Math.round(usd*Number(liveRate.mean)/1000)*1000;
-      await db.collection("adCampaignRequests").add({
+      await firestore.addDoc(firestore.collection(db,"adCampaignRequests"),{
         ownerId:user.uid,title:String(fd.get("title")||"").trim(),description:String(fd.get("description")||"").trim(),
         url,image,slot,durationDays:days,priceUSD:usd,priceCDF:amountCDF,
         exchangeRateCDF:Number(liveRate.mean),exchangeRateDate:String(liveRate.publicationDate||""),
         paymentReference:String(fd.get("paymentReference")||"").trim(),
         paymentStatus:"AWAITING_VERIFICATION",status:"PENDING_REVIEW",
-        submittedAt:firebase.firestore.FieldValue.serverTimestamp()
+        submittedAt:firestore.serverTimestamp()
       });
       feedback.textContent="Demande envoyée. Elle reste en attente jusqu’à la vérification de votre paiement par Bilocost.";
       form.reset();updatePrice(form);
     }catch(error){feedback.textContent=error.message||"Impossible d’envoyer la demande.";}
     finally{submit.disabled=false;}
   });
-  const initRate=async()=>{try{await getRate();document.querySelectorAll("[data-bilo-ad-form]").forEach(updatePrice);}catch(error){console.warn("Bilocost ads exchange rate:",error.message);}};
+  const initRate=async()=>{try{await connect();document.querySelectorAll("[data-bilo-ad-form]").forEach(updatePrice);}catch(error){console.warn("Bilocost ads exchange rate:",error.message);}};
   initRate();
 })();
