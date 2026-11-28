@@ -219,7 +219,7 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Reels: public feed only contains active clips; publishing requires approved KYC.
+    // Reels: public feed only contains active clips; any authenticated owner may publish.
     match /reels/{reelId} {
       allow read: if resource.data.status == "ACTIVE"
         || (signedIn() && resource.data.ownerId == request.auth.uid)
