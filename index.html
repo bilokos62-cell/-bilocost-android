@@ -672,13 +672,11 @@ async function reelLoad(){
 }
 function reelNewSheet(){
  if(!S.user)return needUser();
- if(S.user.verificationStatus!=="verified"){
-  sheet('<h2>Débloquer la publication des Réels</h2><p class="sub">La publication est réservée aux comptes dont l’identité a été vérifiée.</p><div class="warn">Complétez vos informations personnelles et envoyez une pièce d’identité valide dans votre espace de vérification. Le contrôle humain est prévu sous 24 à 72 heures. Vous pourrez publier après approbation.</div><button class="btn" data-act="reel-kyc">Vérifier mon identité</button>');return;
- }
+ // La certification d'identité est facultative pour publier un Réel.
  sheet('<h2>Publier un Réel</h2><p class="sub">Vidéo verticale ou horizontale, durée obligatoire : 5 à 10 secondes.</p><div class="reel-upload"><label>Vidéo du produit</label><input id="reelFile" type="file" accept="video/mp4,video/webm,video/quicktime"><label>Nom du produit *</label><input class="f" id="reelTitle" maxlength="100" placeholder="Ex. : Sneakers Nike"><label>Présentation</label><textarea class="f" id="reelCaption" maxlength="240" placeholder="Décrivez brièvement le produit"></textarea><div id="reelPreview" class="sub">Aucune vidéo sélectionnée.</div><button class="btn" data-act="reel-publish">Publier le Réel</button></div><div class="warn">Un boost payant est facultatif. Sans boost, votre Réel peut toujours apparaître dans le fil.</div>');
 }
 async function reelPublish(){
- if(!S.user||S.user.verificationStatus!=="verified")return toast("Votre identité doit être approuvée avant publication.");
+ if(!S.user)return needUser();
  const file=(document.querySelector("#reelFile")||{}).files?.[0],title=(document.querySelector("#reelTitle")||{}).value.trim(),caption=(document.querySelector("#reelCaption")||{}).value.trim();
  if(!file||!title)return toast("Sélectionnez une vidéo et indiquez le nom du produit.");
  if(!/^video\/(mp4|webm|quicktime)$/.test(file.type))return toast("Format vidéo accepté : MP4, WEBM ou MOV.");
